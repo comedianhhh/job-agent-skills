@@ -66,7 +66,9 @@ def linkedin_search(
 ) -> list[dict[str, Any]]:
     """LinkedIn guest job search: postings matching `keywords` in `location` from the last `hours`.
     Returns title / company / location / url / posted_at — no description (open the url for it)."""
-    return [boards.to_public(j) for j in boards.linkedin_guest_jobs(keywords, location, hours, limit, remote_only)]
+    return [
+        boards.to_public(j) for j in boards.linkedin_guest_jobs(keywords, location, hours, limit, remote_only)
+    ]
 
 
 @mcp.tool()

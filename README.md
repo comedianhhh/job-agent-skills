@@ -1,5 +1,7 @@
 # job-agent-skills
 
+[![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml)
+
 A job-search workflow for coding agents, **North American edition**. Ten skills for Claude Code (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby and LinkedIn for new postings.
 
 It is built around one rule: **every line that goes out traces to a fact you wrote down.** The agent tailors, formats, fills forms, tracks, and drills you for interviews — it never invents a title, a number, or an ownership claim.

@@ -29,6 +29,16 @@ MCP config:
 { "mcpServers": { "jobs-mcp": { "command": "uvx", "args": ["--from", "/path/to/mcp/jobs-mcp", "jobs-mcp"] } } }
 ```
 
+## Develop
+
+```bash
+pip install -e ".[dev]"
+ruff check . && ruff format --check .
+pytest
+```
+
+Tests run against recorded responses in `tests/fixtures/` (one trimmed snapshot per source), so they never touch the live boards. CI (`.github/workflows/ci.yml`) runs lint + tests on Python 3.10 / 3.12 / 3.13 against both `mcp<2` and `mcp>=2`.
+
 ## Notes
 
 - LinkedIn guest search is HTML from a public page and is rate-limited by LinkedIn; keep `limit` modest and do not loop it.

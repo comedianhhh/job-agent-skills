@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["mcp/jobs-mcp/**", ".github/workflows/ci.yml"]
+  pull_request:
+    paths: ["mcp/jobs-mcp/**", ".github/workflows/ci.yml"]
+
+jobs:
+  test:
+    name: jobs-mcp (py${{ matrix.python }}, mcp ${{ matrix.mcp }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12", "3.13"]
+        mcp: ["<2", ">=2"]
+    defaults:
+      run:
+        working-directory: mcp/jobs-mcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: uv pip install --system -e ".[dev]" "mcp${{ matrix.mcp }}"
+      - name: Lint
+        run: ruff check . && ruff format --check .
+      - name: Test (recorded fixtures only, no network)
+        run: pytest

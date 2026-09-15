@@ -23,8 +23,8 @@ TIMEOUT = httpx.Timeout(20.0)
 
 
 class Job(TypedDict, total=False):
-    source: str          # greenhouse | lever | ashby | linkedin
-    board: str           # board token / company slug / org slug / "guest"
+    source: str  # greenhouse | lever | ashby | linkedin
+    board: str  # board token / company slug / org slug / "guest"
     id: str
     title: str
     company: str
@@ -51,6 +51,7 @@ def _strip_html(s: str | None) -> str | None:
 
 
 # ---------------------------------------------------------------- Greenhouse
+
 
 def greenhouse_jobs(board_token: str, with_content: bool = False) -> list[Job]:
     """All open jobs on a Greenhouse board, e.g. board_token="doordashcanada"."""
@@ -101,6 +102,7 @@ def greenhouse_job(board_token: str, job_id: str) -> Job:
 
 # --------------------------------------------------------------------- Lever
 
+
 def lever_jobs(company: str) -> list[Job]:
     """All open postings for a Lever company slug, e.g. company="netflix"."""
     url = f"https://api.lever.co/v0/postings/{company}?mode=json"
@@ -112,9 +114,7 @@ def lever_jobs(company: str) -> list[Job]:
     for j in data:
         cats = j.get("categories") or {}
         created = j.get("createdAt")
-        posted = (
-            datetime.fromtimestamp(created / 1000, tz=timezone.utc).isoformat() if created else None
-        )
+        posted = datetime.fromtimestamp(created / 1000, tz=timezone.utc).isoformat() if created else None
         jobs.append(
             Job(
                 source="lever",
@@ -133,6 +133,7 @@ def lever_jobs(company: str) -> list[Job]:
 
 
 # --------------------------------------------------------------------- Ashby
+
 
 def ashby_jobs(org: str) -> list[Job]:
     """All open postings on an Ashby job board, e.g. org="cohere"."""
@@ -244,6 +245,7 @@ def _group(rx: re.Pattern[str], s: str) -> str | None:
 
 
 # -------------------------------------------------------------------- helpers
+
 
 def newer_than(job: Job, hours: int) -> bool:
     """True when the job has a timestamp within `hours`, or no timestamp at all (unknown → keep)."""

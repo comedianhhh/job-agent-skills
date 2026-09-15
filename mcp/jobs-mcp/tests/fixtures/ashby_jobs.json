@@ -1,0 +1,502 @@
+{
+ "jobs": [
+  {
+   "id": "3136a5a5-06fd-4c82-8b72-a43467e6b128",
+   "title": "Member of Technical Staff, Modeling",
+   "department": "Modeling",
+   "team": "Modeling",
+   "employmentType": "FullTime",
+   "location": "London",
+   "shouldDisplayCompensationOnJobPostings": true,
+   "secondaryLocations": [
+    {
+     "location": "San Francisco",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "California",
+       "addressCountry": "United States",
+       "addressLocality": "San Francisco"
+      }
+     }
+    },
+    {
+     "location": "New York",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "New York",
+       "addressCountry": "United States",
+       "addressLocality": "New York"
+      }
+     }
+    },
+    {
+     "location": "Paris",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "France",
+       "addressLocality": "Paris"
+      }
+     }
+    },
+    {
+     "location": "Toronto",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Ontario",
+       "addressCountry": "Canada",
+       "addressLocality": "Toronto"
+      }
+     }
+    },
+    {
+     "location": "Montreal",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Quebec ",
+       "addressCountry": "Canada",
+       "addressLocality": "Montreal"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2024-11-01T16:06:43.318+00:00",
+   "isListed": true,
+   "isRemote": true,
+   "workplaceType": "Remote",
+   "address": {
+    "postalAddress": {
+     "addressRegion": "London",
+     "addressCountry": "United Kingdom",
+     "addressLocality": "London"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/cohere/3136a5a5-06fd-4c82-8b72-a43467e6b128",
+   "applyUrl": "https://jobs.ashbyhq.com/cohere/3136a5a5-06fd-4c82-8b72-a43467e6b128/application",
+   "descriptionHtml": "<p style=\"min-height:1.5em\"><strong>Who are we?</strong></p><p style=\"min-height:1.5em\">Cohere is the leading security-first enterprise AI company.  We build cutting-edge foundation AI models and end-to-end products that are designed to solve real-world business problems.</p><p style=\"min-height:1.5em\">We\u2019re training and deploying frontier models for enterprises who are building AI systems. We bel",
+   "descriptionPlain": "Who are we?\n\nCohere is the leading security-first enterprise AI company.  We build cutting-edge foundation AI models and end-to-end products that are designed to solve real-world business problems.\n\nWe\u2019re training and deploying frontier models for enterprises who are building AI systems. We believe that our work is instrumental to the widespread adoption of AI and we are looking for folks that wan",
+   "compensation": {
+    "compensationTierSummary": "CA$250K \u2013 CA$535K \u2022 Offers Equity \u2022 Multiple Ranges",
+    "scrapeableCompensationSalarySummary": "CA$250K - CA$535K",
+    "compensationTiers": [
+     {
+      "id": "8a3cbd03-b280-43f3-ae5e-317d4dff2771",
+      "tierSummary": "Base Salary CA$295K \u2013 CA$535K \u2022 Offers Equity",
+      "title": "Canada - Toronto (GTA), Montreal",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "e1664463-befc-483f-8d27-5a383f3175b2",
+        "summary": "Base Salary CA$295K \u2013 CA$535K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "CAD",
+        "minValue": 295000,
+        "maxValue": 535000
+       },
+       {
+        "id": "f08feab7-c112-473f-a11a-ef2b3c9214d7",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     },
+     {
+      "id": "12fc2a9a-c6c6-4972-af59-7eecc4e03bb4",
+      "tierSummary": "Base Salary CA$250K \u2013 CA$460K \u2022 Offers Equity",
+      "title": "Canada",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "6282ad0a-09f8-4c4c-b31f-96b2b6f8d6c4",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       },
+       {
+        "id": "9c45a31a-cf8f-400f-a570-02a16ee4e44c",
+        "summary": "Base Salary CA$250K \u2013 CA$460K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "CAD",
+        "minValue": 250000,
+        "maxValue": 460000
+       }
+      ]
+     },
+     {
+      "id": "08500dad-ba3e-4d55-ba70-9e7ad6943e0c",
+      "tierSummary": "Base Salary $205K \u2013 $380K \u2022 Offers Equity",
+      "title": "USA - California, New York and Washington",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "78eb432f-5dbb-43c8-b031-08af0c9bbcd3",
+        "summary": "Base Salary $205K \u2013 $380K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "USD",
+        "minValue": 205000,
+        "maxValue": 380000
+       },
+       {
+        "id": "4029b7d3-1bc7-42c0-8a72-3498733e1c2c",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     },
+     {
+      "id": "141e0f70-be43-4944-99e2-81ec56c84233",
+      "tierSummary": "Base Salary $175K \u2013 $325K \u2022 Offers Equity",
+      "title": "USA - All Other States",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "588cf37c-fd74-470a-8fd8-59f1bc91a8f9",
+        "summary": "Base Salary $175K \u2013 $325K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "USD",
+        "minValue": 175000,
+        "maxValue": 325000
+       },
+       {
+        "id": "72df3cc8-64c4-45b9-94b9-1660b62adb2b",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     }
+    ],
+    "summaryComponents": [
+     {
+      "minValue": 250000,
+      "maxValue": 535000,
+      "currencyCode": "CAD",
+      "interval": "1 YEAR",
+      "compensationType": "Salary"
+     },
+     {
+      "compensationType": "EquityPercentage",
+      "minValue": null,
+      "maxValue": null,
+      "interval": "1 YEAR"
+     }
+    ]
+   }
+  },
+  {
+   "id": "443368a3-6276-4b90-9671-27fed40fd6d2",
+   "title": "Senior Member of Technical Staff, Multimodal AI",
+   "department": "Modeling",
+   "team": "Modeling",
+   "employmentType": "FullTime",
+   "location": "San Francisco",
+   "shouldDisplayCompensationOnJobPostings": true,
+   "secondaryLocations": [
+    {
+     "location": "New York",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "New York",
+       "addressCountry": "United States",
+       "addressLocality": "New York"
+      }
+     }
+    },
+    {
+     "location": "San Francisco",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "California",
+       "addressCountry": "United States",
+       "addressLocality": "San Francisco"
+      }
+     }
+    },
+    {
+     "location": "Paris",
+     "address": {
+      "postalAddress": {
+       "addressCountry": "France",
+       "addressLocality": "Paris"
+      }
+     }
+    },
+    {
+     "location": "Toronto",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Ontario",
+       "addressCountry": "Canada",
+       "addressLocality": "Toronto"
+      }
+     }
+    },
+    {
+     "location": "Montreal",
+     "address": {
+      "postalAddress": {
+       "addressRegion": "Quebec ",
+       "addressCountry": "Canada",
+       "addressLocality": "Montreal"
+      }
+     }
+    }
+   ],
+   "publishedAt": "2024-12-03T14:25:43.571+00:00",
+   "isListed": true,
+   "isRemote": true,
+   "workplaceType": "Remote",
+   "address": {
+    "postalAddress": {
+     "addressRegion": "California",
+     "addressCountry": "United States",
+     "addressLocality": "San Francisco"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/cohere/443368a3-6276-4b90-9671-27fed40fd6d2",
+   "applyUrl": "https://jobs.ashbyhq.com/cohere/443368a3-6276-4b90-9671-27fed40fd6d2/application",
+   "descriptionHtml": "<p style=\"min-height:1.5em\"><strong>Who are we?</strong></p><p style=\"min-height:1.5em\">Cohere is the leading security-first enterprise AI company.  We build cutting-edge foundation AI models and end-to-end products that are designed to solve real-world business problems.</p><p style=\"min-height:1.5em\">We\u2019re training and deploying frontier models for enterprises who are building AI systems. We bel",
+   "descriptionPlain": "Who are we?\n\nCohere is the leading security-first enterprise AI company.  We build cutting-edge foundation AI models and end-to-end products that are designed to solve real-world business problems.\n\nWe\u2019re training and deploying frontier models for enterprises who are building AI systems. We believe that our work is instrumental to the widespread adoption of AI and we are looking for folks that wan",
+   "compensation": {
+    "compensationTierSummary": "CA$250K \u2013 CA$535K \u2022 Offers Equity \u2022 Multiple Ranges",
+    "scrapeableCompensationSalarySummary": "CA$250K - CA$535K",
+    "compensationTiers": [
+     {
+      "id": "f583df59-dc27-4662-8202-d2c0933b4858",
+      "tierSummary": "Base Salary CA$295K \u2013 CA$535K \u2022 Offers Equity",
+      "title": "Canada - Toronto (GTA), Montreal",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "e2e73e5c-696d-4ae5-af9c-62bc607311be",
+        "summary": "Base Salary CA$295K \u2013 CA$535K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "CAD",
+        "minValue": 295000,
+        "maxValue": 535000
+       },
+       {
+        "id": "16afd3d2-b187-45b9-9dc8-67abc5ba4e59",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     },
+     {
+      "id": "4e3359f6-415d-4ddc-8822-b1d903c156f2",
+      "tierSummary": "Base Salary CA$250K \u2013 CA$460K \u2022 Offers Equity",
+      "title": "Canada",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "5206d7df-693f-46eb-bd8b-74c9714840c4",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       },
+       {
+        "id": "1f918b0a-a69a-4c99-9164-557cece257e6",
+        "summary": "Base Salary CA$250K \u2013 CA$460K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "CAD",
+        "minValue": 250000,
+        "maxValue": 460000
+       }
+      ]
+     },
+     {
+      "id": "d13549b6-7659-4c0f-9f37-650207becbd2",
+      "tierSummary": "Base Salary $205K \u2013 $380K \u2022 Offers Equity",
+      "title": "USA - California, New York and Washington",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "665f242b-4811-4fca-a1a2-b9a86d514f2b",
+        "summary": "Base Salary $205K \u2013 $380K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "USD",
+        "minValue": 205000,
+        "maxValue": 380000
+       },
+       {
+        "id": "82e2a73b-8d18-4ce8-8e13-dda22ec97be9",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     },
+     {
+      "id": "8191fbf1-de73-461c-9b40-23b0ab7715e1",
+      "tierSummary": "Base Salary $175K \u2013 $325K \u2022 Offers Equity",
+      "title": "USA - All Other States",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "f920ee85-1aeb-4513-89bf-99764453b2de",
+        "summary": "Base Salary $175K \u2013 $325K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "USD",
+        "minValue": 175000,
+        "maxValue": 325000
+       },
+       {
+        "id": "4f4ed17b-8ff5-4b84-b667-700e6c168aea",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     }
+    ],
+    "summaryComponents": [
+     {
+      "minValue": 250000,
+      "maxValue": 535000,
+      "currencyCode": "CAD",
+      "interval": "1 YEAR",
+      "compensationType": "Salary"
+     },
+     {
+      "compensationType": "EquityPercentage",
+      "minValue": null,
+      "maxValue": null,
+      "interval": "1 YEAR"
+     }
+    ]
+   }
+  },
+  {
+   "id": "bde93d36-4a41-4c8c-bd98-b4e44f9061e4",
+   "title": "Lead - US Government Affairs & Public Policy",
+   "department": "Government & Public Policy",
+   "team": "Government & Public Policy",
+   "employmentType": "FullTime",
+   "location": "Washington, DC",
+   "shouldDisplayCompensationOnJobPostings": true,
+   "secondaryLocations": [],
+   "publishedAt": "2026-09-03T17:26:05.105+00:00",
+   "isListed": true,
+   "isRemote": true,
+   "workplaceType": "Hybrid",
+   "address": {
+    "postalAddress": {
+     "addressRegion": "Washington, DC",
+     "addressCountry": "United States",
+     "addressLocality": "Washington, DC"
+    }
+   },
+   "jobUrl": "https://jobs.ashbyhq.com/cohere/bde93d36-4a41-4c8c-bd98-b4e44f9061e4",
+   "applyUrl": "https://jobs.ashbyhq.com/cohere/bde93d36-4a41-4c8c-bd98-b4e44f9061e4/application",
+   "descriptionHtml": "<p style=\"min-height:1.5em\"><strong>Who are we?</strong></p><p style=\"min-height:1.5em\">Cohere is the leading security-first enterprise AI company.  We build cutting-edge foundation AI models and end-to-end products that are designed to solve real-world business problems.</p><p style=\"min-height:1.5em\">We\u2019re training and deploying frontier models for enterprises who are building AI systems. We bel",
+   "descriptionPlain": "Who are we?\n\nCohere is the leading security-first enterprise AI company.  We build cutting-edge foundation AI models and end-to-end products that are designed to solve real-world business problems.\n\nWe\u2019re training and deploying frontier models for enterprises who are building AI systems. We believe that our work is instrumental to the widespread adoption of AI and we are looking for folks that wan",
+   "compensation": {
+    "compensationTierSummary": "$175K \u2013 $330K \u2022 Offers Equity \u2022 Multiple Ranges",
+    "scrapeableCompensationSalarySummary": "$175K - $330K",
+    "compensationTiers": [
+     {
+      "id": "f679619f-cab5-4d63-b478-cdb17db6d4f9",
+      "tierSummary": "Base Salary $220K \u2013 $330K \u2022 Offers Equity",
+      "title": "USA - California, New York, Washington state, and Washington DC",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "37558b71-3060-4e0a-88c8-c6e8d50dc771",
+        "summary": "Base Salary $220K \u2013 $330K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "USD",
+        "minValue": 220000,
+        "maxValue": 330000
+       },
+       {
+        "id": "5bb1d27b-a34d-4b9e-b5c2-15b1df8ed634",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       }
+      ]
+     },
+     {
+      "id": "4d982a8b-ff90-4932-8acc-46d9cf43b1e6",
+      "tierSummary": "Base Salary $175K \u2013 $265K \u2022 Offers Equity",
+      "title": "USA - All Other States",
+      "additionalInformation": null,
+      "components": [
+       {
+        "id": "3602213d-e68b-4f7e-b1ab-6b24bd325efa",
+        "summary": "Offers Equity",
+        "compensationType": "EquityPercentage",
+        "interval": "NONE",
+        "currencyCode": null,
+        "minValue": null,
+        "maxValue": null
+       },
+       {
+        "id": "b5250319-52b6-4cee-8847-c5770654c454",
+        "summary": "Base Salary $175K \u2013 $265K",
+        "compensationType": "Salary",
+        "interval": "1 YEAR",
+        "currencyCode": "USD",
+        "minValue": 175000,
+        "maxValue": 265000
+       }
+      ]
+     }
+    ],
+    "summaryComponents": [
+     {
+      "minValue": 175000,
+      "maxValue": 330000,
+      "currencyCode": "USD",
+      "interval": "1 YEAR",
+      "compensationType": "Salary"
+     },
+     {
+      "compensationType": "EquityPercentage",
+      "minValue": null,
+      "maxValue": null,
+      "interval": "1 YEAR"
+     }
+    ]
+   }
+  }
+ ]
+}

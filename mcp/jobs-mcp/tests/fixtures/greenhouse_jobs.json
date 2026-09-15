@@ -1,0 +1,541 @@
+{
+ "jobs": [
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/doordashcanada/jobs/7345227",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "education": "education_optional",
+   "internal_job_id": 3277197,
+   "location": {
+    "name": "Toronto, ON"
+   },
+   "metadata": [
+    {
+     "id": 875125,
+     "name": "Availability Date",
+     "value": "2025-10-01",
+     "value_type": "date"
+    },
+    {
+     "id": 875200,
+     "name": "Earliest Hire Date",
+     "value": "2025-10-01",
+     "value_type": "date"
+    },
+    {
+     "id": 170345,
+     "name": "Business Line",
+     "value": "Marketplace",
+     "value_type": "single_select"
+    },
+    {
+     "id": 170346,
+     "name": "Market",
+     "value": "Corporate - Canada",
+     "value_type": "single_select"
+    },
+    {
+     "id": 172948,
+     "name": "Entity",
+     "value": "DoorDash Technologies Canada Inc.",
+     "value_type": "single_select"
+    },
+    {
+     "id": 174556,
+     "name": "Job Family",
+     "value": "Enterprise Account Management",
+     "value_type": "single_select"
+    },
+    {
+     "id": 1495483,
+     "name": "Engineering Discipline",
+     "value": null,
+     "value_type": "multi_select"
+    },
+    {
+     "id": 172717,
+     "name": "Job Location",
+     "value": "RO, CAN, ON, Toronto, Wellington St W",
+     "value_type": "single_select"
+    },
+    {
+     "id": 875215,
+     "name": "Time Type",
+     "value": "Full time",
+     "value_type": "single_select"
+    },
+    {
+     "id": 923113,
+     "name": "Hiring Manager with Job Title",
+     "value": "Melanie Boakye - CPG Partnerships Manager Lead, Enterprise Ad Sales",
+     "value_type": "single_select"
+    },
+    {
+     "id": 172248,
+     "name": "Careers Page Sorting: Department",
+     "value": "Enterprise Sales",
+     "value_type": "single_select"
+    },
+    {
+     "id": 32781020,
+     "name": "US1 - Base Salary Band Midpoint",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32794284,
+     "name": "US4 - Base Salary Band Minimum",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32794304,
+     "name": "US1 - Equity Band Midpoint",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32796921,
+     "name": "USA: Pay Transparency Range",
+     "value": null,
+     "value_type": "currency_range"
+    },
+    {
+     "id": 33181307,
+     "name": "Canada: Pay Transparency Range",
+     "value": {
+      "unit": "CAD",
+      "max_value": "157500.0",
+      "min_value": "126000.0"
+     },
+     "value_type": "currency_range"
+    },
+    {
+     "id": 40636812,
+     "name": "Umbrella Corp:",
+     "value": "DoorDash",
+     "value_type": "single_select"
+    },
+    {
+     "id": 40689956,
+     "name": "Wolt: Careers Site Department",
+     "value": null,
+     "value_type": "single_select"
+    },
+    {
+     "id": 50331873,
+     "name": "Business Title",
+     "value": null,
+     "value_type": "short_text"
+    },
+    {
+     "id": 54550527,
+     "name": "Fountain HVH",
+     "value": null,
+     "value_type": "yes_no"
+    },
+    {
+     "id": 54550663,
+     "name": "Fountain Opening ID",
+     "value": null,
+     "value_type": "short_text"
+    }
+   ],
+   "id": 7345227,
+   "updated_at": "2026-09-14T15:52:36-04:00",
+   "requisition_id": "P-96035",
+   "title": "Account Manager, CPG Partnerships",
+   "company_name": "DoorDash Canada",
+   "first_published": "2025-10-22T19:35:49-04:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;img style=&quot;display: none; max-width: 100%;&quot; src=&quot;https://click.appcast.io/greenhouse-te8/a31.png?ent=34&amp;amp;e=22630&amp;amp;t=1701374353806&quot; width=&quot;1px&quot;&gt; &lt;img style=&quot;display: none; max-width: 100%;&quot; src=&quot;https://track.jobadx.com/v1/i.gif?utm_pixel=224e990b-8ff4-4287-8d5d-2ff09647f181&amp;amp;utm_ptz=EST&amp;amp;utm_rqt=track&quot; alt=&quot;&quot; width=&quot;1&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;h1&gt;&lt;strong&gt;About the Team&lt;/strong&gt;&lt;/h1&gt;\n&lt;p&gt;The Ad sales team is responsible for the advertising vision, development and growth of our largest advertising partnerships. This is a newly created team, seeking founding members to build an industry-leading ads and promotions business across DoorDash\u2019s core categories, starting with CPG brands. The growing DoorDash ads business will quickly become the single best place for merchants and brands to market to local customers, in an ecosystem that benefits all parties.&lt;/p&gt;\n&lt;h1&gt;&lt;strong&gt;About the Role&lt;/strong&gt;&lt;/h1&gt;\n&lt;p&gt;As a Partnerships Manager, you will build partnerships that create tangible value for both DoorDash and advertisers. In this role, you will manage the ads strategy across a focused portfolio of accounts, and drive adoption of our growing ads and promotions offering. You will also work cross-functionally with business development, marketing, strategy &amp;amp; operations, analytics, and product to innovate on our future approach and solutions.&amp;nbsp;&lt;/p&gt;\n&lt;h1&gt;&lt;strong&gt;You\u2019re excited about this opportunity because you will\u2026&lt;/strong&gt;&lt;/h1&gt;\n&lt;ul&gt;\n&lt;li&gt;Be part of the growing DoorDash Ads &amp;amp; Promos team&lt;/li&gt;\n&lt;li&gt;Lead end-to-end marketing conversations across a portfolio of consumer packaged goods (CPG) advertisers&lt;/li&gt;\n&lt;li&gt;Oversee the strategy for engaging with and selling to our largest partners&lt;/li&gt;\n&lt;li&gt;Steer the development, adoption and scaling of CPG revenue&lt;/li&gt;\n&lt;li&gt;Drive product/feature adoption, and ultimately grow advertiser value and sustainable revenue for DoorDash&lt;/li&gt;\n&lt;li&gt;Represent advertiser needs to influence our Ads &amp;amp; Promos product roadmap and go to market strategy&lt;/li&gt;\n&lt;li&gt;Manage a robust sales pipeline and create annual and quarterly plans to achieve ambitious goals&lt;/li&gt;\n&lt;li&gt;",
+   "departments": [
+    {
+     "id": 57493,
+     "name": "531 Enterprise Outside Sales",
+     "child_ids": [],
+     "parent_id": 63864
+    }
+   ],
+   "offices": [
+    {
+     "id": 79523,
+     "name": "Toronto",
+     "location": null,
+     "child_ids": [],
+     "parent_id": 79450
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/doordashcanada/jobs/7793023",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "education": "education_optional",
+   "internal_job_id": 3407700,
+   "location": {
+    "name": "Toronto, ON"
+   },
+   "metadata": [
+    {
+     "id": 875125,
+     "name": "Availability Date",
+     "value": "2026-04-23",
+     "value_type": "date"
+    },
+    {
+     "id": 875200,
+     "name": "Earliest Hire Date",
+     "value": "2026-04-23",
+     "value_type": "date"
+    },
+    {
+     "id": 170345,
+     "name": "Business Line",
+     "value": "Marketplace",
+     "value_type": "single_select"
+    },
+    {
+     "id": 170346,
+     "name": "Market",
+     "value": "Corporate - Canada",
+     "value_type": "single_select"
+    },
+    {
+     "id": 172948,
+     "name": "Entity",
+     "value": "DoorDash Technologies Canada Inc.",
+     "value_type": "single_select"
+    },
+    {
+     "id": 174556,
+     "name": "Job Family",
+     "value": "Strategy & Operations",
+     "value_type": "single_select"
+    },
+    {
+     "id": 1495483,
+     "name": "Engineering Discipline",
+     "value": null,
+     "value_type": "multi_select"
+    },
+    {
+     "id": 172717,
+     "name": "Job Location",
+     "value": "RO, CAN, ON, Toronto, Wellington St W",
+     "value_type": "single_select"
+    },
+    {
+     "id": 875215,
+     "name": "Time Type",
+     "value": "Full time",
+     "value_type": "single_select"
+    },
+    {
+     "id": 923113,
+     "name": "Hiring Manager with Job Title",
+     "value": "Mahira Arif - Manager, Strategy & Operations",
+     "value_type": "single_select"
+    },
+    {
+     "id": 172248,
+     "name": "Careers Page Sorting: Department",
+     "value": "Strategy & Operations",
+     "value_type": "single_select"
+    },
+    {
+     "id": 32781020,
+     "name": "US1 - Base Salary Band Midpoint",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32794284,
+     "name": "US4 - Base Salary Band Minimum",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32794304,
+     "name": "US1 - Equity Band Midpoint",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32796921,
+     "name": "USA: Pay Transparency Range",
+     "value": null,
+     "value_type": "currency_range"
+    },
+    {
+     "id": 33181307,
+     "name": "Canada: Pay Transparency Range",
+     "value": {
+      "unit": "CAD",
+      "max_value": "108000.0",
+      "min_value": "86500.0"
+     },
+     "value_type": "currency_range"
+    },
+    {
+     "id": 40636812,
+     "name": "Umbrella Corp:",
+     "value": "DoorDash",
+     "value_type": "single_select"
+    },
+    {
+     "id": 40689956,
+     "name": "Wolt: Careers Site Department",
+     "value": null,
+     "value_type": "single_select"
+    },
+    {
+     "id": 50331873,
+     "name": "Business Title",
+     "value": null,
+     "value_type": "short_text"
+    },
+    {
+     "id": 54550527,
+     "name": "Fountain HVH",
+     "value": null,
+     "value_type": "yes_no"
+    },
+    {
+     "id": 54550663,
+     "name": "Fountain Opening ID",
+     "value": null,
+     "value_type": "short_text"
+    }
+   ],
+   "id": 7793023,
+   "updated_at": "2026-09-14T15:52:36-04:00",
+   "requisition_id": "P-110520",
+   "title": "Associate, Canada Strategy & Operations",
+   "company_name": "DoorDash Canada",
+   "first_published": "2026-04-08T18:19:46-04:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;img style=&quot;display: none; max-width: 100%;&quot; src=&quot;https://click.appcast.io/greenhouse-te8/a31.png?ent=34&amp;amp;e=22630&amp;amp;t=1701374353806&quot; width=&quot;1px&quot;&gt; &lt;img style=&quot;display: none; max-width: 100%;&quot; src=&quot;https://track.jobadx.com/v1/i.gif?utm_pixel=224e990b-8ff4-4287-8d5d-2ff09647f181&amp;amp;utm_ptz=EST&amp;amp;utm_rqt=track&quot; alt=&quot;&quot; width=&quot;1&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;h2&gt;&lt;strong&gt;About the Team&lt;/strong&gt;&lt;/h2&gt;\n&lt;p&gt;The Canadian DoorDash Consumer Growth team focuses on building differentiated consumer experiences and supporting our Restaurants, New Verticals, and Ads &amp;amp; Promotions businesses. Our team provides an exciting opportunity to collaborate to create impact and be part of a global company that is evolving how local economies grow.&amp;nbsp;&lt;/p&gt;\n&lt;h2&gt;&lt;strong&gt;About the Role&lt;/strong&gt;&lt;/h2&gt;\n&lt;p&gt;The Strategy &amp;amp; Operations Associate role is for self-motivated, curious, and ownership-minded individuals who think through a customer-first lens, thrive on solving complex problems using data, collaborate across all levels of the organization, and execute their ideas efficiently.&lt;/p&gt;\n&lt;p&gt;The scope will include supporting key campaigns by creating the right experiences and strategies for growth, leveraging data to optimize existing and new initiatives. Success will be measured on the ability to support and hit OKRs as they relate to the above.&lt;/p&gt;\n&lt;h2&gt;&lt;strong&gt;You&#39;re excited about this opportunity because...&lt;/strong&gt;&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;&lt;strong&gt;Build&lt;/strong&gt; - You are excited to work on something that hasn&#39;t been done before. Your job will include building experiences and launching plans from the ground up.&lt;/li&gt;\n&lt;li&gt;&lt;strong&gt;Strategize&lt;/strong&gt; - Develop DoorDash&#39;s path to excellence using first principles &amp;amp; empathy, identify trends that emerge and know when to double down and when to try something new.&lt;/li&gt;\n&lt;li&gt;&lt;strong&gt;Experiment &lt;/strong&gt;- Use data to run tests on everything from promotional campaigns to new in-app creative assets.&lt;/li&gt;\n&lt;li&gt;&lt;strong&gt;Analyze &lt;/strong&gt;",
+   "departments": [
+    {
+     "id": 2437,
+     "name": "614 Strategy & Operations",
+     "child_ids": [],
+     "parent_id": 63831
+    }
+   ],
+   "offices": [
+    {
+     "id": 79523,
+     "name": "Toronto",
+     "location": null,
+     "child_ids": [],
+     "parent_id": 79450
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  },
+  {
+   "absolute_url": "https://job-boards.greenhouse.io/doordashcanada/jobs/8016758",
+   "data_compliance": [
+    {
+     "type": "gdpr",
+     "requires_consent": false,
+     "requires_processing_consent": false,
+     "requires_retention_consent": false,
+     "retention_period": null,
+     "demographic_data_consent_applies": false
+    }
+   ],
+   "education": "education_optional",
+   "internal_job_id": 3475647,
+   "location": {
+    "name": "Remote - Canada"
+   },
+   "metadata": [
+    {
+     "id": 875125,
+     "name": "Availability Date",
+     "value": "2026-07-31",
+     "value_type": "date"
+    },
+    {
+     "id": 875200,
+     "name": "Earliest Hire Date",
+     "value": "2026-07-31",
+     "value_type": "date"
+    },
+    {
+     "id": 170345,
+     "name": "Business Line",
+     "value": "Marketplace",
+     "value_type": "single_select"
+    },
+    {
+     "id": 170346,
+     "name": "Market",
+     "value": "Corporate - Canada",
+     "value_type": "single_select"
+    },
+    {
+     "id": 172948,
+     "name": "Entity",
+     "value": "DoorDash Technologies Canada Inc.",
+     "value_type": "single_select"
+    },
+    {
+     "id": 174556,
+     "name": "Job Family",
+     "value": "Growth Marketing",
+     "value_type": "single_select"
+    },
+    {
+     "id": 1495483,
+     "name": "Engineering Discipline",
+     "value": null,
+     "value_type": "multi_select"
+    },
+    {
+     "id": 172717,
+     "name": "Job Location",
+     "value": "RO, CAN, ON, Toronto, Wellington St W",
+     "value_type": "single_select"
+    },
+    {
+     "id": 875215,
+     "name": "Time Type",
+     "value": "Full time",
+     "value_type": "single_select"
+    },
+    {
+     "id": 923113,
+     "name": "Hiring Manager with Job Title",
+     "value": "Cx Retention (Andrea Zielinski) - Senior Director, Retention Marketing",
+     "value_type": "single_select"
+    },
+    {
+     "id": 172248,
+     "name": "Careers Page Sorting: Department",
+     "value": null,
+     "value_type": "single_select"
+    },
+    {
+     "id": 32781020,
+     "name": "US1 - Base Salary Band Midpoint",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32794284,
+     "name": "US4 - Base Salary Band Minimum",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32794304,
+     "name": "US1 - Equity Band Midpoint",
+     "value": null,
+     "value_type": "currency"
+    },
+    {
+     "id": 32796921,
+     "name": "USA: Pay Transparency Range",
+     "value": null,
+     "value_type": "currency_range"
+    },
+    {
+     "id": 33181307,
+     "name": "Canada: Pay Transparency Range",
+     "value": {
+      "unit": "CAD",
+      "max_value": "141000.0",
+      "min_value": "113000.0"
+     },
+     "value_type": "currency_range"
+    },
+    {
+     "id": 40636812,
+     "name": "Umbrella Corp:",
+     "value": "DoorDash",
+     "value_type": "single_select"
+    },
+    {
+     "id": 40689956,
+     "name": "Wolt: Careers Site Department",
+     "value": null,
+     "value_type": "single_select"
+    },
+    {
+     "id": 50331873,
+     "name": "Business Title",
+     "value": null,
+     "value_type": "short_text"
+    },
+    {
+     "id": 54550527,
+     "name": "Fountain HVH",
+     "value": null,
+     "value_type": "yes_no"
+    },
+    {
+     "id": 54550663,
+     "name": "Fountain Opening ID",
+     "value": null,
+     "value_type": "short_text"
+    }
+   ],
+   "id": 8016758,
+   "updated_at": "2026-09-14T15:52:36-04:00",
+   "requisition_id": "P-110746",
+   "title": "Associate Manager, Consumer Retention Marketing, Canada Core Marketplace",
+   "company_name": "DoorDash Canada",
+   "first_published": "2026-06-19T07:45:44-04:00",
+   "language": "en",
+   "application_deadline": null,
+   "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;img style=&quot;display: none; max-width: 100%;&quot; src=&quot;https://click.appcast.io/greenhouse-te8/a31.png?ent=34&amp;amp;e=22630&amp;amp;t=1701374353806&quot; width=&quot;1px&quot;&gt; &lt;img style=&quot;display: none; max-width: 100%;&quot; src=&quot;https://track.jobadx.com/v1/i.gif?utm_pixel=224e990b-8ff4-4287-8d5d-2ff09647f181&amp;amp;utm_ptz=EST&amp;amp;utm_rqt=track&quot; alt=&quot;&quot; width=&quot;1&quot;&gt;&lt;/p&gt;&lt;/div&gt;&lt;h2&gt;&lt;strong&gt;About the Team&lt;/strong&gt;&lt;/h2&gt;\n&lt;p&gt;DoorDash&#39;s Consumer Lifecycle Marketing team in Canada is responsible for building lasting relationships with our customers through personalized, scalable, cross-channel experiences that drive engagement and long-term value. The Core Marketplace pod focuses on the heart of DoorDash&#39;s Canadian business \u2014 ensuring customers engage, retain, and return to the platform for food delivery and beyond.&lt;/p&gt;\n&lt;h2&gt;&lt;strong&gt;About the Role&lt;/strong&gt;&lt;/h2&gt;\n&lt;p&gt;We are looking for a strategic, solution-oriented, and creative retention marketer to join the Canada Consumer Lifecycle Marketing team. In this role, you will focus on launching and iterating on CRM programs that drive growth and retention for our core marketplace business in Canada.&lt;/p&gt;\n&lt;p&gt;The ideal candidate is able to think big picture about the customer lifecycle in one moment and seamlessly transition into the details of campaign execution and reporting in the next. They have experience building consensus with cross-functional teams, developing trusted relationships with partners, and excelling at making data-informed decisions to accomplish campaign and business objectives.&lt;/p&gt;\n&lt;p&gt;Key areas of focus include: creating and maintaining campaign and workflow strategy for Canada Core MAU efforts, including offer, cadence, and audience testing; analyzing the impact of initiatives on key business metrics; creative ideation and iteration; and consulting on strategy for various customer workstreams.&lt;/p&gt;\n&lt;h2&gt;&lt;strong&gt;You&#39;re excited about this opportunity because you will\u2026&lt;/strong&gt;&lt;/h2&gt;\n&lt;ul&gt;\n&lt;li&gt;Own Canada Core Marketplace lifecycle strategy \u2014 develop and execute CRM programs that drive engagement, retention, and resurrection for DoorDash&#39;s core Canadian customer base&lt;/li&gt;\n&lt;li&gt;&lt;strong&gt;",
+   "departments": [
+    {
+     "id": 52923,
+     "name": "412 Growth Marketing",
+     "child_ids": [],
+     "parent_id": 63860
+    }
+   ],
+   "offices": [
+    {
+     "id": 79523,
+     "name": "Toronto",
+     "location": null,
+     "child_ids": [],
+     "parent_id": 79450
+    }
+   ],
+   "ai_disclaimer": null,
+   "include_ai_disclaimer": null,
+   "ai_opt_out_request_url": null
+  }
+ ]
+}
