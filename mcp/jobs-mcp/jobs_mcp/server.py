@@ -6,7 +6,9 @@ Tools:
   linkedin_search   LinkedIn's unauthenticated job search (title/company/location/url only)
   scan              many boards + LinkedIn queries at once, filtered and deduplicated
 
-Run:  python -m jobs_mcp            (stdio transport)
+Run:  python -m jobs_mcp                       (stdio transport, for Claude Code etc.)
+      python -m jobs_mcp --http [--port 8765]  (streamable HTTP on 127.0.0.1, for hosts
+                                                that attach remote MCP servers, e.g. Rakazo)
 """
 
 from __future__ import annotations
@@ -132,8 +134,24 @@ def scan(
     return {"count": len(out), "scanned": len(found), "jobs": out, "errors": errors}
 
 
-def main() -> None:
-    mcp.run()
+def main(argv: list[str] | None = None) -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="jobs-mcp", description="MCP server over public job boards.")
+    parser.add_argument("--http", action="store_true", help="serve streamable HTTP instead of stdio")
+    parser.add_argument("--host", default="127.0.0.1", help="bind address for --http (default: loopback only)")
+    parser.add_argument("--port", type=int, default=8765, help="port for --http (default: 8765)")
+    args = parser.parse_args(argv)
+    if not args.http:
+        mcp.run()
+        return
+    # mcp 1.x reads host/port from settings; 2.x takes them as run() kwargs.
+    try:
+        mcp.run(transport="streamable-http", host=args.host, port=args.port)
+    except TypeError:
+        mcp.settings.host = args.host
+        mcp.settings.port = args.port
+        mcp.run(transport="streamable-http")
 
 
 if __name__ == "__main__":
