@@ -1,0 +1,53 @@
+name: Skill evals
+
+# Real model calls, so this never runs on push. Trigger it by hand (Actions → Skill evals → Run workflow)
+# or let the weekly schedule catch model-rollout regressions. Needs the ANTHROPIC_API_KEY secret.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "smoke = 1 run per case, plugin arm only; full = 3 runs + no-plugin baseline"
+        type: choice
+        default: smoke
+        options: [smoke, full]
+      case:
+        description: "optional --case glob, e.g. offer/*"
+        default: ""
+  schedule:
+    - cron: "0 9 * * 1" # Mondays 09:00 UTC, smoke
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code && claude --version
+      - name: Run
+        run: |
+          mode="${{ github.event.inputs.mode || 'smoke' }}"
+          extra=()
+          [ -n "${{ github.event.inputs.case }}" ] && extra+=(--case "${{ github.event.inputs.case }}")
+          if [ "$mode" = full ]; then
+            evals/run.sh --json evals/results.json --model claude-sonnet-5 --judge-model claude-haiku-4-5 --max-cost-usd 40 "${extra[@]}"
+          else
+            evals/run.sh --smoke --json evals/results.json --model claude-sonnet-5 --judge-model claude-haiku-4-5 --max-cost-usd 15 "${extra[@]}"
+          fi
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: |
+            evals/results.json
+            evals/results/**/report.html
+          if-no-files-found: ignore

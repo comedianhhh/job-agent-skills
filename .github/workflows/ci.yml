@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
-    paths: ["mcp/jobs-mcp/**", "web/**", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "web/**", "evals/**", "skills/**", ".github/workflows/ci.yml"]
   pull_request:
-    paths: ["mcp/jobs-mcp/**", "web/**", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "web/**", "evals/**", "skills/**", ".github/workflows/ci.yml"]
 
 jobs:
   jobs-mcp:
@@ -77,3 +77,14 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run build
+
+  evals-static:
+    name: evals (static checks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate eval cases and graders (no model calls)
+        run: python evals/validate.py

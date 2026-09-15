@@ -12,3 +12,4 @@ web/app/.next/
 web/app/.env*
 .claude/launch.json
 .env
+evals/**/results/

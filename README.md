@@ -32,6 +32,8 @@ Adapted from [ASu-skills](https://github.com/Hisn00w/ASu-skills) (MIT), which do
 
 **jobs-mcp** — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. No API keys; these are the public endpoints the career pages use.
 
+**Evals** (`evals/`) — 21 `claude plugin eval` cases, two per skill, that check the behaviours that matter (facts never invented, stage never inflated, nothing submitted without confirmation) against a no-plugin baseline. See [evals/README.md](evals/README.md).
+
 **Tracker web app** (`web/`) — a kanban over the same `career/tracker.md` the skills write, plus a scan page that runs jobs-mcp against `targets.yaml`. Next.js + FastAPI + Postgres, `docker compose up`. See [web/README.md](web/README.md).
 
 ## Install
