@@ -2,11 +2,10 @@
 
 [![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml)
 
-A job-search workflow for coding agents, **North American edition**. Ten skills for Claude Code (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby and LinkedIn for new postings.
+A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby and LinkedIn for new postings.
 
 It is built around one rule: **every line that goes out traces to a fact you wrote down.** The agent tailors, formats, fills forms, tracks, and drills you for interviews — it never invents a title, a number, or an ownership claim.
 
-Adapted from [ASu-skills](https://github.com/Hisn00w/ASu-skills) (MIT), which does this for the Chinese campus-recruiting market. This port keeps its structure — evidence matrix, interview contracts, claim taxonomy, per-item confirmation — and replaces everything market-specific with how hiring works in the US and Canada.
 
 ## What you get
 
@@ -103,10 +102,7 @@ See `templates/career/README.md`.
 - **NA specifics.** Letter paper, one page, no photo or personal-data block; hard constraints are work authorization / sponsorship / location / years / band; pipeline is APPLIED → SCREEN → OA → TECH → ONSITE → OFFER; outreach is LinkedIn notes and cold email, not chat openers.
 - **No agent framework.** Skills are Markdown; the MCP server is ~300 lines of Python on `httpx`.
 
-## What changed from ASu-skills
-
-Chinese 秋招 pipeline → NA pipeline · Boss直聘 / WeChat openers → LinkedIn / email · 学历 / 年龄 constraints → work authorization / years / band · A4 + photo templates → one Letter template · JSON claim ledger → `facts.md` · Kimi WebBridge → the host browser · 18 templates and multi-platform manifests dropped · `/career-init` and jobs-mcp added.
 
 ## License
 
-MIT. Portions adapted from ASu-skills © Hisn0w, MIT.
+MIT — see [LICENSE](LICENSE).
