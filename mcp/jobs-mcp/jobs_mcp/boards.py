@@ -104,7 +104,7 @@ def greenhouse_job(board_token: str, job_id: str) -> Job:
 
 
 def lever_jobs(company: str) -> list[Job]:
-    """All open postings for a Lever company slug, e.g. company="netflix"."""
+    """All open postings for a Lever company slug (the <slug> in jobs.lever.co/<slug>)."""
     url = f"https://api.lever.co/v0/postings/{company}?mode=json"
     with _client() as c:
         r = c.get(url)

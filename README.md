@@ -32,6 +32,8 @@ Adapted from [ASu-skills](https://github.com/Hisn00w/ASu-skills) (MIT), which do
 
 **jobs-mcp** — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. No API keys; these are the public endpoints the career pages use.
 
+**Tracker web app** (`web/`) — a kanban over the same `career/tracker.md` the skills write, plus a scan page that runs jobs-mcp against `targets.yaml`. Next.js + FastAPI + Postgres, `docker compose up`. See [web/README.md](web/README.md).
+
 ## Install
 
 ### As a Claude Code plugin
@@ -65,6 +67,14 @@ or `pip install -e mcp/jobs-mcp` and use `"command": "jobs-mcp"`.
 ```
 
 Typical day: `/offer scan` in the morning → `/job-match` on anything promising → `/make-resume` → `/job-apply` → `/offer`. Evenings: `/contributor` or a project, then `/evidence-recap` so the work becomes resume evidence.
+
+## Tracker web app
+
+```bash
+CAREER_DIR=/path/to/career docker compose up      # web :3000, api :8000, postgres
+```
+
+Drag a card between columns and the status cell of that one row in `tracker.md` changes — nothing else in the file is touched. "Scan now" calls jobs-mcp with your `targets.yaml`, marks postings already in the tracker, appends the rest to `career/SCAN-<date>.md` (the same table `/offer` writes), and "track" turns a posting into a `DRAFT` row for `/job-match` to pick up. Postgres only holds what markdown shouldn't: status-change history (for the 10-business-day follow-up flag) and scan history. Details and the no-Docker dev setup are in [web/README.md](web/README.md).
 
 ## The `career/` workspace
 

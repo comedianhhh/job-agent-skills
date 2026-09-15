@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches: [main]
-    paths: ["mcp/jobs-mcp/**", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "web/**", ".github/workflows/ci.yml"]
   pull_request:
-    paths: ["mcp/jobs-mcp/**", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "web/**", ".github/workflows/ci.yml"]
 
 jobs:
-  test:
+  jobs-mcp:
     name: jobs-mcp (py${{ matrix.python }}, mcp ${{ matrix.mcp }})
     runs-on: ubuntu-latest
     strategy:
@@ -34,3 +34,46 @@ jobs:
           uv run --no-project ruff format --check .
       - name: Test (recorded fixtures only, no network)
         run: uv run --no-project pytest
+
+  tracker-api:
+    name: tracker-api (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12"]
+    defaults:
+      run:
+        working-directory: web/api
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install (jobs-mcp comes in as a path dependency)
+        run: uv sync --extra dev
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Test (SQLite, jobs-mcp stubbed)
+        run: uv run pytest
+
+  web:
+    name: web (Next.js)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/app/package-lock.json
+      - run: npm ci
+      - run: npx prettier --check "src/**/*.{ts,tsx,css}"
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build

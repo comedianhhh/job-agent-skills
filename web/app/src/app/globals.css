@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #f6f6f4;
+  --panel: #ffffff;
+  --ink: #1b1b1a;
+  --muted: #6b6b66;
+  --line: #e2e2dd;
+  --accent: #2f6fed;
+  --accent-soft: #e6eefc;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #141414;
+    --panel: #1d1d1d;
+    --ink: #ececea;
+    --muted: #9a9a94;
+    --line: #2e2e2c;
+    --accent: #6d9cff;
+    --accent-soft: #1d2a45;
+    --warn: #fbbf24;
+    --warn-soft: #3a2a08;
+    --danger: #f87171;
+    --danger-soft: #3f1515;
+    --ok: #4ade80;
+    --ok-soft: #10301c;
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* markdown-ish inline emphasis that survives from tracker cells */
+.cell-md strong {
+  font-weight: 600;
+}
+.cell-md code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
