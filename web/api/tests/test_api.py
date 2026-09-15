@@ -231,3 +231,11 @@ def test_posting_triage_and_track(client, career: Path, fake_scan):
     li = next(p for p in new if p["source"] == "linkedin")
     client.post(f"/api/postings/{li['id']}/track")
     assert client.get("/api/tracker").json()["rows"][-1]["req"] == "LinkedIn 4458535812"
+
+
+def test_bad_targets_yaml_is_422(client, career: Path):
+    (career / "targets.yaml").write_text('filters:\n  exclude_regex: "sr\\.?"\n', encoding="utf-8")
+    r = client.get("/api/targets")
+    assert r.status_code == 422
+    assert "not valid YAML" in r.json()["detail"]
+    assert client.post("/api/scans", json={}).status_code == 422

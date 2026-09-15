@@ -21,10 +21,20 @@ from .tracker import Row, Tracker
 SCAN_HEADER = "| Company | Role | Location | Posted | URL | first-look GAP |\n|---|---|---|---|---|---|\n"
 
 
+class TargetsError(ValueError):
+    pass
+
+
 def load_targets(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"boards": [], "linkedin": [], "filters": {}}
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as e:
+        # regexes with backslashes must be single-quoted in YAML — a common slip, so say where
+        raise TargetsError(f"{path.name} is not valid YAML: {e}") from e
+    if not isinstance(data, dict):
+        raise TargetsError(f"{path.name} must be a mapping with boards / linkedin / filters")
     return {
         "boards": list(data.get("boards") or []),
         "linkedin": list(data.get("linkedin") or []),

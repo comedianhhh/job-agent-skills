@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from .auth import BearerAuthMiddleware
 from .config import Settings, load_settings
 from .db import TRIAGE, Event, Posting, Scan, make_session_factory
-from .scans import load_targets, run_scan, scan_params
+from .scans import TargetsError, load_targets, run_scan, scan_params
 from .tracker import STATUSES, Row, Tracker, TrackerError, business_days_between
 
 FOLLOW_UP_BUSINESS_DAYS = 10
@@ -312,7 +312,10 @@ def recent_events(limit: int = Query(50, le=500), db: Session = Depends(get_db))
 
 @router.get("/targets")
 def targets(settings: Settings = Depends(get_settings)):
-    t = load_targets(settings.targets_path)
+    try:
+        t = load_targets(settings.targets_path)
+    except TargetsError as e:
+        raise HTTPException(422, str(e)) from e
     return {**t, "path": str(settings.targets_path), "effective": scan_params(t)}
 
 
@@ -323,7 +326,10 @@ async def start_scan(
     tracker: Tracker = Depends(get_tracker),
     db: Session = Depends(get_db),
 ):
-    t = load_targets(settings.targets_path)
+    try:
+        t = load_targets(settings.targets_path)
+    except TargetsError as e:
+        raise HTTPException(422, str(e)) from e
     params = scan_params(t, body.model_dump(exclude={"write_scan_file"}, exclude_none=True))
     if not params["boards_"] and not params["linkedin_queries"]:
         raise HTTPException(422, "nothing to scan: add boards or linkedin queries to targets.yaml")
