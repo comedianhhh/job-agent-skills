@@ -11,25 +11,32 @@ web/
 ## Run with Docker
 
 ```bash
-CAREER_DIR=/path/to/career docker compose up --build
+cp .env.example .env            # set TRACKER_TOKEN (python -c "import secrets;print(secrets.token_urlsafe(32))") and CAREER_DIR
+docker compose up --build -d
 ```
 
 | Service | Port | Notes |
 |---|---|---|
-| `web` | 3000 | Next.js, calls the API at `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`, baked at build time) |
-| `api` | 8000 | FastAPI; `career/` is bind-mounted at `/career`; OpenAPI docs at `/docs` |
-| `db` | — | Postgres 16, volume `pgdata` |
+| `web` | 3000 | Next.js; the browser only talks to this. `/api/*` is proxied server-side to the api container |
+| `api` | internal | FastAPI; `career/` is bind-mounted at `/career`; OpenAPI docs at `/docs` |
+| `db` | internal | Postgres 16, volume `pgdata` |
 
-`CAREER_DIR` defaults to `./career` next to `docker-compose.yml`. No auth — this is a local tool; do not expose it.
+Open http://localhost:3000, paste the token once (it is kept in the browser's localStorage), done.
+
+## Auth
+
+One shared secret, `TRACKER_TOKEN`. The API requires `Authorization: Bearer <token>` on every `/api/*` route except `/api/health` (constant-time compare, `401` + `WWW-Authenticate: Bearer` otherwise). The web app never sees the token server-side — it forwards the browser's header through its `/api/[...path]` proxy. If `TRACKER_TOKEN` is unset the API runs open and logs a warning; compose refuses to start without it.
+
+This is single-user auth, not accounts. If you expose the app beyond localhost, put HTTPS in front (Caddy, Tailscale Serve, a reverse proxy) — the token travels in a header.
 
 ## Run without Docker
 
 ```bash
-# API (SQLite file inside career/ unless DATABASE_URL is set)
+# API (SQLite file inside career/ unless DATABASE_URL is set; add TRACKER_TOKEN=... to lock it)
 cd web/api && uv sync --extra dev
 CAREER_DIR=/path/to/career uv run uvicorn --factory tracker_api.main:create_app --reload
 
-# Web
+# Web (proxies /api/* to API_URL, default http://localhost:8000)
 cd web/app && npm install && npm run dev      # http://localhost:3000
 ```
 
@@ -45,6 +52,8 @@ cd web/app && npm install && npm run dev      # http://localhost:3000
 
 | Method | Path | |
 |---|---|---|
+| GET | `/api/health` | public; reports whether auth is on |
+| GET | `/api/auth` | 200 with a valid token, else 401 — the UI's probe |
 | GET | `/api/tracker` | rows with `follow_up_due` (≥ 10 business days in `APPLIED`) and `ghost_candidate` flags |
 | PATCH | `/api/tracker/{id}` | `status`, `next_step`, `applied`, `location`, `req`, optional `note` → event |
 | POST | `/api/tracker` | new `DRAFT` row |

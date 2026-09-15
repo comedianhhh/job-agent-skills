@@ -1,7 +1,8 @@
 """Two knobs, both environment variables.
 
-CAREER_DIR    the private workspace created by /career-init (tracker.md, targets.yaml, SCAN-*.md)
-DATABASE_URL  SQLAlchemy URL; docker-compose points it at Postgres, default is a local SQLite file
+CAREER_DIR     the private workspace created by /career-init (tracker.md, targets.yaml, SCAN-*.md)
+DATABASE_URL   SQLAlchemy URL; docker-compose points it at Postgres, default is a local SQLite file
+TRACKER_TOKEN  bearer token every /api call must carry; unset = no auth (local dev only)
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from pathlib import Path
 class Settings:
     career_dir: Path
     database_url: str
+    token: str | None = None
 
     @property
     def tracker_path(self) -> Path:
@@ -33,4 +35,5 @@ class Settings:
 def load_settings() -> Settings:
     career = Path(os.environ.get("CAREER_DIR", "career")).expanduser().resolve()
     db = os.environ.get("DATABASE_URL", f"sqlite:///{(career / '.tracker-api.sqlite').as_posix()}")
-    return Settings(career_dir=career, database_url=db)
+    token = os.environ.get("TRACKER_TOKEN", "").strip() or None
+    return Settings(career_dir=career, database_url=db, token=token)

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 
+import { AuthGate, SignOutButton } from "@/components/AuthGate";
+
 export const metadata: Metadata = {
   title: "Pipeline · job-agent-skills",
   description: "Kanban over career/tracker.md plus jobs-mcp scans.",
@@ -21,9 +23,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Scan
             </Link>
             <span className="ml-auto font-mono text-xs text-muted">career/tracker.md is the record</span>
+            <SignOutButton />
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-4">{children}</main>
+        <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-4">
+          <AuthGate>{children}</AuthGate>
+        </main>
       </body>
     </html>
   );

@@ -1,14 +1,14 @@
-# One command brings up the tracker: `docker compose up`
-#   web  http://localhost:3000   Next.js board + scan page
-#   api  http://localhost:8000   FastAPI over ./career (tracker.md, targets.yaml, SCAN-*.md)
-#   db   Postgres for scan history and status events
-# Point CAREER_DIR at your private career/ workspace (default: ./career next to this file).
+# One command brings up the tracker:  cp .env.example .env  →  edit  →  docker compose up --build
+#   web  http://localhost:3000   Next.js board + scan page; proxies /api/* to the api container
+#   api  (internal only)         FastAPI over ./career (tracker.md, targets.yaml, SCAN-*.md)
+#   db   (internal only)         Postgres for scan history and status events
+# Every request needs TRACKER_TOKEN (paste it once in the browser). Put HTTPS in front if remote.
 services:
   db:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: tracker
-      POSTGRES_PASSWORD: tracker
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tracker}
       POSTGRES_DB: tracker
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -17,6 +17,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    restart: unless-stopped
 
   api:
     build:
@@ -24,24 +25,27 @@ services:
       dockerfile: web/api/Dockerfile
     environment:
       CAREER_DIR: /career
-      DATABASE_URL: postgresql+psycopg://tracker:tracker@db:5432/tracker
+      DATABASE_URL: postgresql+psycopg://tracker:${POSTGRES_PASSWORD:-tracker}@db:5432/tracker
+      TRACKER_TOKEN: ${TRACKER_TOKEN:?set TRACKER_TOKEN in .env (python -c "import secrets;print(secrets.token_urlsafe(32))")}
     volumes:
       - ${CAREER_DIR:-./career}:/career
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
   web:
     build:
       context: web/app
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    environment:
+      API_URL: http://api:8000
     ports:
-      - "3000:3000"
+      - "${WEB_PORT:-3000}:3000"
     depends_on:
       - api
+    restart: unless-stopped
 
 volumes:
   pgdata:

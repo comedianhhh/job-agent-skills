@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from .auth import BearerAuthMiddleware
 from .config import Settings, load_settings
 from .db import TRIAGE, Event, Posting, Scan, make_session_factory
 from .scans import load_targets, run_scan, scan_params
@@ -30,9 +31,10 @@ router = APIRouter(prefix="/api")
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or load_settings()
     app = FastAPI(title="tracker-api", version="0.1.0")
-    app.add_middleware(
-        CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
-    )  # local tool, no auth
+    # Auth runs inside CORS so preflights are answered first; the web app normally reaches us
+    # through the Next.js rewrite (same origin), CORS is for running the API on its own port.
+    app.add_middleware(BearerAuthMiddleware, token=settings.token)
+    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
     app.state.settings = settings
     app.state.sessions = make_session_factory(settings.database_url)
     app.include_router(router)
@@ -231,7 +233,14 @@ def health(settings: Settings = Depends(get_settings)):
         "career_dir": str(settings.career_dir),
         "tracker_exists": settings.tracker_path.exists(),
         "database": settings.database_url.split("@")[-1],  # never echo credentials
+        "auth": bool(settings.token),
     }
+
+
+@router.get("/auth")
+def auth_check():
+    """Cheap probe for the UI: 401 without a valid token, 200 with one (or when auth is off)."""
+    return {"ok": True}
 
 
 @router.get("/tracker")

@@ -1,7 +1,30 @@
 // Thin typed client for tracker-api. Every call goes to the FastAPI service, which is the only
 // thing that touches career/tracker.md — the UI never parses markdown.
+//
+// Requests are same-origin: next.config.ts rewrites /api/* to the API. Set NEXT_PUBLIC_API_URL
+// only if you want the browser to hit the API directly.
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000";
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
+
+const TOKEN_KEY = "tracker_token";
+export const UNAUTHORIZED_EVENT = "tracker:unauthorized";
+
+export function getToken(): string | null {
+  try {
+    return typeof window === "undefined" ? null : window.localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setToken(token: string | null): void {
+  try {
+    if (token) window.localStorage.setItem(TOKEN_KEY, token);
+    else window.localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage unavailable (private mode) — the token just lives for this page load */
+  }
+}
 
 export type Status =
   | "DRAFT"
@@ -113,11 +136,19 @@ export class ApiError extends Error {
 }
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getToken();
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
-    headers: { "content-type": "application/json", ...(init?.headers ?? {}) },
+    headers: {
+      "content-type": "application/json",
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+      ...(init?.headers ?? {}),
+    },
     cache: "no-store",
   });
+  if (res.status === 401 && typeof window !== "undefined") {
+    window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+  }
   if (!res.ok) {
     let detail = res.statusText;
     try {
@@ -132,7 +163,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  health: () => call<{ ok: boolean; career_dir: string; tracker_exists: boolean }>("/api/health"),
+  health: () => call<{ ok: boolean; career_dir: string; tracker_exists: boolean; auth: boolean }>("/api/health"),
+  auth: () => call<{ ok: boolean }>("/api/auth"),
   tracker: () => call<TrackerResponse>("/api/tracker"),
   patchRow: (
     id: string,

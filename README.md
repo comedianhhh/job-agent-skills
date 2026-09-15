@@ -71,7 +71,8 @@ Typical day: `/offer scan` in the morning → `/job-match` on anything promising
 ## Tracker web app
 
 ```bash
-CAREER_DIR=/path/to/career docker compose up      # web :3000, api :8000, postgres
+cp .env.example .env    # TRACKER_TOKEN + CAREER_DIR
+docker compose up -d    # http://localhost:3000 — paste the token once
 ```
 
 Drag a card between columns and the status cell of that one row in `tracker.md` changes — nothing else in the file is touched. "Scan now" calls jobs-mcp with your `targets.yaml`, marks postings already in the tracker, appends the rest to `career/SCAN-<date>.md` (the same table `/offer` writes), and "track" turns a posting into a `DRAFT` row for `/job-match` to pick up. Postgres only holds what markdown shouldn't: status-change history (for the 10-business-day follow-up flag) and scan history. Details and the no-Docker dev setup are in [web/README.md](web/README.md).
