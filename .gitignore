@@ -5,7 +5,7 @@ dist/
 build/
 *.egg-info/
 .DS_Store
-career/
+/career/   # the user's private workspace at the plugin root; evals/**/career are fixtures
 *.sqlite
 web/app/node_modules/
 web/app/.next/

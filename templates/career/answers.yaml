@@ -1,0 +1,52 @@
+# Standing form answers. /job-apply fills applications from this file and never guesses a field it does not cover.
+# Keep this file private.
+
+identity:
+  first_name: ""
+  last_name: ""
+  preferred_name: ""
+  pronouns: ""            # e.g. he/him — only if you want it on forms
+  phone: ""
+  email: ""
+  city: ""
+  region: ""              # province / state
+  country: ""
+  postal_code: ""
+  linkedin: ""
+  github: ""
+  portfolio: ""
+
+authorization:
+  authorized_countries: []          # e.g. ["Canada"]
+  needs_sponsorship_now: false
+  needs_sponsorship_future: false
+  permit_note: ""                   # e.g. "open work permit valid until 2028"
+
+experience:
+  years_default: 0
+  years_excluding_internships: 0
+  current_title: ""
+  current_company: ""
+
+preferences:
+  work_model: "follow the posting"  # remote | hybrid | onsite | follow the posting
+  salary_floor: ""                  # e.g. "CAD 100,000"; leave blank to skip optional salary fields
+  notice_period: "2-4 weeks"
+  relocate: false
+  travel: false
+
+eeo:                                # voluntary self-identification; leave blank to choose "prefer not to say"
+  gender: ""
+  ethnicity: ""
+  disability: ""
+  veteran: ""
+
+defaults:
+  how_did_you_hear: "Company careers page"
+  consent_background_check: true
+  consent_recording: true
+
+policy:
+  submit_without_confirmation: false   # true = the agent may click Submit on its own once every field is resolved
+  portals_handled_by_me: ["Workday", "amazon.jobs"]   # portals that need an account: the agent prepares, you submit
+  max_roles_per_company: 2
