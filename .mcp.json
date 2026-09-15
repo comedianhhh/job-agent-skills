@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "jobs-mcp": {
+      "command": "uvx",
+      "args": ["--from", "./mcp/jobs-mcp", "jobs-mcp"]
+    }
+  }
+}

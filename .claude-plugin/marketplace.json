@@ -1,0 +1,12 @@
+{
+  "name": "job-agent-skills",
+  "owner": { "name": "Nianzhi (Alan) Li", "url": "https://github.com/comedianhhh" },
+  "plugins": [
+    {
+      "name": "job-agent-skills",
+      "source": "./",
+      "description": "Job-search workflow for coding agents (North America): /career-init, /job-match, /great-resume, /make-resume, /job-apply, /offer, /interview, /contributor, /project-guide, /evidence-recap + jobs-mcp.",
+      "version": "0.1.0"
+    }
+  ]
+}

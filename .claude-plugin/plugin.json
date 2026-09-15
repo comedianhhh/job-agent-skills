@@ -1,0 +1,16 @@
+{
+  "name": "job-agent-skills",
+  "description": "Job-search workflow for coding agents, North American edition: fit analysis, resume + cover letter files, form filling, pipeline tracking, interview drills, plus open-source contribution and project deep-dive skills. Ships jobs-mcp for scanning Greenhouse / Lever / Ashby / LinkedIn.",
+  "version": "0.1.0",
+  "author": { "name": "Nianzhi (Alan) Li", "url": "https://github.com/comedianhhh" },
+  "homepage": "https://github.com/comedianhhh/job-agent-skills",
+  "repository": "https://github.com/comedianhhh/job-agent-skills",
+  "license": "MIT",
+  "keywords": ["job-search", "resume", "interview", "career", "mcp", "greenhouse", "lever", "ashby", "linkedin", "open-source", "skills"],
+  "mcpServers": {
+    "jobs-mcp": {
+      "command": "uvx",
+      "args": ["--from", "${CLAUDE_PLUGIN_ROOT}/mcp/jobs-mcp", "jobs-mcp"]
+    }
+  }
+}
