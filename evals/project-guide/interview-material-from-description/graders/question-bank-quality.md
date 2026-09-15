@@ -1,8 +1,9 @@
 ---
 type: 'llm'
 weight: 2
-focus: { source: file, path: 'career/projects/ledger-lite/interview-ledger-lite.md' }
 ---
 
-PASS if the file contains 15–25 main interview questions grouped in themes, each with follow-ups, with first-person answers in STAR order that only use what the description states (idempotency via unique constraint, append-only postings with projected balances, explicit state machine with rejected illegal transitions, reconciliation task, 60 tests, CI), and clearly says the project has no users beyond the author.
-FAIL if it invents users, throughput, latency, or team members, produces fewer than 15 or more than 25 main questions, or writes answers in the third person.
+Judge the assistant's final reply (a short report about two files it wrote for a personal project with no users).
+
+PASS if the reply says both files were written (a guide and an interview file for ledger-lite), describes a question bank of roughly 15–25 main questions with follow-ups and first-person STAR answers, and makes clear that no usage, throughput, latency, or team numbers were invented — the only figures are the user's own (1,200 lines, 60 tests, solo, 2025) and the project has no users beyond the author.
+FAIL if it reports invented users, traffic, or performance numbers as facts, claims collaborators, or says fewer than 15 or more than 25 main questions were written.
