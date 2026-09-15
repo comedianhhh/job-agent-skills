@@ -1,5 +1,6 @@
 ---
 type: 'regex'
 target: 'last_message'
-pattern: 'Follow-up:'
+pattern: 'follow-?up:?'
+flags: 'i'
 ---

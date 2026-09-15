@@ -6,7 +6,7 @@ allowed_tools: [Read, Glob, Grep, Skill]
 expected_outcome: Requirement–evidence matrix citing facts.md sections, hard constraints listed separately with the years mismatch called out, Kubernetes marked REAL GAP, a verdict from the fixed set, no match percentage.
 ---
 
-My job-search workspace (facts.md, answers.yaml, targets.yaml, tracker.md) is in a `career/` folder — either `./career` in the working directory or a `resources/career` directory you were given read access to; use Glob to find `facts.md` if it isn't in the working directory.
+My job-search workspace is the `career/` folder in the working directory.
 
 Is this role worth applying to? Here's the posting:
 

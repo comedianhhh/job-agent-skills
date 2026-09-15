@@ -2,4 +2,3 @@ schema_version: "1.1"
 name: tailor-from-master-with-tbd
 context:
   scaffold_script: fixture.sh
-  add_dirs: [resources]

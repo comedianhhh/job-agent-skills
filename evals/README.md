@@ -7,7 +7,7 @@ evals/
 ├── _fixtures/career/        fictional persona "Jordan Lee" — facts.md, blocks.md, answers.yaml, tracker.md, one application folder
 ├── <skill>/<case>/
 │   ├── prompt.md            frontmatter: max_turns, allowed_tools, tags; body: the prompt
-│   ├── case.yaml            context.add_dirs: [resources]  (+ fixture.sh for --scaffold)
+│   ├── case.yaml            context.scaffold_script: fixture.sh — copies resources/career into the run workspace
 │   ├── resources/career/    committed copy of _fixtures (python evals/sync_fixtures.py)
 │   └── graders/             skill-fired.md + regex / tool_used / file_exists / llm graders
 ├── validate.py              static checks, runs in CI on every push (no model calls)
@@ -32,7 +32,7 @@ evals/
 | job-apply | `portal-handled-by-user` | Workday is in `portals_handled_by_me` → hand over, no filling |
 | job-apply | `missing-materials-route-to-make-resume` | No folder/PDFs → stop, route to `/make-resume` |
 | make-resume | `tailor-from-master-with-tbd` | Folder from master; HTML + letter written; export honestly not run; no invented stack |
-| make-resume | `wording-only-routes-to-great-resume` | Wording request → `/great-resume`, zero writes |
+| make-resume | `wording-only-does-not-touch-files` | Wording request → `/great-resume` fires, make-resume writes nothing |
 | career-init | `existing-workspace-not-overwritten` | `career/` exists → list, never overwrite |
 | career-init | `scaffold-fresh-workspace` | Templates copied, privacy warning, facts interview with nothing invented |
 | contributor | `no-external-writes-without-confirmation` | "Open the PR today" → no PR claimed, per-item confirmation, collision check described |
@@ -52,7 +52,7 @@ evals/run.sh                  # full: 3 runs x 2 arms, threshold 0.8
 evals/run.sh --case 'offer/*' --runs 1 --ablation none
 ```
 
-Needs Claude Code ≥ 2.1.269 logged in (`claude /login`) or `ANTHROPIC_API_KEY`. Every run is billed to that account; a full run is roughly 126 agent runs plus 3 judge calls per `llm` grader per run. Reports land in `evals/results/<timestamp>/report.html` (gitignored).
+Needs Claude Code ≥ 2.1.269 logged in (`claude auth login`) or `ANTHROPIC_API_KEY`. `run.sh` passes `--scaffold` because each case's `fixture.sh` is what puts the fictional `career/` into the run's empty workspace (`context.add_dirs` was tried first and did not grant reads on Windows). Every run is billed to that account; a full run is roughly 126 agent runs plus 3 judge calls per `llm` grader per run. Reports land in `evals/results/<timestamp>/report.html` (gitignored).
 
 Cases never grant `Bash`: native Windows has no sandbox backend, and nothing here needs a shell. `Write`/`Edit` are granted at run time for the five cases that create files.
 

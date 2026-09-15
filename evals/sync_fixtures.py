@@ -1,4 +1,4 @@
-"""Copy the shared fictional career/ workspace into every case that declares `resources` in add_dirs.
+"""Copy the shared fictional career/ workspace into every case that declares a scaffold_script.
 
 Run after editing anything under evals/_fixtures/:  python evals/sync_fixtures.py
 Cases keep a committed copy so `claude plugin eval` sees a self-contained case directory.
@@ -19,7 +19,7 @@ def main() -> None:
         if "_fixtures" in case_yaml.parts or "results" in case_yaml.parts:
             continue
         text = case_yaml.read_text(encoding="utf-8")
-        if "resources" not in text:
+        if "scaffold_script" not in text:
             continue
         dst = case_yaml.parent / "resources" / "career"
         if dst.exists():

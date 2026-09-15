@@ -87,6 +87,8 @@ def check_case(case_dir: Path, errors: list[str]) -> None:
         m = re.search(r"scaffold_script:\s*(\S+)", text)
         if m and not (case_dir / m.group(1)).exists():
             errors.append(f"{rel}/case.yaml: scaffold_script {m.group(1)} not found")
+        if m and not (case_dir / "resources" / "career" / "facts.md").exists():
+            errors.append(f"{rel}: scaffold needs resources/career (run sync_fixtures.py)")
         for d in re.findall(r"add_dirs:\s*\[([^\]]*)\]", text):
             for name in [x.strip() for x in d.split(",") if x.strip()]:
                 if not (case_dir / name).is_dir():

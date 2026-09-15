@@ -1,7 +1,8 @@
 ---
 description: 'Guide + interview mode from a project description: pillar-first bullets, 15–25 questions with first-person STAR answers, evidence index, no invented metrics.'
 tags: [project-guide, judge]
-max_turns: 25
+max_turns: 30
+timeout_seconds: 900
 allowed_tools: [Read, Glob, Grep, Skill]
 expected_outcome: 'Pillar bullets + 15–25 questions + STAR answers + evidence index; no invented metrics.'
 ---

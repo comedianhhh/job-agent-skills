@@ -1,4 +1,4 @@
 schema_version: "1.1"
-name: existing-workspace-not-overwritten
+name: wording-only-does-not-touch-files
 context:
   scaffold_script: fixture.sh
