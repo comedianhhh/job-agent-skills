@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
-    paths: ["mcp/jobs-mcp/**", "web/**", "evals/**", "skills/**", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "web/**", "evals/**", "skills/**", "extensions/**", "tests/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
   pull_request:
-    paths: ["mcp/jobs-mcp/**", "web/**", "evals/**", "skills/**", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "web/**", "evals/**", "skills/**", "extensions/**", "tests/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
 
 jobs:
   jobs-mcp:
@@ -88,3 +88,22 @@ jobs:
           python-version: "3.12"
       - name: Validate eval cases and graders (no model calls)
         run: python evals/validate.py
+
+  pi-package:
+    name: pi package (extension)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - name: Type-check the extension
+        run: npm run check
+      - name: Load the extension against a fake ExtensionAPI (spawns jobs-mcp via uvx, no network)
+        run: npm run test:pi

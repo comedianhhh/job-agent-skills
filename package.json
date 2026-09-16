@@ -1,0 +1,65 @@
+{
+  "name": "job-agent-skills",
+  "version": "0.1.0",
+  "description": "Job-search workflow for coding agents, North American edition: ten skills (fit analysis, resume + cover letter files, form filling, pipeline tracking, interview drills, open-source contribution, project deep-dives) plus jobs-mcp for scanning Greenhouse / Lever / Ashby / LinkedIn.",
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Nianzhi (Alan) Li",
+    "url": "https://github.com/comedianhhh"
+  },
+  "homepage": "https://github.com/comedianhhh/job-agent-skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/comedianhhh/job-agent-skills.git"
+  },
+  "keywords": [
+    "pi-package",
+    "job-search",
+    "resume",
+    "interview",
+    "career",
+    "mcp",
+    "greenhouse",
+    "lever",
+    "ashby",
+    "linkedin",
+    "open-source",
+    "skills"
+  ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ],
+    "extensions": [
+      "./extensions"
+    ]
+  },
+  "files": [
+    "skills",
+    "extensions",
+    "templates",
+    "scripts",
+    "mcp/jobs-mcp/jobs_mcp",
+    "!**/__pycache__",
+    "mcp/jobs-mcp/pyproject.toml",
+    "mcp/jobs-mcp/README.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json",
+    "test:pi": "node --experimental-strip-types tests/pi-extension.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.85.1",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}

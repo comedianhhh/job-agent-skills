@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml)
 
-A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby and LinkedIn for new postings.
+A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby and LinkedIn for new postings.
 
 It is built around one rule: **every line that goes out traces to a fact you wrote down.** The agent tailors, formats, fills forms, tracks, and drills you for interviews — it never invents a title, a number, or an ownership claim.
 
@@ -45,6 +45,14 @@ claude plugin install job-agent-skills
 ```
 
 jobs-mcp starts through `uvx` (install [uv](https://docs.astral.sh/uv/) if you do not have it).
+
+### As a pi package
+
+```bash
+pi install git:github.com/comedianhhh/job-agent-skills
+```
+
+Skills load as `/skill:job-match`, `/skill:offer`, … (or the model picks them up on its own). pi has no MCP support by design, so the bundled extension ([extensions/jobs-mcp.ts](extensions/jobs-mcp.ts)) starts jobs-mcp over stdio at session start and registers its four tools natively — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. It needs `uv` on PATH; set `JOBS_MCP_COMMAND=jobs-mcp` to use a `pip install -e mcp/jobs-mcp` install instead. If the server cannot start, pi shows a warning and the skills still load.
 
 ### Manual
 
@@ -101,6 +109,7 @@ See `templates/career/README.md`.
 - **External writes are confirmed.** Submitting an application, opening a PR, sending a message — each is shown and confirmed unless your `answers.yaml` policy says otherwise.
 - **NA specifics.** Letter paper, one page, no photo or personal-data block; hard constraints are work authorization / sponsorship / location / years / band; pipeline is APPLIED → SCREEN → OA → TECH → ONSITE → OFFER; outreach is LinkedIn notes and cold email, not chat openers.
 - **No agent framework.** Skills are Markdown; the MCP server is ~300 lines of Python on `httpx`.
+- **One skill set, two hosts.** The same `skills/` load as a Claude Code plugin and as a pi package; the pi extension (~100 lines, `@modelcontextprotocol/sdk`) is the only host-specific code. `npm run check` type-checks it, `npm run test:pi` loads it against a fake `ExtensionAPI` and round-trips a `scan` call.
 
 
 ## License

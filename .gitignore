@@ -14,3 +14,5 @@ web/app/.env*
 .claude/launch.json
 .env
 evals/**/results/
+
+node_modules/

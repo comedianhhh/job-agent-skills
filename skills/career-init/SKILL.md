@@ -5,7 +5,7 @@ description: Scaffold the private career/ workspace that every other job-agent s
 
 # /career-init — Set up the workspace
 
-Create `career/` in the current project (or the path the user gives) from this plugin's `templates/career/`, then walk the user through the two files that everything depends on.
+Create `career/` in the current project (or the path the user gives) from this plugin's `templates/career/` (the `templates/` folder sits next to `skills/` in the install root), then walk the user through the two files that everything depends on.
 
 ## Steps
 
@@ -20,4 +20,4 @@ Create `career/` in the current project (or the path the user gives) from this p
 
 - Never invent facts to fill gaps; leave `TODO:`.
 - Do not paste the user's phone number, email, or answers into any public file or chat log beyond what they typed.
-- If `jobs-mcp` is not configured, tell the user how (see the plugin README) — `/offer` scanning needs it.
+- If `jobs-mcp` is not configured, tell the user how (see the README: MCP config for Claude Code; in pi the bundled extension starts it, which needs `uv` on PATH) — `/offer` scanning needs it.

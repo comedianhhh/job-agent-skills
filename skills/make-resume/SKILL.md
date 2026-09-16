@@ -29,7 +29,7 @@ Ask only for what blocks delivery. Unknown field → visible `[TBD]` in the draf
    sh scripts/export-pdf.sh "career/<folder>" "<Company-Role>" "<Full Name>"
    ```
 
-   (When installed as a plugin, the script is at `${CLAUDE_PLUGIN_ROOT}/scripts/export-pdf.sh`.) It writes `<Company-Role>-<Name>.pdf` and `<Company-Role>-Cover-Letter-<Name>.pdf` and prints page counts.
+   (When installed as a plugin or package, the script is at `<install root>/scripts/export-pdf.sh` — `${CLAUDE_PLUGIN_ROOT}` in Claude Code, the package directory that contains this skill's `skills/` folder in pi.) It writes `<Company-Role>-<Name>.pdf` and `<Company-Role>-Cover-Letter-<Name>.pdf` and prints page counts.
 4. **Gate** — both PDFs must be `1 page(s)`. Two pages is a defect: cut or tighten; never shrink fonts below the stylesheet. Links visible as text; no `[TBD]` / `TODO`.
 5. **Freeze** — after submission, commit the folder (`apply(<Company>): <Role>`) so the sent version is recoverable; add the row to `career/tracker.md` (`/offer`).
 
