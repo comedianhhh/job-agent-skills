@@ -24,7 +24,7 @@ Claim status lives in `facts.md`: confirmed (dated ✅ or plain fact), unconfirm
 2. Read the facts and the existing resume. Conflicting sources → do **not** pick the flattering one; mark unconfirmed and list it. Missing material → draft from what exists, list ≤ 5 must-fill items.
 3. Offer 1–3 positioning lines: a safe and an ambitious version; the ambitious one states the evidence it still needs.
 4. Rewrite bullets as **action → system capability → business value → result evidence → personal boundary**. Reuse `blocks.md`; new blocks get added there (with the user's OK) so they are never lost.
-5. Produce the summary, a recruiter note, and a slightly longer self-introduction.
+5. Produce the summary, a recruiter note, and a slightly longer self-introduction. The self-introduction is spoken — follow the "Spoken register" rules in `skills/interview/SKILL.md` (short sentences, no taglines, no summary line).
 6. Audit strong claims: original → proposed → fact → boundary → risk. Update `facts.md` only with confirmation.
 
 ## Boundaries

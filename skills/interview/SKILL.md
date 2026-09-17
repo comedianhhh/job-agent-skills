@@ -75,6 +75,19 @@ budget reached → wrap up → Review
 
 When the resume is stronger than the user can defend, offer exactly three paths: add a real fact, learn the missing knowledge, or tone the wording down. Changes to `facts.md` / `stories.md` only with confirmation.
 
+## Spoken register
+
+Anything the user will say out loud — a pitch, a background walkthrough, a STAR answer, a model phrasing offered as a hint — is written for the ear, not the page. Polished parallel prose reads as machine-written the moment it is spoken.
+
+- Short sentences, contractions, one idea per breath. Spoken connectors are expected: "so", "basically", "the thing I did was", "and then".
+- Open like a person answering ("Sure. So, quick version —"), not with a thesis statement.
+- No taglines, no parallel slogans, no closing summary line. End on a fact or a one-line "that's what got my attention", then stop.
+- Plain verbs over résumé verbs: swapped / fixed / built / made sure, not replaced / eliminated / architected / ensured.
+- Approximations and one small self-correction are allowed ("about 75%", "like, ten hours a week") — that is how real recall sounds.
+- Facts and numbers are unchanged and still come only from `career/facts.md`.
+- Test before handing it over: read it aloud. If it sounds like a LinkedIn About section, rewrite.
+- Pair every script with a beat skeleton (per beat: where / what you did / number / why it matters to them) and have the user say it back in their own words. The skeleton is the deliverable; the script only shows how the beats connect.
+
 ## Sequence
 
 `/job-match → /great-resume → /make-resume → /job-apply → /interview → /offer`. The resume is written for the recruiter; the follow-ups are reserved for the facts.
