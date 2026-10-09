@@ -272,10 +272,12 @@ def parse_board(spec: str) -> tuple[str, str]:
     return source, slug.strip()
 
 
-def fetch_board(spec: str) -> list[Job]:
+def fetch_board(spec: str, with_content: bool = False) -> list[Job]:
+    """All jobs on one board. Lever and Ashby always include descriptions; Greenhouse only with
+    `with_content` (one heavier request instead of one per job)."""
     source, slug = parse_board(spec)
     if source == "greenhouse":
-        return greenhouse_jobs(slug)
+        return greenhouse_jobs(slug, with_content=with_content)
     if source == "lever":
         return lever_jobs(slug)
     return ashby_jobs(slug)

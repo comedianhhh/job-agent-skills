@@ -9,6 +9,7 @@ dependencies = ["mcp>=1.10", "httpx>=0.27"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+rank = ["fastembed>=0.4"]  # optional dense re-ranking for scan(rank_query=...)
 
 [project.scripts]
 jobs-mcp = "jobs_mcp.server:main"
