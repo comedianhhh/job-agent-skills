@@ -30,7 +30,9 @@ Ask only for what blocks delivery. Unknown field → visible `[TBD]` in the draf
    ```
 
    (When installed as a plugin or package, the script is at `<install root>/scripts/export-pdf.sh` — `${CLAUDE_PLUGIN_ROOT}` in Claude Code, the package directory that contains this skill's `skills/` folder in pi.) It writes `<Company-Role>-<Name>.pdf` and `<Company-Role>-Cover-Letter-<Name>.pdf` and prints page counts.
-4. **Gate** — both PDFs must be `1 page(s)`. Two pages is a defect: cut or tighten; never shrink fonts below the stylesheet. Links visible as text; no `[TBD]` / `TODO`.
+4. **Gate** — two checks, both deterministic:
+   - **Trace** — `export-pdf.sh` runs `scripts/check-trace.py` first and refuses to export when a number in the resume or letter body (75%, 3x, 256, 4.5) is not in `facts.md`, or a `TODO` / `[TBD]` is left. An `UNTRACED` line means one of two things: the number is wrong (fix the line) or the fact is real but missing from `facts.md` (ask the user, add it there with its source, re-run). Never reword a number to dodge the check, and never set `SKIP_TRACE=1` on your own.
+   - **Pages** — both PDFs must be `1 page(s)`. Two pages is a defect: cut or tighten; never shrink fonts below the stylesheet. Links visible as text.
 5. **Freeze** — after submission, commit the folder (`apply(<Company>): <Role>`) so the sent version is recoverable; add the row to `career/tracker.md` (`/offer`).
 
 ## Deliverable

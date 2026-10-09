@@ -5,6 +5,7 @@
 #
 # Produces <folder>/<slug>-<Name>.pdf and <folder>/<slug>-Cover-Letter-<Name>.pdf and prints page counts.
 # Set CHROME to your Chrome/Chromium binary if it is not found automatically.
+# Runs scripts/check-trace.py first and refuses to export if a number is not in facts.md (SKIP_TRACE=1 bypasses).
 
 set -e
 DIR="$1"; SLUG="$2"; NAME="${3:-Resume}"
@@ -19,6 +20,16 @@ if [ -z "$CHROME" ]; then
   done
 fi
 [ -n "$CHROME" ] || { echo "Chrome not found; set CHROME=/path/to/chrome" >&2; exit 2; }
+
+# Trace gate: every number must exist in facts.md; no TODO / [TBD]. SKIP_TRACE=1 to bypass.
+if [ "$SKIP_TRACE" != 1 ]; then
+  PY="$(command -v python3 || command -v python || true)"
+  if [ -n "$PY" ]; then
+    "$PY" "$(dirname "$0")/check-trace.py" "$DIR" || { echo "trace gate failed: fix the lines above or add the fact to facts.md" >&2; exit 1; }
+  else
+    echo "warning: python not found, trace gate skipped" >&2
+  fi
+fi
 
 abs() { case "$1" in /*) printf '%s' "$1" ;; *) printf '%s/%s' "$(pwd)" "$1" ;; esac; }
 DIR_ABS="$(abs "$DIR")"
