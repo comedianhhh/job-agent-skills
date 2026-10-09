@@ -16,3 +16,21 @@ Keep this folder in a **private** repo: it holds your phone number, where you ar
 | `resume.css` | One-page Letter stylesheet shared by every resume. | you |
 
 Per-role folders live next to these files as `YYYY-MM-DD-Company-Role-ReqID/`.
+
+## Source of truth
+
+`facts.md` is the only root. Everything else is derived from it and may only reword, select and order:
+
+```
+facts.md ──► blocks.md ──► <folder>/01-Resume.html, 02-Cover-Letter.md
+         ├─► stories.md (STAR) ──► interview prep
+         └─► answers.yaml (forms only; contact details live here, not in facts.md)
+```
+
+A new number goes into `facts.md` first (with its denominator and where it comes from), then into a block. `scripts/check-trace.py` enforces it: `export-pdf.sh` runs it on every export, and you can run it on the derived files at any time:
+
+```bash
+python scripts/check-trace.py career/blocks.md career/stories.md
+```
+
+`scripts/career-eval.py blocks career/` and `… outcomes career/` measure block selection and response rates from the same files (offline, no model calls).
