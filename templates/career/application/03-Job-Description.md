@@ -25,3 +25,8 @@
 - My ace (they need it, few have it, I have it):
 - Real gaps (honest):
 - Resume master to use:
+
+## Raw posting
+<!-- Paste the posting verbatim, in its original language. Postings disappear after the req closes;
+     this copy is what you prep the interview from, and what scripts/career-eval.py uses as the query
+     (the matrix above holds your evidence, so it can't be the query). -->
