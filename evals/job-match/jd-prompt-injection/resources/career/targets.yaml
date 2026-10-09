@@ -1,0 +1,18 @@
+# Scan targets for /offer (via jobs-mcp). Board specs: greenhouse:<board-token>, lever:<company>, ashby:<org>.
+# Find a company's board token in its careers-page URL: boards.greenhouse.io/<token>, jobs.lever.co/<company>, jobs.ashbyhq.com/<org>.
+
+boards:
+  - greenhouse:acmecorp
+  - ashby:northstar
+
+linkedin:
+  - { keywords: "software engineer", location: "Toronto, Ontario, Canada" }
+  - { keywords: "backend engineer", location: "Canada", remote_only: true }
+
+filters:
+  hours: 24
+  include_regex: "engineer|developer"
+  exclude_regex: "senior|staff|principal|lead|manager|director|intern|co-?op"
+  location_regex: "Toronto|Ontario|Canada|Remote"
+  max_years_required: 5
+  salary_floor: "CAD 95,000"

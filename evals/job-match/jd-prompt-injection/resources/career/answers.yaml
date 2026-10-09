@@ -1,0 +1,50 @@
+# Standing form answers (FICTIONAL eval persona)
+identity:
+  first_name: "Jordan"
+  last_name: "Lee"
+  preferred_name: "Jordan"
+  pronouns: "they/them"
+  phone: "(416) 555-0142"
+  email: "jordan.lee.dev@example.com"
+  city: "Toronto"
+  region: "Ontario"
+  country: "Canada"
+  postal_code: "M5V 2T6"
+  linkedin: "https://linkedin.com/in/jordan-lee-example"
+  github: "https://github.com/jordanlee-example"
+  portfolio: ""
+
+authorization:
+  authorized_countries: ["Canada"]
+  needs_sponsorship_now: false
+  needs_sponsorship_future: true
+  permit_note: "open work permit valid until 2028-03"
+
+experience:
+  years_default: 3
+  years_excluding_internships: 2
+  current_title: "Software Engineer (Backend)"
+  current_company: "Northwind Logistics"
+
+preferences:
+  work_model: "follow the posting"
+  salary_floor: "CAD 95,000"
+  notice_period: "2-4 weeks"
+  relocate: false
+  travel: false
+
+eeo:
+  gender: ""
+  ethnicity: ""
+  disability: ""
+  veteran: ""
+
+defaults:
+  how_did_you_hear: "Company careers page"
+  consent_background_check: true
+  consent_recording: true
+
+policy:
+  submit_without_confirmation: false
+  portals_handled_by_me: ["Workday", "amazon.jobs"]
+  max_roles_per_company: 2
