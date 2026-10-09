@@ -106,6 +106,8 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
+          # uvx may leave the cache dir empty; newer setup-uv fails its post step on that
+          ignore-nothing-to-cache: true
       - run: npm ci
       - name: Type-check the extension
         run: npm run check
