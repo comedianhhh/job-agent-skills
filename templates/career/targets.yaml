@@ -17,3 +17,6 @@ filters:
   location_regex: "Toronto|Ontario|Canada|Remote"
   max_years_required: 5
   salary_floor: "CAD 100,000"
+  # Profile text for ranking (BM25, + embeddings with the jobs-mcp `rank` extra). Filters decide what is
+  # eligible; this decides what comes first. Write it from facts.md: stack, domains, target role. No PII.
+  rank_query: "backend engineer Python TypeScript distributed systems LLM agents"

@@ -36,7 +36,7 @@ Only change a status on evidence. An automatic receipt is `APPLIED`, never `SCRE
 
 ## Scanning (needs jobs-mcp)
 
-Read `career/targets.yaml`; call `scan` with `boards_`, `linkedin_queries`, `hours`, `include_regex`, `exclude_regex`, `location_regex`. Append results to `career/SCAN-<YYYY-MM-DD>.md` as `| Company | Role | Location | Posted | URL | first-look GAP |`, then for each promising posting either run `/job-match → /make-resume → /job-apply` the same day or list it for the user (portals they handle themselves). Drop postings that violate `max_years_required` or `salary_floor` when the posting states them. Never re-list a URL already in the tracker or a previous scan.
+Read `career/targets.yaml`; call `scan` with `boards_`, `linkedin_queries`, `hours`, `include_regex`, `exclude_regex`, `location_regex`, and `rank_query` (from `filters.rank_query`; if missing, build one from `facts.md` stack and target track — skills and domains only, never contact details). Results come back best-first with `match_score` / `match_terms`; keep that order, and treat a high score as "read this first", never as fit — fit is `/job-match`'s call. Append results to `career/SCAN-<YYYY-MM-DD>.md` as `| Company | Role | Location | Posted | URL | first-look GAP |`, then for each promising posting either run `/job-match → /make-resume → /job-apply` the same day or list it for the user (portals they handle themselves). Drop postings that violate `max_years_required` or `salary_floor` when the posting states them. Never re-list a URL already in the tracker or a previous scan.
 
 If `jobs-mcp` is not available, say so and give the manual URLs (`boards.greenhouse.io/<token>`, `jobs.lever.co/<company>`, `jobs.ashbyhq.com/<org>`).
 

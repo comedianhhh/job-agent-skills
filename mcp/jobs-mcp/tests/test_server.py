@@ -95,7 +95,7 @@ def fake_boards(monkeypatch):
     """Replace fetch_board with an in-memory table so scan's logic is tested in isolation."""
     table: dict[str, list[boards.Job] | Exception] = {}
 
-    def fetch(spec: str):
+    def fetch(spec: str, with_content: bool = False):
         v = table[spec]
         if isinstance(v, Exception):
             raise v
@@ -196,3 +196,37 @@ def test_scan_collects_errors_and_keeps_going(fake_boards, mock_http):
 
 def test_scan_empty_inputs():
     assert server.scan() == {"count": 0, "scanned": 0, "jobs": [], "errors": []}
+
+
+# ------------------------------------------------------------------ ranking
+
+
+def test_scan_rank_query_orders_by_relevance_before_limit(fake_boards, monkeypatch):
+    monkeypatch.setenv("JOBS_MCP_DENSE", "0")
+    fake_boards["greenhouse:b"] = [
+        _fresh(id="1", url="u1", title="Software Engineer", description="Java billing, Spring, Oracle."),
+        _fresh(id="2", url="u2", title="Software Engineer", description="Unity C# gameplay."),
+        _fresh(id="3", url="u3", title="Agents Engineer", description="Python LLM agents, MCP, evals."),
+    ]
+    res = server.scan(boards_=["greenhouse:b"], rank_query="Python LLM agents MCP evals", limit=2)
+    assert res["ranked_by"] == "bm25"
+    assert res["count"] == 2
+    top = res["jobs"][0]
+    assert top["id"] == "3"  # last on the board, first after ranking: limit applies after ranking
+    assert {"python", "llm", "mcp", "evals"} <= set(top["match_terms"])
+    assert top["match_score"] > res["jobs"][1]["match_score"]
+    assert all(not j["description"] for j in res["jobs"])  # ranked on the text, text still not shipped
+
+
+def test_scan_without_rank_query_keeps_board_order_and_shape(fake_boards):
+    fake_boards["greenhouse:b"] = [_fresh(id=str(i), url=f"u{i}") for i in range(3)]
+    res = server.scan(boards_=["greenhouse:b"])
+    assert "ranked_by" not in res
+    assert [j["id"] for j in res["jobs"]] == ["0", "1", "2"]
+    assert "match_score" not in res["jobs"][0]
+
+
+def test_scan_rank_query_fetches_greenhouse_content(mock_http, monkeypatch):
+    monkeypatch.setenv("JOBS_MCP_DENSE", "0")
+    server.scan(boards_=["greenhouse:doordashcanada"], hours=24 * 365 * 5, exclude_regex="", rank_query="x")
+    assert mock_http.requests[0].url.params.get("content") == "true"

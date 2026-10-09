@@ -4,7 +4,7 @@ Tools:
   list_board_jobs   one Greenhouse / Lever / Ashby board, all open roles
   get_job           full description for one posting
   linkedin_search   LinkedIn's unauthenticated job search (title/company/location/url only)
-  scan              many boards + LinkedIn queries at once, filtered and deduplicated
+  scan              many boards + LinkedIn queries at once, filtered, deduplicated, optionally ranked
 
 Run:  python -m jobs_mcp                       (stdio transport, for Claude Code etc.)
       python -m jobs_mcp --http [--port 8765]  (streamable HTTP on 127.0.0.1, for hosts
@@ -21,7 +21,7 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP as MCPServer
 
-from . import boards
+from . import boards, rank
 
 mcp = MCPServer(
     "jobs-mcp",
@@ -82,6 +82,7 @@ def scan(
     exclude_regex: str | None = _DEFAULT_EXCLUDE,
     location_regex: str | None = None,
     limit: int = 100,
+    rank_query: str | None = None,
 ) -> dict[str, Any]:
     """Scan several sources at once and return one deduplicated, filtered list.
 
@@ -91,12 +92,16 @@ def scan(
     include_regex:    title must match (e.g. "engineer|developer")
     exclude_regex:    title must NOT match; default drops senior/staff/lead/manager/intern
     location_regex:   location must match (e.g. "Toronto|Canada|Remote")
+    rank_query:       profile text (stack, domains, target role); when set, eligible postings are
+                      ranked best-first by BM25 (+ dense embeddings if the `rank` extra is installed)
+                      before `limit` applies, and each gets `match_score` / `match_terms`
     """
     found: list[boards.Job] = []
     errors: list[str] = []
     for spec in boards_ or []:
         try:
-            found.extend(boards.fetch_board(spec))
+            # ranking needs descriptions; Greenhouse only sends them when asked
+            found.extend(boards.fetch_board(spec, with_content=bool(rank_query)))
         except Exception as e:  # keep scanning other boards
             errors.append(f"{spec}: {e}")
     for q in linkedin_queries or []:
@@ -113,7 +118,7 @@ def scan(
     exc = re.compile(exclude_regex, re.I) if exclude_regex else None
     loc = re.compile(location_regex, re.I) if location_regex else None
 
-    out: list[dict[str, Any]] = []
+    eligible: list[boards.Job] = []
     seen: set[str] = set()
     for j in found:
         key = j.get("url") or f"{j['source']}:{j['id']}"
@@ -128,10 +133,17 @@ def scan(
         if loc and not loc.search(j.get("location", "")):
             continue
         seen.add(key)
-        out.append(boards.to_public(j, max_desc=0))
-        if len(out) >= limit:
+        eligible.append(j)
+        if not rank_query and len(eligible) >= limit:
             break
-    return {"count": len(out), "scanned": len(found), "jobs": out, "errors": errors}
+
+    extra: dict[str, Any] = {}
+    if rank_query:
+        ranked, extra["ranked_by"] = rank.rank_jobs(rank_query, list(eligible))
+        out = [boards.to_public(j, max_desc=0) for j in ranked[:limit]]
+    else:
+        out = [boards.to_public(j, max_desc=0) for j in eligible]
+    return {"count": len(out), "scanned": len(found), "jobs": out, "errors": errors, **extra}
 
 
 def main(argv: list[str] | None = None) -> None:

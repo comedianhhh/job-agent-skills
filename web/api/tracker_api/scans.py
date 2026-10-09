@@ -56,6 +56,7 @@ def scan_params(targets: dict[str, Any], overrides: dict[str, Any] | None = None
         "exclude_regex": o.get("exclude_regex", f.get("exclude_regex", jobs._DEFAULT_EXCLUDE)),
         "location_regex": o.get("location_regex", f.get("location_regex")),
         "limit": int(o.get("limit") or 200),
+        "rank_query": o.get("rank_query", f.get("rank_query")) or None,
     }
     # jobs-mcp treats "" as "no filter"; YAML users may leave the key blank
     for k in ("include_regex", "exclude_regex", "location_regex"):
