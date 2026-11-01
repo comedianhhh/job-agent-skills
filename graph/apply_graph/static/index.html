@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>apply-graph</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #e3e1da;
+    --accent: #2f6fdb; --accent-soft: #e6eefc; --ok: #1f8a4c; --ok-soft: #e3f4ea;
+    --warn: #b7791f; --warn-soft: #fbf0dc; --bad: #c0392b; --bad-soft: #fbe6e3;
+    --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --panel: #1f1f1d; --ink: #ecebe6; --muted: #9a998f; --line: #34332f;
+      --accent: #6f9ef0; --accent-soft: #1e2a40; --ok: #4cc27f; --ok-soft: #173023;
+      --warn: #e0a84a; --warn-soft: #33281a; --bad: #ef6b5c; --bad-soft: #3a1f1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 16px; margin: 0; letter-spacing: .2px; }
+  .badge { font: 12px var(--mono); padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+  .layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 53px); }
+  aside { border-right: 1px solid var(--line); padding: 16px; background: var(--panel); }
+  aside h2, .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 8px; }
+  select, textarea, button { font: inherit; color: inherit; }
+  select, textarea { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+  button { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.good { background: var(--ok); border-color: var(--ok); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+  .runs { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 4px; }
+  .runs li button { width: 100%; text-align: left; display: flex; justify-content: space-between; gap: 8px; border-color: transparent; padding: 6px 8px; }
+  .runs li button:hover, .runs li button.on { background: var(--bg); border-color: var(--line); }
+  .runs .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  main { padding: 20px; display: grid; gap: 16px; align-content: start; max-width: 1200px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .status { display: flex; align-items: center; gap: 10px; min-height: 24px; }
+  .chip { font: 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--muted); white-space: nowrap; }
+  .chip.READY, .chip.APPLY { background: var(--ok-soft); color: var(--ok); }
+  .chip.SKIPPED, .chip.SKIP, .chip.waiting { background: var(--warn-soft); color: var(--warn); }
+  .chip.BLOCKED, .chip.REJECTED, .chip.error { background: var(--bad-soft); color: var(--bad); }
+  .chip.running { background: var(--accent-soft); color: var(--accent); }
+  .muted { color: var(--muted); }
+  .empty { color: var(--muted); font-style: italic; }
+  svg text { font: 12px var(--mono); fill: var(--ink); }
+  svg .lbl { font-size: 10px; fill: var(--muted); }
+  svg .edge { stroke: var(--line); stroke-width: 1.5; fill: none; }
+  svg .node rect { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+  svg .node.done rect { fill: var(--ok-soft); stroke: var(--ok); }
+  svg .node.active rect { fill: var(--accent-soft); stroke: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+  svg .node.waiting rect { fill: var(--warn-soft); stroke: var(--warn); }
+  @keyframes pulse { 50% { stroke-width: 3; } }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td { border-top: 1px solid var(--line); padding: 6px 4px; vertical-align: top; }
+  td:first-child { width: 38%; font-weight: 500; }
+  .gap { color: var(--bad); font-weight: 600; }
+  .draft { white-space: pre-wrap; background: var(--bg); border-radius: 8px; padding: 12px; max-height: 420px; overflow: auto; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  ol.log { margin: 0; padding-left: 20px; font: 12px/1.7 var(--mono); }
+  ol.log .t { color: var(--muted); }
+  ul.vals { margin: 4px 0 0; padding-left: 18px; }
+  .err { color: var(--bad); white-space: pre-wrap; font: 12px var(--mono); }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid var(--line); }
+    .grid { grid-template-columns: 1fr; } main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<header><h1>apply-graph</h1><span class="badge" id="backend">…</span><span class="muted" id="runsdir"></span></header>
+<div class="layout">
+  <aside>
+    <h2>New run</h2>
+    <select id="job" aria-label="Posting"></select>
+    <div class="actions"><button class="primary" id="startBtn">Run graph</button></div>
+    <p class="muted" style="font-size:12px">Writes to <code>_graph-runs/</code>, never the role folder.</p>
+    <h2 style="margin-top:20px">Runs</h2>
+    <ul class="runs" id="runs"></ul>
+  </aside>
+  <main>
+    <section class="card">
+      <div class="status" id="status"><span class="empty">Pick a posting and run the graph.</span></div>
+      <svg id="graph" viewBox="0 0 860 190" width="100%" role="img" aria-label="Graph progress"></svg>
+    </section>
+    <section class="card" id="draftCard" hidden>
+      <h2>Draft <span class="muted" id="attempts"></span></h2>
+      <div class="draft" id="draft"></div>
+      <div id="approveBox" hidden>
+        <textarea id="note" rows="2" placeholder="Note for a redraft (leave empty and press Reject to stop)"></textarea>
+        <div class="actions">
+          <button class="good" id="approveBtn">Approve</button>
+          <button id="redraftBtn">Send back with note</button>
+          <button id="rejectBtn">Reject</button>
+        </div>
+      </div>
+    </section>
+    <div class="grid">
+      <section class="card"><h2>Match</h2><div id="match" class="empty">Not run yet.</div></section>
+      <section class="card"><h2>Company brief</h2><div id="company" class="empty">Not run yet.</div></section>
+      <section class="card"><h2>Trace check</h2><div id="trace" class="empty">Not run yet.</div></section>
+      <section class="card"><h2>Run log</h2><div id="log" class="empty">Nothing yet.</div></section>
+    </div>
+  </main>
+</div>
+<script>
+const $ = (id) => document.getElementById(id)
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+
+// Same nodes and edges as graph.py; positions only.
+const NODES = { match: [70, 70], research_company: [215, 70], draft: [370, 70], trace_check: [510, 70], approve: [650, 70], record: [785, 150] }
+const W = { match: 90, research_company: 140, draft: 90, trace_check: 110, approve: 90, record: 90 }
+const EDGES = [
+  ['M115 70 H145', ''], ['M285 70 H325', ''], ['M415 70 H455', ''], ['M565 70 H605', 'clean', 585, 62],
+  ['M510 55 C510 15 370 15 370 55', 'untraced → redraft', 440, 22],
+  ['M650 55 C650 0 380 0 380 55', 'human note', 520, 6],
+  ['M70 85 V150 H740', 'SKIP', 90, 140], ['M520 85 V140 H740', 'BLOCKED', 530, 120],
+  ['M660 85 V140 H740', 'yes / reject', 668, 120],
+]
+
+let view = { run_id: null, next: [], state: {} }
+let streaming = false, lastTick = Date.now(), lastAt = 0, times = []
+
+// the node running now: what the checkpoint says comes next, or match before the first step lands
+const current = () => view.next[0] || (streaming && !(view.state.log || []).length ? 'match' : undefined)
+
+function nodeClass(n) {
+  const done = new Set((view.state.log || []).map((l) => l.split(':')[0]))
+  if (current() === n) return streaming ? 'active' : 'waiting'
+  return done.has(n) ? 'done' : ''
+}
+
+function drawGraph() {
+  let s = '<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="var(--muted)"/></marker></defs>'
+  for (const [d, label, x, y] of EDGES) s += `<path class="edge" d="${d}" marker-end="url(#arr)"/>` + (label ? `<text class="lbl" x="${x}" y="${y}">${label}</text>` : '')
+  for (const [n, [x, y]] of Object.entries(NODES)) {
+    s += `<g class="node ${nodeClass(n)}"><rect x="${x - W[n] / 2}" y="${y - 15}" width="${W[n]}" height="30" rx="8"/><text x="${x}" y="${y + 4}" text-anchor="middle">${n}</text></g>`
+  }
+  $('graph').innerHTML = s
+}
+
+function render() {
+  const st = view.state, next = current()
+  drawGraph()
+
+  const secs = Math.round((Date.now() - lastTick) / 1000)
+  let status
+  if (!view.run_id) status = '<span class="empty">Pick a posting and run the graph.</span>'
+  else if (streaming) status = `<span class="chip running">running</span> <b>${esc(next || '…')}</b> <span class="muted">${secs}s</span>`
+  else if (next === 'approve') status = '<span class="chip waiting">waiting for you</span> Read the draft, then approve, send it back or reject.'
+  else if (st.status) status = `<span class="chip ${esc(st.status)}">${esc(st.status)}</span> <span class="muted">Written to ${esc(st.out_dir)}</span>`
+  else status = '<span class="chip">stopped</span>'
+  if (view.error) status += `<div class="err">${esc(view.error)}</div>`
+  $('status').innerHTML = (view.run_id ? `<span class="muted" style="font-size:12px">${esc(view.run_id)}</span> ` : '') + status
+
+  const m = st.match
+  $('match').className = m ? '' : 'empty'
+  $('match').innerHTML = m ? `<p><span class="chip ${esc(m.decision)}">${esc(m.decision)}</span> ${esc(m.reason)}</p>
+    <table>${m.requirements.map((r) => `<tr><td>${esc(r.requirement)}</td><td>${r.evidence ? esc(r.evidence) : '<span class="gap">gap</span>'}</td></tr>`).join('')}</table>` : 'Not run yet.'
+
+  const c = st.company
+  $('company').className = c ? '' : 'empty'
+  $('company').innerHTML = c ? `<p><b>Product.</b> ${esc(c.product)}</p><p><b>Team.</b> ${esc(c.team_focus)}</p>
+    <b>Stresses</b><ul class="vals">${c.values.map((v) => `<li>${esc(v)}</li>`).join('')}</ul>` : (m && m.decision === 'SKIP' ? 'Skipped: the posting was not a match.' : 'Not run yet.')
+
+  const f = st.findings
+  $('trace').className = f ? '' : 'empty'
+  $('trace').innerHTML = f ? (f.length ? `<p class="gap">${f.length} number(s) not in facts.md:</p><ul class="vals">${f.map((x) => `<li><code>${esc(x.claim)}</code></li>`).join('')}</ul>`
+    : '<p><span class="chip READY">clean</span> Every number traces to facts.md.</p>') + `<p class="muted">Draft attempts: ${st.attempts ?? 0} of ${meta.max_drafts}</p>` : 'Not run yet.'
+
+  const log = st.log || []
+  $('log').className = log.length ? '' : 'empty'
+  $('log').innerHTML = log.length ? `<ol class="log">${log.map((l, i) => `<li>${esc(l)}${times[i] !== undefined ? ` <span class="t">${times[i].toFixed(1)}s</span>` : ''}</li>`).join('')}</ol>` : 'Nothing yet.'
+
+  $('draftCard').hidden = !st.draft
+  $('draft').textContent = st.draft || ''
+  $('attempts').textContent = st.attempts ? `attempt ${st.attempts}` : ''
+  $('approveBox').hidden = !(next === 'approve' && !streaming)
+  for (const b of ['startBtn', 'approveBtn', 'redraftBtn', 'rejectBtn']) $(b).disabled = streaming
+}
+
+async function readSSE(resp, onEvent) {
+  const reader = resp.body.getReader(), dec = new TextDecoder()
+  let buf = ''
+  for (;;) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buf += dec.decode(value, { stream: true })
+    let i
+    while ((i = buf.indexOf('\n\n')) >= 0) {
+      const data = buf.slice(0, i).split('\n').filter((l) => l.startsWith('data: ')).map((l) => l.slice(6)).join('\n')
+      buf = buf.slice(i + 2)
+      if (data) onEvent(JSON.parse(data))
+    }
+  }
+}
+
+async function runStream(url, body) {
+  streaming = true; view.error = null; lastTick = Date.now(); render()
+  try {
+    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    if (!resp.ok) throw new Error((await resp.json()).detail || resp.statusText)
+    await readSSE(resp, (ev) => {
+      const before = (view.state.log || []).length
+      view = { run_id: ev.run_id, next: ev.next, state: ev.state, error: ev.type === 'error' ? ev.message : null }
+      // how long each node took: gap between server timestamps of consecutive events
+      for (let i = before; i < (ev.state.log || []).length; i++) times[i] = ev.at - lastAt
+      lastAt = ev.at; lastTick = Date.now()
+      if (ev.type === 'start') location.hash = 'run=' + encodeURIComponent(ev.run_id)
+      render()
+    })
+  } catch (e) { view.error = String(e.message || e) }
+  streaming = false; render(); loadRuns()
+}
+
+async function openRun(id) {
+  const resp = await fetch('/api/runs/' + encodeURIComponent(id))
+  if (!resp.ok) return
+  view = await resp.json(); times = []; location.hash = 'run=' + encodeURIComponent(id); render(); loadRuns()
+}
+
+async function loadRuns() {
+  const runs = await (await fetch('/api/runs')).json()
+  $('runs').innerHTML = runs.length ? runs.map((r) => {
+    const s = r.status || (r.next[0] === 'approve' ? 'waiting' : r.next.length ? 'stopped' : '')
+    return `<li><button data-run="${esc(r.run_id)}" class="${r.run_id === view.run_id ? 'on' : ''}"><span class="name">${esc(r.run_id)}</span><span class="chip ${esc(s)}">${esc(s)}</span></button></li>`
+  }).join('') : '<li class="empty">No runs yet.</li>'
+}
+
+let meta = { max_drafts: 3 }
+$('runs').addEventListener('click', (e) => { const b = e.target.closest('button[data-run]'); if (b && !streaming) openRun(b.dataset.run) })
+$('startBtn').onclick = () => { times = []; view = { run_id: null, next: [], state: {} }; runStream('/api/runs', { job: $('job').value }) }
+const resume = (approved, note) => runStream(`/api/runs/${encodeURIComponent(view.run_id)}/resume`, { approved, note })
+$('approveBtn').onclick = () => resume(true, '')
+$('redraftBtn').onclick = () => { const n = $('note').value.trim(); if (!n) return $('note').focus(); $('note').value = ''; resume(false, n) }
+$('rejectBtn').onclick = () => resume(false, '')
+setInterval(() => streaming && render(), 1000)
+
+;(async () => {
+  meta = await (await fetch('/api/meta')).json()
+  $('backend').textContent = meta.backend
+  $('runsdir').textContent = meta.runs_dir
+  const jobs = await (await fetch('/api/jobs')).json()
+  $('job').innerHTML = jobs.map((j) => `<option value="${esc(j.id)}">${esc(j.id)}</option>`).join('')
+  render(); await loadRuns()
+  const m = location.hash.match(/run=([^&]+)/)
+  if (m) openRun(decodeURIComponent(m[1]))
+})()
+</script>
+</body>
+</html>
