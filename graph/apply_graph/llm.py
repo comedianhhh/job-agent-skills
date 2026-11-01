@@ -70,19 +70,24 @@ class ClaudeCodeLLM:
 
     def parse(self, system: str, user: str, schema: type[T]) -> T:
         cmd = [
-            self.exe, "-p",
-            "--output-format", "json",
-            "--json-schema", json.dumps(schema.model_json_schema()),
-            "--system-prompt", system,
-            "--tools", "",
-            "--model", self.model,
-            "--effort", self.effort,
+            self.exe,
+            "-p",
+            "--output-format",
+            "json",
+            "--json-schema",
+            json.dumps(schema.model_json_schema()),
+            "--system-prompt",
+            system,
+            "--tools",
+            "",
+            "--model",
+            self.model,
+            "--effort",
+            self.effort,
             "--no-session-persistence",
         ]
         with tempfile.TemporaryDirectory() as cwd:
-            proc = subprocess.run(
-                cmd, input=user, capture_output=True, text=True, encoding="utf-8", cwd=cwd
-            )
+            proc = subprocess.run(cmd, input=user, capture_output=True, text=True, encoding="utf-8", cwd=cwd)
         if proc.returncode != 0:
             detail = proc.stderr.strip() or proc.stdout[:500]
             raise RuntimeError(f"claude -p failed ({proc.returncode}): {detail}")

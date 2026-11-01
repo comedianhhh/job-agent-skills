@@ -32,7 +32,9 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--thread", default=None, help="defaults to the --out folder name")
     p.add_argument(
-        "--backend", choices=["api", "claude-code"], default="api",
+        "--backend",
+        choices=["api", "claude-code"],
+        default="api",
         help="api: Anthropic SDK (needs ANTHROPIC_API_KEY); claude-code: the logged-in `claude` CLI",
     )
     a = p.parse_args(argv)
