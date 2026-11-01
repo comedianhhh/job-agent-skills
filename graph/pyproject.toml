@@ -1,0 +1,39 @@
+[project]
+name = "apply-graph"
+version = "0.1.0"
+description = "The job-agent-skills apply flow as a LangGraph state graph: match, draft, trace gate, human approval, record."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+  "langgraph>=1.0",
+  "langgraph-checkpoint-sqlite>=2.0",
+  "anthropic>=0.70",
+  "pydantic>=2",
+]
+
+[project.optional-dependencies]
+web = ["fastapi>=0.110", "uvicorn>=0.29"]
+dev = ["pytest>=8", "ruff>=0.6", "httpx>=0.27", "apply-graph[web]"]
+
+[project.scripts]
+apply-graph = "apply_graph.cli:main"
+apply-graph-web = "apply_graph.web:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["apply_graph"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
