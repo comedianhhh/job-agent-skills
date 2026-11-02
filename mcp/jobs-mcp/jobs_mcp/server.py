@@ -63,7 +63,7 @@ def linkedin_search(
     keywords: str,
     location: str,
     hours: int = 24,
-    limit: int = 50,
+    limit: int = 100,
     remote_only: bool = False,
 ) -> list[dict[str, Any]]:
     """LinkedIn guest job search: postings matching `keywords` in `location` from the last `hours`.
@@ -108,7 +108,12 @@ def scan(
         try:
             found.extend(
                 boards.linkedin_guest_jobs(
-                    q.get("keywords", ""), q.get("location", ""), hours=hours, limit=int(q.get("limit", 50))
+                    q.get("keywords", ""),
+                    q.get("location", ""),
+                    hours=hours,
+                    limit=int(q.get("limit", 100)),
+                    remote_only=bool(q.get("remote_only", False)),
+                    errors=errors,
                 )
             )
         except Exception as e:

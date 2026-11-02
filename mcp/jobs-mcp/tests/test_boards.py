@@ -156,12 +156,63 @@ def test_linkedin_guest_respects_limit_and_stops_paging(mock_http):
 def test_linkedin_guest_pages_until_empty(mock_http):
     boards.linkedin_guest_jobs("x", "y", limit=50)
     starts = [r.url.params["start"] for r in mock_http.requests]
-    assert starts == ["0", "25"]  # page two was empty -> stop
+    assert starts == ["0", "3"]  # advanced by the 3 cards on page one; page two was empty -> stop
 
 
-def test_linkedin_guest_non_200_returns_what_it_has(mock_http):
+def _li_card(jid: str) -> str:
+    return (
+        f'<li><div data-entity-urn="urn:li:jobPosting:{jid}">'
+        f'<h3 class="base-search-card__title">Job {jid}</h3>'
+        '<time class="job-search-card__listdate" datetime="2026-11-02"></time></div></li>'
+    )
+
+
+def test_linkedin_guest_pages_by_cards_returned(mock_http):
+    # LinkedIn serves 10 cards per page; a fixed step of 25 used to skip 15 of every 25
+    total = 23
+
+    def ten_per_page(request: httpx.Request) -> httpx.Response:
+        start = int(request.url.params["start"])
+        return httpx.Response(
+            200, text="".join(_li_card(str(i)) for i in range(start, min(start + 10, total)))
+        )
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", ten_per_page)
+    jobs = boards.linkedin_guest_jobs("x", "y", limit=100)
+    assert [j["id"] for j in jobs] == [str(i) for i in range(total)]
+    assert [r.url.params["start"] for r in mock_http.requests] == ["0", "10", "20", "23"]
+
+
+def test_linkedin_guest_retries_throttled_page(mock_http):
+    calls = []
+
+    def throttle_then_ok(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        if len(calls) == 1:
+            return httpx.Response(429, text="slow down")
+        return httpx.Response(200, text=_li_card("1") if request.url.params["start"] == "0" else "")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", throttle_then_ok)
+    assert [j["id"] for j in boards.linkedin_guest_jobs("x", "y")] == ["1"]
+
+
+def test_linkedin_guest_non_200_raises_when_nothing_collected(mock_http):
     mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(429, text="slow down"))
-    assert boards.linkedin_guest_jobs("x", "y") == []
+    with pytest.raises(RuntimeError, match="HTTP 429"):
+        boards.linkedin_guest_jobs("x", "y")
+
+
+def test_linkedin_guest_non_200_goes_to_errors_and_keeps_partial(mock_http):
+    def first_ok_then_blocked(request: httpx.Request) -> httpx.Response:
+        if request.url.params["start"] == "0":
+            return httpx.Response(200, text=_li_card("1"))
+        return httpx.Response(999, text="")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", first_ok_then_blocked)
+    errors: list[str] = []
+    jobs = boards.linkedin_guest_jobs("x", "y", errors=errors)
+    assert [j["id"] for j in jobs] == ["1"]
+    assert len(errors) == 1 and "HTTP 999 at start=1, kept 1" in errors[0]
 
 
 # -------------------------------------------------------------------- helpers
@@ -215,6 +266,11 @@ def test_newer_than():
     assert boards.newer_than(boards.Job(posted_at=naive), 24)  # naive -> assumed UTC
     date_only = (now - timedelta(hours=1)).strftime("%Y-%m-%d")  # LinkedIn gives dates, not datetimes
     assert boards.newer_than(boards.Job(posted_at=date_only), 48)
+    # a bare date is a whole local day: yesterday's date is still inside a 24 h window
+    yesterday = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    assert boards.newer_than(boards.Job(posted_at=yesterday), 24)
+    old = (now - timedelta(days=3)).strftime("%Y-%m-%d")
+    assert not boards.newer_than(boards.Job(posted_at=old), 24)
 
 
 def test_job_search_url():

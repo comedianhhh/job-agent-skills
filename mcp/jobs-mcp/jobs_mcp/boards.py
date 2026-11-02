@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import html
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, TypedDict
 from urllib.parse import quote_plus
@@ -20,6 +21,10 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 )
 TIMEOUT = httpx.Timeout(20.0)
+# LinkedIn guest search: pause between page requests, and once before retrying a throttled one.
+LI_PAGE_DELAY = 2.0
+LI_RETRY_DELAYS = (10.0, 30.0)  # waits before each retry of a throttled page
+LI_MAX_START = 1000  # the guest endpoint stops returning cards around here
 
 
 class Job(TypedDict, total=False):
@@ -180,19 +185,24 @@ def linkedin_guest_jobs(
     keywords: str,
     location: str,
     hours: int = 24,
-    limit: int = 50,
+    limit: int = 100,
     remote_only: bool = False,
+    errors: list[str] | None = None,
 ) -> list[Job]:
     """LinkedIn's unauthenticated job search (the same endpoint the public /jobs page uses).
 
     Returns title / company / location / url / posted date only — fetch the page for the
     description. Be gentle: this is HTML scraping of a public page, rate-limited by LinkedIn.
+
+    Pages advance by the number of cards actually returned (LinkedIn serves 10 per page; a
+    fixed step skips postings). A throttled page is retried with backoff; if it still fails, the
+    failure goes to `errors` when given, otherwise it raises unless some jobs were collected.
     """
     jobs: list[Job] = []
     seen: set[str] = set()
     start = 0
     with _client() as c:
-        while len(jobs) < limit and start < 200:
+        while len(jobs) < limit and start < LI_MAX_START:
             params = {
                 "keywords": keywords,
                 "location": location,
@@ -201,11 +211,27 @@ def linkedin_guest_jobs(
             }
             if remote_only:
                 params["f_WT"] = "2"
-            r = c.get(
-                "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search",
-                params=params,
-            )
-            if r.status_code != 200 or not r.text.strip():
+            url = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+            if start:
+                time.sleep(LI_PAGE_DELAY)
+            r = c.get(url, params=params)
+            for delay in LI_RETRY_DELAYS:
+                if r.status_code not in (429, 999) and r.status_code < 500:
+                    break
+                time.sleep(delay)
+                r = c.get(url, params=params)
+            if r.status_code != 200:
+                msg = (
+                    f"linkedin {keywords!r} @ {location!r}: "
+                    f"HTTP {r.status_code} at start={start}, kept {len(jobs)}"
+                )
+                if errors is not None:
+                    errors.append(msg)
+                    break
+                if not jobs:
+                    raise RuntimeError(msg)
+                break
+            if not r.text.strip():
                 break
             cards = [x for x in re.split(r"<li(?:\s[^>]*)?>", r.text)[1:] if "jobPosting:" in x]
             if not cards:
@@ -217,7 +243,7 @@ def linkedin_guest_jobs(
                     continue
                 seen.add(jid)
                 m_url = _LI_URL.search(card)
-                url = html.unescape(m_url.group(1)).split("?")[0] if m_url else ""
+                url_ = html.unescape(m_url.group(1)).split("?")[0] if m_url else ""
                 m_time = _LI_TIME.search(card)
                 jobs.append(
                     Job(
@@ -228,14 +254,14 @@ def linkedin_guest_jobs(
                         company=_strip_html(_group(_LI_COMPANY, card)) or "",
                         location=_strip_html(_group(_LI_LOC, card)) or "",
                         remote=None,
-                        url=url,
+                        url=url_,
                         posted_at=m_time.group(1) if m_time else None,
                         description=None,
                     )
                 )
                 if len(jobs) >= limit:
                     break
-            start += 25
+            start += len(cards)
     return jobs
 
 
@@ -252,13 +278,22 @@ def newer_than(job: Job, hours: int) -> bool:
     ts = job.get("posted_at")
     if not ts:
         return True
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", ts):
+        # A bare date (LinkedIn) is a local calendar day: its last instant can be as late as
+        # the next day 12:00 UTC (UTC-12). Keep it if any part of that day is inside the window.
+        try:
+            day = datetime.fromisoformat(ts).replace(tzinfo=timezone.utc)
+        except ValueError:
+            return True
+        return day + timedelta(days=1, hours=12) >= cutoff
     try:
         dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
     except ValueError:
         return True
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    return dt >= datetime.now(timezone.utc) - timedelta(hours=hours)
+    return dt >= cutoff
 
 
 def parse_board(spec: str) -> tuple[str, str]:

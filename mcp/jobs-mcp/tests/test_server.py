@@ -194,6 +194,13 @@ def test_scan_collects_errors_and_keeps_going(fake_boards, mock_http):
     assert res["errors"][2].startswith("linkedin {")
 
 
+def test_scan_passes_remote_only_and_reports_throttling(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(429, text="slow down"))
+    res = server.scan(linkedin_queries=[{"keywords": "x", "location": "y", "remote_only": True}])
+    assert mock_http.requests[0].url.params["f_WT"] == "2"
+    assert len(res["errors"]) == 1 and "HTTP 429" in res["errors"][0]
+
+
 def test_scan_empty_inputs():
     assert server.scan() == {"count": 0, "scanned": 0, "jobs": [], "errors": []}
 
