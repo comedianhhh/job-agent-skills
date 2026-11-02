@@ -77,4 +77,6 @@ def mock_http(monkeypatch: pytest.MonkeyPatch) -> MockHTTP:
     m.route("www.linkedin.com", "/jobs-guest/jobs/api/seeMoreJobPostings/search", linkedin)
 
     monkeypatch.setattr(boards, "_client", m.client)
+    monkeypatch.setattr(boards, "LI_PAGE_DELAY", 0)
+    monkeypatch.setattr(boards, "LI_RETRY_DELAYS", (0, 0))
     return m
