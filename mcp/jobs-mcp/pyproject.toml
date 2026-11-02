@@ -21,6 +21,11 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["jobs_mcp"]
 
+# The plugin runs `uvx --from ./mcp/jobs-mcp`. By default uv only rebuilds a local package
+# when pyproject.toml changes, so source edits would never reach the running server.
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "jobs_mcp/**/*.py" }]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
