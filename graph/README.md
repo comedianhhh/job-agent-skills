@@ -62,13 +62,21 @@ Pick a posting and watch each node finish live (FastAPI streams `graph.stream` o
 
 Each SSE event pairs the `updates` chunk (which node finished) with the `checkpoints` chunk that follows it (state with that node applied, plus `next`). Calling `get_state()` at the update instead returns the state one step behind, because the checkpoint is saved after the update is emitted.
 
+## Step history
+
+```bash
+uv run --no-project apply-graph-history --db ../../career/_graph-runs/.graph.sqlite --thread <run id> [--field draft]
+```
+
+Reads a finished or parked run back with `get_state_history` and prints, oldest first, which node ran at each step and which state fields it changed, with each step's `checkpoint_id` (pass that in `config["configurable"]` to read or fork the run from that point). `--field` keeps only the steps that changed one field and shows its value. Checkpoints don't record who wrote them, so the node is taken from the previous checkpoint's `next`. Nothing runs and no model is called.
+
 ## Test
 
 ```bash
 uv run --no-project pytest
 ```
 
-Tests drive every path (approve, trace retry, give up, skip, human redraft, reject, SQLite resume) and the web API (node-by-node SSE, resume over HTTP, bad input) on a scripted fake model against the fictional eval persona in `evals/_fixtures/career/`. No network, no API key.
+Tests drive every path (approve, trace retry, give up, skip, human redraft, reject, SQLite resume, step history) and the web API (node-by-node SSE, resume over HTTP, bad input) on a scripted fake model against the fictional eval persona in `evals/_fixtures/career/`. No network, no API key.
 
 ## Layout
 
@@ -80,3 +88,4 @@ Tests drive every path (approve, trace retry, give up, skip, human redraft, reje
 | `apply_graph/trace.py` | Loads `scripts/check-trace.py` so the graph and the CLI gate are the same code |
 | `apply_graph/cli.py` | Interactive runner with SQLite checkpoints |
 | `apply_graph/web.py`, `static/index.html` | FastAPI + SSE server and the single-page UI |
+| `apply_graph/history.py` | `changes(graph, config)` and the `apply-graph-history` command |
