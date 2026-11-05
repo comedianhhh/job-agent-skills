@@ -81,9 +81,15 @@ def list_board_jobs(board: str, title_regex: str | None = None, limit: int = 200
 
 @mcp.tool()
 def get_job(board: str, job_id: str) -> dict[str, Any]:
-    """Full posting (plain-text description) for one job on a Greenhouse / Lever / Ashby board;
-    `items[0]` is that job."""
+    """Full posting (plain-text description) for one job; `items[0]` is that job.
+    Greenhouse / Lever / Ashby: `board` is the board spec. LinkedIn: `board` is 'linkedin' and
+    `job_id` the posting id or any linkedin.com job URL (read from the public page, no login)."""
     try:
+        if board.strip().lower().split(":", 1)[0] == "linkedin":
+            job = boards.linkedin_guest_job(job_id)
+            return ok(
+                [boards.to_public(job)], backend=job["backend"], attempts=[attempt(job["backend"], count=1)]
+            )
         source, slug = boards.parse_board(board)
         if source == "greenhouse":
             job = boards.greenhouse_job(slug, job_id)

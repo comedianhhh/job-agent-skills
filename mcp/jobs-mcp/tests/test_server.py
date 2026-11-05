@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import httpx
 import pytest
@@ -365,3 +366,29 @@ def test_scan_rank_query_fetches_greenhouse_content(mock_http, monkeypatch):
     monkeypatch.setenv("JOBS_MCP_DENSE", "0")
     server.scan(boards_=["greenhouse:doordashcanada"], hours=24 * 365 * 5, exclude_regex="", rank_query="x")
     assert mock_http.requests[0].url.params.get("content") == "true"
+
+
+# --------------------------------------------------------- get_job: LinkedIn
+
+
+def test_get_job_linkedin_reads_public_page(mock_http):
+    page = (Path(__file__).parent / "fixtures" / "linkedin_job.html").read_text(encoding="utf-8")
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(200, text=page))
+    res = server.get_job(
+        "linkedin", "https://ca.linkedin.com/jobs/view/backend-engineer-at-acme-robotics-4012345678"
+    )
+    (j,) = assert_ok(res)
+    assert res["backend"] == "linkedin-guest"
+    assert j["company"] == "Acme Robotics" and "PostgreSQL" in j["description"]
+    assert "linkedin.com/login" not in str([r.url for r in mock_http.requests])  # never touches login
+
+
+def test_get_job_linkedin_closed_posting(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(404, text=""))
+    err = assert_error(server.get_job("linkedin", "4012345678"), NOT_FOUND)
+    assert "gone" in err["hint"]
+
+
+def test_get_job_linkedin_bad_target():
+    err = assert_error(server.get_job("linkedin", "hello"), BAD_INPUT)
+    assert "jobs/view" in err["hint"]
