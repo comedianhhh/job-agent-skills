@@ -9,7 +9,7 @@ Break the JD into verifiable requirements and check each against evidence that a
 
 ## Inputs
 
-1. A concrete JD — text, link, or screenshot. A title alone is not enough; ask for the requirements. If `jobs-mcp` is available and the link is a Greenhouse / Lever / Ashby posting, fetch it with `get_job`.
+1. A concrete JD — text, link, or screenshot. A title alone is not enough; ask for the requirements. If `jobs-mcp` is available and the link is a Greenhouse / Lever / Ashby posting, fetch it with `get_job` and read the JD from `items[0].description`; a LinkedIn link works only through the optional agent-reach backend (`get_job` board `linkedin`). If the result has `ok: false`, follow `error.hint` (e.g. ask for the pasted JD on `NOT_FOUND` or `NEED_LOGIN`; never log in for the user) instead of guessing the requirements.
 2. `career/facts.md` (truth), `career/blocks.md` (wording), `career/stories.md` (depth). Never add a fact that is not there.
 3. The user's filters in `career/targets.yaml` (`filters:`) and `career/answers.yaml` (`authorization`, `experience`, `preferences`).
 

@@ -16,6 +16,8 @@ from urllib.parse import quote_plus
 
 import httpx
 
+from .result import JobsError, http_status_code
+
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
@@ -38,6 +40,7 @@ class Job(TypedDict, total=False):
     url: str
     posted_at: str | None  # ISO 8601 when the source provides it
     description: str | None  # plain text, only when fetched
+    backend: str  # what served it: greenhouse-api | lever-api | ashby-api | linkedin-guest | agent-reach
 
 
 def _client() -> httpx.Client:
@@ -80,6 +83,7 @@ def greenhouse_jobs(board_token: str, with_content: bool = False) -> list[Job]:
                 url=j.get("absolute_url", ""),
                 posted_at=j.get("updated_at") or j.get("first_published"),
                 description=_strip_html(j.get("content")) if with_content else None,
+                backend="greenhouse-api",
             )
         )
     return jobs
@@ -102,6 +106,7 @@ def greenhouse_job(board_token: str, job_id: str) -> Job:
         url=j.get("absolute_url", ""),
         posted_at=j.get("updated_at"),
         description=_strip_html(j.get("content")),
+        backend="greenhouse-api",
     )
 
 
@@ -132,6 +137,7 @@ def lever_jobs(company: str) -> list[Job]:
                 url=j.get("hostedUrl", ""),
                 posted_at=posted,
                 description=_strip_html(j.get("descriptionPlain") or j.get("description")),
+                backend="lever-api",
             )
         )
     return jobs
@@ -166,6 +172,7 @@ def ashby_jobs(org: str) -> list[Job]:
                 url=j.get("jobUrl") or j.get("applyUrl", ""),
                 posted_at=j.get("publishedAt"),
                 description=desc,
+                backend="ashby-api",
             )
         )
     return jobs
@@ -188,6 +195,7 @@ def linkedin_guest_jobs(
     limit: int = 100,
     remote_only: bool = False,
     errors: list[str] | None = None,
+    failures: list[JobsError] | None = None,
 ) -> list[Job]:
     """LinkedIn's unauthenticated job search (the same endpoint the public /jobs page uses).
 
@@ -196,7 +204,8 @@ def linkedin_guest_jobs(
 
     Pages advance by the number of cards actually returned (LinkedIn serves 10 per page; a
     fixed step skips postings). A throttled page is retried with backoff; if it still fails, the
-    failure goes to `errors` when given, otherwise it raises unless some jobs were collected.
+    failure goes to `errors` (message) / `failures` (JobsError) when given; otherwise it raises
+    a JobsError (RATE_LIMITED for 429/999, UPSTREAM_BROKEN for 5xx) unless some jobs were collected.
     """
     jobs: list[Job] = []
     seen: set[str] = set()
@@ -225,11 +234,15 @@ def linkedin_guest_jobs(
                     f"linkedin {keywords!r} @ {location!r}: "
                     f"HTTP {r.status_code} at start={start}, kept {len(jobs)}"
                 )
-                if errors is not None:
-                    errors.append(msg)
+                err = JobsError(http_status_code(r.status_code), msg, source="linkedin-guest")
+                if errors is not None or failures is not None:
+                    if errors is not None:
+                        errors.append(msg)
+                    if failures is not None:
+                        failures.append(err)
                     break
                 if not jobs:
-                    raise RuntimeError(msg)
+                    raise err
                 break
             if not r.text.strip():
                 break
@@ -257,6 +270,7 @@ def linkedin_guest_jobs(
                         url=url_,
                         posted_at=m_time.group(1) if m_time else None,
                         description=None,
+                        backend="linkedin-guest",
                     )
                 )
                 if len(jobs) >= limit:

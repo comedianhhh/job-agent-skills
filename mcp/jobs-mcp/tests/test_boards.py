@@ -8,6 +8,7 @@ import httpx
 import pytest
 
 from jobs_mcp import boards
+from jobs_mcp.result import RATE_LIMITED, UPSTREAM_BROKEN, JobsError
 
 JOB_KEYS = {
     "source",
@@ -20,6 +21,7 @@ JOB_KEYS = {
     "url",
     "posted_at",
     "description",
+    "backend",
 }
 
 
@@ -198,8 +200,16 @@ def test_linkedin_guest_retries_throttled_page(mock_http):
 
 def test_linkedin_guest_non_200_raises_when_nothing_collected(mock_http):
     mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(429, text="slow down"))
-    with pytest.raises(RuntimeError, match="HTTP 429"):
+    with pytest.raises(RuntimeError, match="HTTP 429") as info:  # JobsError is a RuntimeError
         boards.linkedin_guest_jobs("x", "y")
+    assert info.value.code == RATE_LIMITED and not info.value.retryable
+
+
+def test_linkedin_guest_5xx_is_retryable(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(503, text="down"))
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_jobs("x", "y")
+    assert info.value.code == UPSTREAM_BROKEN and info.value.retryable
 
 
 def test_linkedin_guest_non_200_goes_to_errors_and_keeps_partial(mock_http):
@@ -213,6 +223,31 @@ def test_linkedin_guest_non_200_goes_to_errors_and_keeps_partial(mock_http):
     jobs = boards.linkedin_guest_jobs("x", "y", errors=errors)
     assert [j["id"] for j in jobs] == ["1"]
     assert len(errors) == 1 and "HTTP 999 at start=1, kept 1" in errors[0]
+
+
+def test_linkedin_guest_partial_failure_is_typed(mock_http):
+    def first_ok_then_blocked(request: httpx.Request) -> httpx.Response:
+        if request.url.params["start"] == "0":
+            return httpx.Response(200, text=_li_card("1"))
+        return httpx.Response(999, text="")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", first_ok_then_blocked)
+    failures: list[JobsError] = []
+    jobs = boards.linkedin_guest_jobs("x", "y", failures=failures)
+    assert [j["backend"] for j in jobs] == ["linkedin-guest"]
+    assert [f.code for f in failures] == [RATE_LIMITED]
+
+
+@pytest.mark.parametrize(
+    "spec, backend",
+    [
+        ("greenhouse:doordashcanada", "greenhouse-api"),
+        ("lever:paytm", "lever-api"),
+        ("ashby:cohere", "ashby-api"),
+    ],
+)
+def test_board_jobs_record_backend(mock_http, spec, backend):
+    assert {j["backend"] for j in boards.fetch_board(spec)} == {backend}
 
 
 # -------------------------------------------------------------------- helpers
