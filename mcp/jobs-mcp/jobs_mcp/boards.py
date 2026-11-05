@@ -16,7 +16,7 @@ from urllib.parse import quote_plus
 
 import httpx
 
-from .result import JobsError, http_status_code
+from .result import BAD_INPUT, NEED_LOGIN, NOT_FOUND, UPSTREAM_BROKEN, JobsError, http_status_code
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -223,12 +223,7 @@ def linkedin_guest_jobs(
             url = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
             if start:
                 time.sleep(LI_PAGE_DELAY)
-            r = c.get(url, params=params)
-            for delay in LI_RETRY_DELAYS:
-                if r.status_code not in (429, 999) and r.status_code < 500:
-                    break
-                time.sleep(delay)
-                r = c.get(url, params=params)
+            r = _li_get(c, url, params)
             if r.status_code != 200:
                 msg = (
                     f"linkedin {keywords!r} @ {location!r}: "
@@ -277,6 +272,99 @@ def linkedin_guest_jobs(
                     break
             start += len(cards)
     return jobs
+
+
+def _li_get(c: httpx.Client, url: str, params: dict[str, Any] | None = None) -> httpx.Response:
+    """GET a LinkedIn guest URL, retrying throttled (429 / 999) and 5xx answers with backoff."""
+    r = c.get(url, params=params)
+    for delay in LI_RETRY_DELAYS:
+        if r.status_code not in (429, 999) and r.status_code < 500:
+            break
+        time.sleep(delay)
+        r = c.get(url, params=params)
+    return r
+
+
+_LI_JOB_ID = re.compile(r"(?:/jobs/view/(?:[^/?#]*-)?|currentJobId=|jobPosting[:/])(\d{6,})")
+_LI_D_TITLE = re.compile(r'<h[12] class="top-card-layout__title[^"]*">\s*(.*?)\s*</h[12]>', re.S)
+_LI_D_COMPANY = re.compile(r'class="topcard__org-name-link[^"]*"[^>]*>\s*(.*?)\s*</a>', re.S)
+_LI_D_LOC = re.compile(r'<span class="topcard__flavor topcard__flavor--bullet">\s*(.*?)\s*</span>', re.S)
+_LI_D_POSTED = re.compile(r'<span class="posted-time-ago__text[^"]*">\s*(.*?)\s*</span>', re.S)
+_LI_D_DESC = re.compile(
+    r'<div class="show-more-less-html__markup[^"]*">(.*?)</div>\s*(?:<button|</section>)', re.S
+)
+_LI_D_CRITERIA = re.compile(
+    r'<h3 class="description__job-criteria-subheader">\s*(.*?)\s*</h3>\s*'
+    r'<span class="description__job-criteria-text[^"]*">\s*(.*?)\s*</span>',
+    re.S,
+)
+
+
+def linkedin_job_id(target: str) -> str:
+    """'4012345678', '.../jobs/view/backend-engineer-at-acme-4012345678?x', '...?currentJobId=401…'
+    → '4012345678'."""
+    t = str(target).strip()
+    if re.fullmatch(r"\d{6,}", t):
+        return t
+    m = _LI_JOB_ID.search(t)
+    if not m:
+        raise JobsError(
+            BAD_INPUT,
+            f"not a LinkedIn job id or job URL: {t[:120]!r}",
+            "Pass the numeric posting id or a linkedin.com/jobs/view/... URL.",
+        )
+    return m.group(1)
+
+
+def linkedin_guest_job(target: str) -> Job:
+    """One LinkedIn posting with its description, from the public (logged-out) job page.
+
+    `target` is the numeric id or any LinkedIn job URL. The seniority / employment type /
+    function / industry box and the relative "posted" text lead the description, since the
+    page has no absolute date."""
+    job_id = linkedin_job_id(target)
+    url = f"https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{job_id}"
+    with _client() as c:
+        r = _li_get(c, url)
+    if r.status_code != 200:
+        code = http_status_code(r.status_code)
+        msg = f"linkedin job {job_id}: HTTP {r.status_code}"
+        hint = "The posting is gone or the id is wrong; do not retry it." if code == NOT_FOUND else None
+        raise JobsError(code, msg, hint, source="linkedin-guest")
+    page = r.text
+    title = _strip_html(_group(_LI_D_TITLE, page))
+    if not title:
+        if "authwall" in str(r.url) or "authwall" in page[:5000]:
+            raise JobsError(
+                NEED_LOGIN, f"linkedin job {job_id}: LinkedIn asked for a login", source="linkedin-guest"
+            )
+        raise JobsError(
+            UPSTREAM_BROKEN,
+            f"linkedin job {job_id}: page has no job title (layout changed?)",
+            "LinkedIn's public page did not look like a job posting; open the url instead and tell the "
+            "user the parser may need updating.",
+            source="linkedin-guest",
+        )
+    header = [f"{_strip_html(k)}: {_strip_html(v)}" for k, v in _LI_D_CRITERIA.findall(page)]
+    posted = _strip_html(_group(_LI_D_POSTED, page))
+    if posted:
+        header.insert(0, f"Posted: {posted}")
+    desc = _strip_html(_group(_LI_D_DESC, page))
+    if header:
+        desc = "\n".join(header) + ("\n\n" + desc if desc else "")
+    return Job(
+        source="linkedin",
+        board="guest",
+        id=job_id,
+        title=title,
+        company=_strip_html(_group(_LI_D_COMPANY, page)) or "",
+        location=_strip_html(_group(_LI_D_LOC, page)) or "",
+        remote=None,
+        url=f"https://www.linkedin.com/jobs/view/{job_id}",
+        posted_at=None,
+        description=desc or None,
+        backend="linkedin-guest",
+    )
 
 
 def _group(rx: re.Pattern[str], s: str) -> str | None:

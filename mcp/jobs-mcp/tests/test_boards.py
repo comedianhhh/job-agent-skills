@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import httpx
 import pytest
@@ -320,3 +321,76 @@ def test_to_public_truncates_description():
     assert boards.to_public(j, max_desc=3)["description"] == "abc"
     assert boards.to_public(j, max_desc=0)["description"] == ""
     assert boards.to_public(boards.Job(id="1", description=None), max_desc=0)["description"] is None
+
+
+# ------------------------------------------------------- LinkedIn job detail
+
+
+@pytest.fixture
+def li_detail(mock_http):
+    page = (Path(__file__).parent / "fixtures" / "linkedin_job.html").read_text(encoding="utf-8")
+    mock_http.route(
+        "www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/4012345678", httpx.Response(200, text=page)
+    )
+    return mock_http
+
+
+def test_linkedin_guest_job_parses_public_page(li_detail):
+    j = boards.linkedin_guest_job("4012345678")
+    assert set(j) == JOB_KEYS
+    assert (j["source"], j["board"], j["backend"]) == ("linkedin", "guest", "linkedin-guest")
+    assert j["title"] == "Backend Engineer, Platform & APIs"
+    assert j["company"] == "Acme Robotics"
+    assert j["location"] == "Toronto, Ontario, Canada"
+    assert j["url"] == "https://www.linkedin.com/jobs/view/4012345678"
+    assert j["posted_at"] is None  # the page only says "3 days ago"
+    desc = j["description"]
+    assert desc.startswith("Posted: 3 days ago\nSeniority level: Entry level\nEmployment type: Full-time\n\n")
+    assert "2+ years of Python and PostgreSQL" in desc and "Show more" not in desc
+    assert li_detail.requests[-1].url.path == "/jobs-guest/jobs/api/jobPosting/4012345678"
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "4012345678",
+        "https://ca.linkedin.com/jobs/view/backend-engineer-at-acme-robotics-4012345678?trk=x",
+        "https://www.linkedin.com/jobs/view/4012345678/",
+        "https://www.linkedin.com/jobs/search/?currentJobId=4012345678&keywords=python",
+        "urn:li:jobPosting:4012345678",
+    ],
+)
+def test_linkedin_job_id_accepts_ids_and_urls(target):
+    assert boards.linkedin_job_id(target) == "4012345678"
+
+
+@pytest.mark.parametrize("target", ["", "abc", "12", "https://www.linkedin.com/in/someone"])
+def test_linkedin_job_id_rejects(target):
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_job_id(target)
+    assert info.value.code == "BAD_INPUT"
+
+
+@pytest.mark.parametrize("status, code", [(404, "NOT_FOUND"), (429, RATE_LIMITED), (503, UPSTREAM_BROKEN)])
+def test_linkedin_guest_job_http_errors(mock_http, status, code):
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(status, text=""))
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_job("4012345678")
+    assert info.value.code == code
+
+
+def test_linkedin_guest_job_authwall_is_need_login(mock_http):
+    wall = '<html><body><a href="https://www.linkedin.com/authwall?trk=x">Sign in</a></body></html>'
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(200, text=wall))
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_job("4012345678")
+    assert info.value.code == "NEED_LOGIN"
+
+
+def test_linkedin_guest_job_unknown_layout_is_upstream_broken(mock_http):
+    mock_http.route(
+        "www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(200, text="<p>?</p>")
+    )
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_job("4012345678")
+    assert info.value.code == UPSTREAM_BROKEN and "layout" in info.value.message

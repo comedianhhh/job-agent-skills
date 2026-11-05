@@ -7,7 +7,7 @@ MCP server that lets an agent scan public job boards. No API keys — it uses th
 | Tool | Args | Returns |
 |---|---|---|
 | `list_board_jobs` | `board` (`greenhouse:<token>` / `lever:<company>` / `ashby:<org>`), `title_regex?`, `limit?` | open jobs on one board |
-| `get_job` | `board`, `job_id` | one posting with plain-text description (Ashby includes the compensation summary when published) |
+| `get_job` | `board`, `job_id` | one posting with plain-text description (Ashby includes the compensation summary when published); `board: "linkedin"` with a posting id or any LinkedIn job URL reads LinkedIn's public job page |
 | `linkedin_search` | `keywords`, `location`, `hours?`, `limit?`, `remote_only?` | LinkedIn guest search: title / company / location / url / posted date |
 | `scan` | `boards_?`, `linkedin_queries?`, `hours?`, `include_regex?`, `exclude_regex?`, `location_regex?`, `limit?`, `rank_query?` | one deduplicated, filtered list across all sources, plus per-source `source_errors`; with `rank_query`, sorted best-first with `match_score` / `match_terms` |
 
@@ -89,6 +89,7 @@ Tests run against recorded responses in `tests/fixtures/` (one trimmed snapshot 
 
 ## Notes
 
+- LinkedIn job details (`get_job(board="linkedin", ...)`) come from the same public, logged-out page anyone sees at `linkedin.com/jobs/view/<id>`: title, company, location, the seniority / employment-type box and the full description. That page gives only a relative date ("3 days ago"), so it leads the description and `posted_at` stays null. jobs-mcp never logs in; a login wall comes back as `NEED_LOGIN`.
 - LinkedIn guest search is HTML from a public page and is rate-limited by LinkedIn; keep `limit` modest and do not loop it. A 429 / 999 that survives the built-in backoff comes back as `RATE_LIMITED`.
 - `scan` keeps postings that carry no timestamp (Greenhouse `updated_at` is an update time, not a first-published time).
 - The default `exclude_regex` drops senior / staff / principal / lead / manager / director / intern / co-op titles; pass `""` to disable.
