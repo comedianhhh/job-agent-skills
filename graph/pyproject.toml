@@ -19,6 +19,7 @@ dev = ["pytest>=8", "ruff>=0.6", "httpx>=0.27", "apply-graph[web]"]
 [project.scripts]
 apply-graph = "apply_graph.cli:main"
 apply-graph-web = "apply_graph.web:main"
+apply-graph-history = "apply_graph.history:main"
 
 [build-system]
 requires = ["hatchling"]

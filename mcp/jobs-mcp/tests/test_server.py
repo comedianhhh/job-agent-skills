@@ -1,14 +1,35 @@
-"""MCP tools: registration plus the filtering / dedup / error-collection logic of `scan`."""
+"""MCP tools: registration, the result envelope, and the filtering / dedup / error logic of `scan`."""
 
 from __future__ import annotations
 
 import asyncio
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import httpx
 import pytest
 
 from jobs_mcp import boards, server
+from jobs_mcp.result import BAD_INPUT, NOT_FOUND, RATE_LIMITED, TIMEOUT, UPSTREAM_BROKEN
+
+ENVELOPE_KEYS = {"schema_version", "ok", "items", "count", "backend", "attempts", "error"}
+
+
+def assert_ok(res: dict) -> list[dict]:
+    assert ENVELOPE_KEYS <= set(res)
+    assert res["ok"] is True and res["error"] is None, res.get("error")
+    assert res["count"] == len(res["items"])
+    return res["items"]
+
+
+def assert_error(res: dict, code: str) -> dict:
+    assert ENVELOPE_KEYS <= set(res)
+    assert res["ok"] is False and res["items"] == [] and res["count"] == 0
+    err = res["error"]
+    assert err["code"] == code, err
+    assert err["hint"] and err["message"]
+    assert err["retryable"] is (code in {UPSTREAM_BROKEN, TIMEOUT})
+    return err
 
 
 def test_all_tools_registered():
@@ -16,58 +37,124 @@ def test_all_tools_registered():
     assert names == {"list_board_jobs", "get_job", "linkedin_search", "scan"}
 
 
+def test_tool_call_returns_envelope_not_mcp_error(mock_http):
+    """A bad board is an answer the agent can act on, not an MCP-level isError."""
+    out = asyncio.run(server.mcp.call_tool("list_board_jobs", {"board": "doordashcanada"}))
+    text = str(out)
+    assert "BAD_INPUT" in text and "hint" in text
+
+
 # ------------------------------------------------------------ list_board_jobs
 
 
 def test_list_board_jobs_strips_descriptions(mock_http):
-    out = server.list_board_jobs("ashby:cohere")
+    res = server.list_board_jobs("ashby:cohere")
+    out = assert_ok(res)
     assert len(out) == 3
     assert all(j["description"] == "" for j in out)  # never ship full text from the list call
+    assert res["backend"] == "ashby-api" and {j["backend"] for j in out} == {"ashby-api"}
+    assert res["attempts"] == [{"backend": "ashby-api", "ok": True, "count": 3}]
 
 
 def test_list_board_jobs_title_regex_and_limit(mock_http):
-    out = server.list_board_jobs("ashby:cohere", title_regex="member of technical staff")
+    out = assert_ok(server.list_board_jobs("ashby:cohere", title_regex="member of technical staff"))
     assert [j["title"] for j in out] == [
         "Member of Technical Staff, Modeling",
         "Senior Member of Technical Staff, Multimodal AI",
     ]
-    assert len(server.list_board_jobs("ashby:cohere", limit=1)) == 1
+    assert server.list_board_jobs("ashby:cohere", limit=1)["count"] == 1
 
 
 def test_list_board_jobs_bad_spec():
-    with pytest.raises(ValueError):
-        server.list_board_jobs("doordashcanada")
+    err = assert_error(server.list_board_jobs("doordashcanada"), BAD_INPUT)
+    assert "source:slug" in err["message"]
+    assert err["source"] == "doordashcanada"
+
+
+def test_list_board_jobs_bad_regex_is_bad_input(mock_http):
+    err = assert_error(server.list_board_jobs("ashby:cohere", title_regex="("), BAD_INPUT)
+    assert "title_regex" in err["message"]
+    assert mock_http.requests == []  # rejected before any network call
+
+
+def test_list_board_jobs_unknown_board_is_not_found(mock_http):
+    err = assert_error(server.list_board_jobs("greenhouse:no-such-co"), NOT_FOUND)
+    assert "HTTP 404" in err["message"]
+
+
+@pytest.mark.parametrize(
+    "status, code",
+    [(429, RATE_LIMITED), (500, UPSTREAM_BROKEN), (502, UPSTREAM_BROKEN), (400, BAD_INPUT)],
+)
+def test_list_board_jobs_http_status_codes(mock_http, status, code):
+    mock_http.route("api.ashbyhq.com", "/posting-api", httpx.Response(status, text="x"))
+    assert_error(server.list_board_jobs("ashby:cohere"), code)
+
+
+def test_list_board_jobs_timeout_is_retryable(mock_http):
+    def slow(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("slow", request=request)
+
+    mock_http.route("api.lever.co", "/v0/postings", slow)
+    err = assert_error(server.list_board_jobs("lever:paytm"), TIMEOUT)
+    assert err["retryable"] is True
+
+
+def test_list_board_jobs_non_json_is_upstream_broken(mock_http):
+    mock_http.route("api.ashbyhq.com", "/posting-api", httpx.Response(200, text="<html>maintenance</html>"))
+    assert_error(server.list_board_jobs("ashby:cohere"), UPSTREAM_BROKEN)
 
 
 # -------------------------------------------------------------------- get_job
 
 
 def test_get_job_greenhouse_hits_single_endpoint(mock_http):
-    j = server.get_job("greenhouse:doordashcanada", "7345227")
+    res = server.get_job("greenhouse:doordashcanada", "7345227")
+    (j,) = assert_ok(res)
     assert j["id"] == "7345227"
     assert j["description"]
+    assert res["backend"] == "greenhouse-api"
     assert mock_http.requests[-1].url.path.endswith("/jobs/7345227")
 
 
 def test_get_job_lever_scans_board(mock_http):
-    j = server.get_job("lever:paytm", "86665c39-2182-4d69-8b8c-33eac104ec2b")
+    (j,) = assert_ok(server.get_job("lever:paytm", "86665c39-2182-4d69-8b8c-33eac104ec2b"))
     assert j["title"].startswith("Accounts Payable")
     assert j["description"]
 
 
 def test_get_job_not_found(mock_http):
-    with pytest.raises(ValueError, match="not found"):
-        server.get_job("ashby:cohere", "does-not-exist")
+    err = assert_error(server.get_job("ashby:cohere", "does-not-exist"), NOT_FOUND)
+    assert "not found" in err["message"]
 
 
 # ------------------------------------------------------------ linkedin_search
 
 
 def test_linkedin_search_passes_through(mock_http):
-    out = server.linkedin_search("backend engineer", "Toronto, Ontario, Canada", hours=12, limit=2)
+    res = server.linkedin_search("backend engineer", "Toronto, Ontario, Canada", hours=12, limit=2)
+    out = assert_ok(res)
     assert len(out) == 2
     assert out[0]["company"] == "RBC"
+    assert res["backend"] == "linkedin-guest"
+    assert res["attempts"] == [{"backend": "linkedin-guest", "ok": True, "count": 2}]
     assert mock_http.requests[0].url.params["f_TPR"] == f"r{12 * 3600}"
+
+
+def test_linkedin_search_throttled_is_final(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(429, text="slow down"))
+    err = assert_error(server.linkedin_search("x", "y"), RATE_LIMITED)
+    assert "HTTP 429" in err["message"] and "hour" in err["hint"]
+
+
+def test_linkedin_search_network_down_without_fallback(mock_http):
+    def down(_request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("down")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", down)
+    res = server.linkedin_search("x", "y")
+    assert_error(res, UPSTREAM_BROKEN)
+    assert [a["backend"] for a in res["attempts"]] == ["linkedin-guest"]
 
 
 # ----------------------------------------------------------------------- scan
@@ -112,10 +199,19 @@ def test_scan_end_to_end_with_fixtures(mock_http):
         hours=24 * 365 * 5,  # fixtures are a snapshot; don't let the clock drop them
         exclude_regex="",
     )
-    assert res["errors"] == []
+    assert_ok(res)
+    assert res["errors"] == [] and res["source_errors"] == []
+    assert res["items"] == res["jobs"]
     assert res["scanned"] == 12
     assert res["count"] == 12
     assert {j["source"] for j in res["jobs"]} == {"greenhouse", "lever", "ashby", "linkedin"}
+    assert {j["backend"] for j in res["jobs"]} == {
+        "greenhouse-api",
+        "lever-api",
+        "ashby-api",
+        "linkedin-guest",
+    }
+    assert [a["ok"] for a in res["attempts"]] == [True] * 4
     assert all(not j["description"] for j in res["jobs"])
 
 
@@ -187,15 +283,55 @@ def test_scan_collects_errors_and_keeps_going(fake_boards, mock_http):
         boards_=["greenhouse:broken", "greenhouse:ok", "workday:bad"],
         linkedin_queries=[{"keywords": "x", "location": "y"}],
     )
+    assert_ok(res)  # one source worked, so the scan as a whole is usable
     assert [j["id"] for j in res["jobs"]] == ["1"]
     assert len(res["errors"]) == 3
     assert res["errors"][0].startswith("greenhouse:broken: boom")
     assert res["errors"][1].startswith("workday:bad:")
-    assert res["errors"][2].startswith("linkedin {")
+    assert res["errors"][2].startswith("linkedin 'x' @ 'y'")
+    codes = [(e["source"], e["code"], e["retryable"]) for e in res["source_errors"]]
+    assert codes == [
+        ("greenhouse:broken", UPSTREAM_BROKEN, True),
+        ("workday:bad", BAD_INPUT, False),
+        ("linkedin 'x' @ 'y'", UPSTREAM_BROKEN, True),
+    ]
+    assert all(e["hint"] for e in res["source_errors"])
+
+
+def test_scan_passes_remote_only_and_reports_throttling(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(429, text="slow down"))
+    res = server.scan(linkedin_queries=[{"keywords": "x", "location": "y", "remote_only": True}])
+    assert mock_http.requests[0].url.params["f_WT"] == "2"
+    assert len(res["errors"]) == 1 and "HTTP 429" in res["errors"][0]
+    assert_error(res, RATE_LIMITED)  # the only source failed
+    assert res["source_errors"][0]["code"] == RATE_LIMITED
+
+
+def test_scan_all_sources_failed_is_not_ok(fake_boards):
+    fake_boards["greenhouse:a"] = RuntimeError("boom")
+    fake_boards["greenhouse:b"] = RuntimeError("bang")
+    res = server.scan(boards_=["greenhouse:a", "greenhouse:b"])
+    err = assert_error(res, UPSTREAM_BROKEN)
+    assert "all 2 sources failed" in err["message"]
+    assert len(res["source_errors"]) == 2 and res["jobs"] == []
+
+
+def test_scan_bad_regex_fails_before_fetching(fake_boards):
+    fake_boards["greenhouse:b"] = [_fresh()]
+    res = server.scan(boards_=["greenhouse:b"], include_regex="[")
+    assert_error(res, BAD_INPUT)
+    assert res["jobs"] == [] and res["errors"] and res["scanned"] == 0
 
 
 def test_scan_empty_inputs():
-    assert server.scan() == {"count": 0, "scanned": 0, "jobs": [], "errors": []}
+    res = server.scan()
+    assert assert_ok(res) == []
+    assert {k: res[k] for k in ("count", "scanned", "jobs", "errors")} == {
+        "count": 0,
+        "scanned": 0,
+        "jobs": [],
+        "errors": [],
+    }
 
 
 # ------------------------------------------------------------------ ranking
@@ -230,3 +366,29 @@ def test_scan_rank_query_fetches_greenhouse_content(mock_http, monkeypatch):
     monkeypatch.setenv("JOBS_MCP_DENSE", "0")
     server.scan(boards_=["greenhouse:doordashcanada"], hours=24 * 365 * 5, exclude_regex="", rank_query="x")
     assert mock_http.requests[0].url.params.get("content") == "true"
+
+
+# --------------------------------------------------------- get_job: LinkedIn
+
+
+def test_get_job_linkedin_reads_public_page(mock_http):
+    page = (Path(__file__).parent / "fixtures" / "linkedin_job.html").read_text(encoding="utf-8")
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(200, text=page))
+    res = server.get_job(
+        "linkedin", "https://ca.linkedin.com/jobs/view/backend-engineer-at-acme-robotics-4012345678"
+    )
+    (j,) = assert_ok(res)
+    assert res["backend"] == "linkedin-guest"
+    assert j["company"] == "Acme Robotics" and "PostgreSQL" in j["description"]
+    assert "linkedin.com/login" not in str([r.url for r in mock_http.requests])  # never touches login
+
+
+def test_get_job_linkedin_closed_posting(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(404, text=""))
+    err = assert_error(server.get_job("linkedin", "4012345678"), NOT_FOUND)
+    assert "gone" in err["hint"]
+
+
+def test_get_job_linkedin_bad_target():
+    err = assert_error(server.get_job("linkedin", "hello"), BAD_INPUT)
+    assert "jobs/view" in err["hint"]

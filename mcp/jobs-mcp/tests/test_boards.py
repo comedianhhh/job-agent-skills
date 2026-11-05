@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 import httpx
 import pytest
 
 from jobs_mcp import boards
+from jobs_mcp.result import RATE_LIMITED, UPSTREAM_BROKEN, JobsError
 
 JOB_KEYS = {
     "source",
@@ -20,6 +22,7 @@ JOB_KEYS = {
     "url",
     "posted_at",
     "description",
+    "backend",
 }
 
 
@@ -156,12 +159,96 @@ def test_linkedin_guest_respects_limit_and_stops_paging(mock_http):
 def test_linkedin_guest_pages_until_empty(mock_http):
     boards.linkedin_guest_jobs("x", "y", limit=50)
     starts = [r.url.params["start"] for r in mock_http.requests]
-    assert starts == ["0", "25"]  # page two was empty -> stop
+    assert starts == ["0", "3"]  # advanced by the 3 cards on page one; page two was empty -> stop
 
 
-def test_linkedin_guest_non_200_returns_what_it_has(mock_http):
+def _li_card(jid: str) -> str:
+    return (
+        f'<li><div data-entity-urn="urn:li:jobPosting:{jid}">'
+        f'<h3 class="base-search-card__title">Job {jid}</h3>'
+        '<time class="job-search-card__listdate" datetime="2026-11-02"></time></div></li>'
+    )
+
+
+def test_linkedin_guest_pages_by_cards_returned(mock_http):
+    # LinkedIn serves 10 cards per page; a fixed step of 25 used to skip 15 of every 25
+    total = 23
+
+    def ten_per_page(request: httpx.Request) -> httpx.Response:
+        start = int(request.url.params["start"])
+        return httpx.Response(
+            200, text="".join(_li_card(str(i)) for i in range(start, min(start + 10, total)))
+        )
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", ten_per_page)
+    jobs = boards.linkedin_guest_jobs("x", "y", limit=100)
+    assert [j["id"] for j in jobs] == [str(i) for i in range(total)]
+    assert [r.url.params["start"] for r in mock_http.requests] == ["0", "10", "20", "23"]
+
+
+def test_linkedin_guest_retries_throttled_page(mock_http):
+    calls = []
+
+    def throttle_then_ok(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        if len(calls) == 1:
+            return httpx.Response(429, text="slow down")
+        return httpx.Response(200, text=_li_card("1") if request.url.params["start"] == "0" else "")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", throttle_then_ok)
+    assert [j["id"] for j in boards.linkedin_guest_jobs("x", "y")] == ["1"]
+
+
+def test_linkedin_guest_non_200_raises_when_nothing_collected(mock_http):
     mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(429, text="slow down"))
-    assert boards.linkedin_guest_jobs("x", "y") == []
+    with pytest.raises(RuntimeError, match="HTTP 429") as info:  # JobsError is a RuntimeError
+        boards.linkedin_guest_jobs("x", "y")
+    assert info.value.code == RATE_LIMITED and not info.value.retryable
+
+
+def test_linkedin_guest_5xx_is_retryable(mock_http):
+    mock_http.route("www.linkedin.com", "/jobs-guest", httpx.Response(503, text="down"))
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_jobs("x", "y")
+    assert info.value.code == UPSTREAM_BROKEN and info.value.retryable
+
+
+def test_linkedin_guest_non_200_goes_to_errors_and_keeps_partial(mock_http):
+    def first_ok_then_blocked(request: httpx.Request) -> httpx.Response:
+        if request.url.params["start"] == "0":
+            return httpx.Response(200, text=_li_card("1"))
+        return httpx.Response(999, text="")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", first_ok_then_blocked)
+    errors: list[str] = []
+    jobs = boards.linkedin_guest_jobs("x", "y", errors=errors)
+    assert [j["id"] for j in jobs] == ["1"]
+    assert len(errors) == 1 and "HTTP 999 at start=1, kept 1" in errors[0]
+
+
+def test_linkedin_guest_partial_failure_is_typed(mock_http):
+    def first_ok_then_blocked(request: httpx.Request) -> httpx.Response:
+        if request.url.params["start"] == "0":
+            return httpx.Response(200, text=_li_card("1"))
+        return httpx.Response(999, text="")
+
+    mock_http.route("www.linkedin.com", "/jobs-guest", first_ok_then_blocked)
+    failures: list[JobsError] = []
+    jobs = boards.linkedin_guest_jobs("x", "y", failures=failures)
+    assert [j["backend"] for j in jobs] == ["linkedin-guest"]
+    assert [f.code for f in failures] == [RATE_LIMITED]
+
+
+@pytest.mark.parametrize(
+    "spec, backend",
+    [
+        ("greenhouse:doordashcanada", "greenhouse-api"),
+        ("lever:paytm", "lever-api"),
+        ("ashby:cohere", "ashby-api"),
+    ],
+)
+def test_board_jobs_record_backend(mock_http, spec, backend):
+    assert {j["backend"] for j in boards.fetch_board(spec)} == {backend}
 
 
 # -------------------------------------------------------------------- helpers
@@ -215,6 +302,11 @@ def test_newer_than():
     assert boards.newer_than(boards.Job(posted_at=naive), 24)  # naive -> assumed UTC
     date_only = (now - timedelta(hours=1)).strftime("%Y-%m-%d")  # LinkedIn gives dates, not datetimes
     assert boards.newer_than(boards.Job(posted_at=date_only), 48)
+    # a bare date is a whole local day: yesterday's date is still inside a 24 h window
+    yesterday = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    assert boards.newer_than(boards.Job(posted_at=yesterday), 24)
+    old = (now - timedelta(days=3)).strftime("%Y-%m-%d")
+    assert not boards.newer_than(boards.Job(posted_at=old), 24)
 
 
 def test_job_search_url():
@@ -229,3 +321,76 @@ def test_to_public_truncates_description():
     assert boards.to_public(j, max_desc=3)["description"] == "abc"
     assert boards.to_public(j, max_desc=0)["description"] == ""
     assert boards.to_public(boards.Job(id="1", description=None), max_desc=0)["description"] is None
+
+
+# ------------------------------------------------------- LinkedIn job detail
+
+
+@pytest.fixture
+def li_detail(mock_http):
+    page = (Path(__file__).parent / "fixtures" / "linkedin_job.html").read_text(encoding="utf-8")
+    mock_http.route(
+        "www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/4012345678", httpx.Response(200, text=page)
+    )
+    return mock_http
+
+
+def test_linkedin_guest_job_parses_public_page(li_detail):
+    j = boards.linkedin_guest_job("4012345678")
+    assert set(j) == JOB_KEYS
+    assert (j["source"], j["board"], j["backend"]) == ("linkedin", "guest", "linkedin-guest")
+    assert j["title"] == "Backend Engineer, Platform & APIs"
+    assert j["company"] == "Acme Robotics"
+    assert j["location"] == "Toronto, Ontario, Canada"
+    assert j["url"] == "https://www.linkedin.com/jobs/view/4012345678"
+    assert j["posted_at"] is None  # the page only says "3 days ago"
+    desc = j["description"]
+    assert desc.startswith("Posted: 3 days ago\nSeniority level: Entry level\nEmployment type: Full-time\n\n")
+    assert "2+ years of Python and PostgreSQL" in desc and "Show more" not in desc
+    assert li_detail.requests[-1].url.path == "/jobs-guest/jobs/api/jobPosting/4012345678"
+
+
+@pytest.mark.parametrize(
+    "target",
+    [
+        "4012345678",
+        "https://ca.linkedin.com/jobs/view/backend-engineer-at-acme-robotics-4012345678?trk=x",
+        "https://www.linkedin.com/jobs/view/4012345678/",
+        "https://www.linkedin.com/jobs/search/?currentJobId=4012345678&keywords=python",
+        "urn:li:jobPosting:4012345678",
+    ],
+)
+def test_linkedin_job_id_accepts_ids_and_urls(target):
+    assert boards.linkedin_job_id(target) == "4012345678"
+
+
+@pytest.mark.parametrize("target", ["", "abc", "12", "https://www.linkedin.com/in/someone"])
+def test_linkedin_job_id_rejects(target):
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_job_id(target)
+    assert info.value.code == "BAD_INPUT"
+
+
+@pytest.mark.parametrize("status, code", [(404, "NOT_FOUND"), (429, RATE_LIMITED), (503, UPSTREAM_BROKEN)])
+def test_linkedin_guest_job_http_errors(mock_http, status, code):
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(status, text=""))
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_job("4012345678")
+    assert info.value.code == code
+
+
+def test_linkedin_guest_job_authwall_is_need_login(mock_http):
+    wall = '<html><body><a href="https://www.linkedin.com/authwall?trk=x">Sign in</a></body></html>'
+    mock_http.route("www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(200, text=wall))
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_job("4012345678")
+    assert info.value.code == "NEED_LOGIN"
+
+
+def test_linkedin_guest_job_unknown_layout_is_upstream_broken(mock_http):
+    mock_http.route(
+        "www.linkedin.com", "/jobs-guest/jobs/api/jobPosting/", httpx.Response(200, text="<p>?</p>")
+    )
+    with pytest.raises(JobsError) as info:
+        boards.linkedin_guest_job("4012345678")
+    assert info.value.code == UPSTREAM_BROKEN and "layout" in info.value.message

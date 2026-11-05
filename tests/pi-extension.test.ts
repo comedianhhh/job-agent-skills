@@ -22,7 +22,17 @@ for (const t of tools.values()) {
 
 const result = await tools.get("scan").execute("call-1", { boards_: [], linkedin_queries: [] }, undefined, undefined, {});
 const parsed = JSON.parse(result.content[0].text);
-assert.deepEqual(parsed, { count: 0, scanned: 0, jobs: [], errors: [] });
+// The agent-facing envelope (see mcp/jobs-mcp/README.md "Result shape")…
+assert.equal(parsed.schema_version, 1);
+assert.equal(parsed.ok, true);
+assert.equal(parsed.error, null);
+assert.deepEqual(parsed.items, []);
+assert.deepEqual(parsed.source_errors, []);
+// …plus the legacy fields older callers still read.
+assert.deepEqual(
+	{ count: parsed.count, scanned: parsed.scanned, jobs: parsed.jobs, errors: parsed.errors },
+	{ count: 0, scanned: 0, jobs: [], errors: [] },
+);
 
 await handlers.get("session_shutdown")!({ type: "session_shutdown", reason: "quit" }, {});
 console.log(`ok — ${tools.size} tools registered via jobs-mcp, scan round-trip works`);

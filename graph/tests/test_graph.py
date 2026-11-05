@@ -11,6 +11,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.types import Command
 
 from apply_graph import MAX_DRAFTS, build_graph
+from apply_graph.history import changes
 from apply_graph.state import SERDE, CompanyBrief, CoverLetter, Match, Requirement
 
 FIXTURES = Path(__file__).resolve().parents[2] / "evals" / "_fixtures" / "career"
@@ -124,6 +125,30 @@ def test_resume_from_sqlite_in_a_new_graph(tmp_path):
     assert result["status"] == "READY"
     assert result["log"][0].startswith("match: APPLY")
     conn.close()
+
+
+def test_history_names_the_step_that_changed_each_field(tmp_path):
+    llm = FakeLLM(APPLY, ACME, UNTRACED, CLEAN)
+    graph, config, _ = start(llm, tmp_path)
+    graph.invoke(Command(resume={"approved": True}), config)
+
+    steps = changes(graph, config)
+    nodes = [s["node"] for s in steps if s["node"] not in {"input", "__start__"}]
+    assert nodes == [
+        "match",
+        "research_company",
+        "draft",
+        "trace_check",
+        "draft",
+        "trace_check",
+        "approve",
+        "record",
+    ]
+    drafts = [s for s in steps if "draft" in s["changed"]]
+    assert [d["changed"]["draft"] for d in drafts] == [UNTRACED.body, CLEAN.body]
+    assert [s["node"] for s in steps if "status" in s["changed"]] == ["approve"]
+    # the trace gate sets feedback, the next draft clears it
+    assert [s["node"] for s in steps if "feedback" in s["changed"]] == ["trace_check", "draft"]
 
 
 @pytest.mark.parametrize("draft", [CLEAN.body, "TODO: add a metric"])
