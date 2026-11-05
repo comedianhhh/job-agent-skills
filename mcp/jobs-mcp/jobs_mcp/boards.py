@@ -40,7 +40,7 @@ class Job(TypedDict, total=False):
     url: str
     posted_at: str | None  # ISO 8601 when the source provides it
     description: str | None  # plain text, only when fetched
-    backend: str  # what served it: greenhouse-api | lever-api | ashby-api | linkedin-guest | agent-reach
+    backend: str  # what served it: greenhouse-api | lever-api | ashby-api | linkedin-guest
 
 
 def _client() -> httpx.Client:

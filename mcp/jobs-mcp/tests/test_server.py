@@ -127,12 +127,6 @@ def test_get_job_not_found(mock_http):
     assert "not found" in err["message"]
 
 
-def test_get_job_linkedin_without_agent_reach_says_what_to_do():
-    err = assert_error(server.get_job("linkedin", "4012345678"), BAD_INPUT)
-    assert "agent-reach" in err["message"]
-    assert "paste" in err["hint"]
-
-
 # ------------------------------------------------------------ linkedin_search
 
 

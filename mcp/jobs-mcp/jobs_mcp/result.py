@@ -55,8 +55,8 @@ DEFAULT_HINTS = {
         "backends, and continue with the other sources."
     ),
     NEED_LOGIN: (
-        "This backend needs a signed-in session: ask the user to run `agent-reach login linkedin` "
-        "themselves; never log in or ask for their password."
+        "This content is behind a login, which jobs-mcp never does: open the url in the user's own "
+        "browser or ask them to paste the job description; never ask for their password."
     ),
 }
 

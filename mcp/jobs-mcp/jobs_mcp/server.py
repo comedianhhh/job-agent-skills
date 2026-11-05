@@ -3,8 +3,7 @@
 Tools:
   list_board_jobs   one Greenhouse / Lever / Ashby board, all open roles
   get_job           full description for one posting
-  linkedin_search   LinkedIn's unauthenticated job search (title/company/location/url only),
-                    with an optional agent-reach fallback
+  linkedin_search   LinkedIn's unauthenticated job search (title/company/location/url only)
   scan              many boards + LinkedIn queries at once, filtered, deduplicated, optionally ranked
 
 Every tool returns the envelope from `result.py`: {ok, items, count, backend, attempts, error}.
@@ -24,7 +23,7 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP as MCPServer
 
-from . import boards, rank, reach
+from . import boards, rank
 from .result import BAD_INPUT, NOT_FOUND, JobsError, attempt, classify, fail, ok
 
 mcp = MCPServer(
@@ -82,12 +81,8 @@ def list_board_jobs(board: str, title_regex: str | None = None, limit: int = 200
 
 @mcp.tool()
 def get_job(board: str, job_id: str) -> dict[str, Any]:
-    """Full posting (plain-text description) for one job; `items[0]` is that job.
-    Greenhouse / Lever / Ashby: `board` is the board spec. LinkedIn: `board` is 'linkedin' and
-    `job_id` the posting id or URL — this needs the optional agent-reach backend and the user's
-    own LinkedIn login."""
-    if board.strip().lower().split(":", 1)[0] == "linkedin":
-        return _linkedin_job(job_id)
+    """Full posting (plain-text description) for one job on a Greenhouse / Lever / Ashby board;
+    `items[0]` is that job."""
     try:
         source, slug = boards.parse_board(board)
         if source == "greenhouse":
@@ -99,24 +94,6 @@ def get_job(board: str, job_id: str) -> dict[str, Any]:
     except Exception as e:
         return fail(e, source=board)
     return ok([boards.to_public(job)], backend=job["backend"], attempts=[attempt(job["backend"], count=1)])
-
-
-def _linkedin_job(job_id: str) -> dict[str, Any]:
-    if not reach.available():
-        return fail(
-            JobsError(
-                BAD_INPUT,
-                "LinkedIn descriptions need the optional agent-reach backend, which is not installed",
-                "Open the posting url yourself or ask the user to paste the job description text.",
-                source="linkedin",
-            )
-        )
-    try:
-        job = reach.linkedin_read(str(job_id))
-    except Exception as e:
-        err = classify(e, reach.BACKEND)
-        return fail(err, attempts=[attempt(reach.BACKEND, err)])
-    return ok([boards.to_public(job)], backend=reach.BACKEND, attempts=[attempt(reach.BACKEND, count=1)])
 
 
 # ------------------------------------------------------------ linkedin_search
@@ -131,10 +108,8 @@ def _linkedin(
     warnings: list[str],
     attempts: list[dict[str, Any]],
 ) -> list[boards.Job]:
-    """Guest search first; on a retryable failure, agent-reach when it is installed.
-
-    Partial guest results (a later page failed) are kept and noted in `warnings` — no fallback,
-    since the agent already has postings. Raises JobsError when no backend produced a result."""
+    """LinkedIn guest search. Partial results (a later page failed) are kept and noted in
+    `warnings`. Raises JobsError when nothing came back."""
     partial: list[JobsError] = []
     try:
         jobs = boards.linkedin_guest_jobs(keywords, location, hours, limit, remote_only, failures=partial)
@@ -143,19 +118,7 @@ def _linkedin(
     except Exception as e:
         err = classify(e, "linkedin-guest")
         attempts.append(attempt("linkedin-guest", err))
-        if not err.retryable or not reach.available():
-            raise err from None
-        try:
-            jobs = reach.linkedin_jobs(keywords, location, limit)
-        except Exception as e2:
-            err2 = classify(e2, reach.BACKEND)
-            attempts.append(attempt(reach.BACKEND, err2))
-            raise err2 from None
-        jobs = [j for j in jobs if boards.newer_than(j, hours)]
-        attempts.append(attempt(reach.BACKEND, count=len(jobs)))
-        if remote_only:
-            warnings.append("agent-reach cannot filter remote_only; results may include on-site roles")
-        return jobs
+        raise err from None
     attempts.append(attempt("linkedin-guest", count=len(jobs)))
     warnings.extend(f"partial result: {p.message}" for p in partial)
     return jobs
@@ -171,8 +134,7 @@ def linkedin_search(
 ) -> dict[str, Any]:
     """LinkedIn job search: postings matching `keywords` in `location` from the last `hours`.
     Items have title / company / location / url / posted_at — no description (open the url for it).
-    Uses LinkedIn's public guest search; when that fails with a retryable error and `agent-reach`
-    is installed, falls back to it. `backend` and `attempts` say which path served the result."""
+    Uses LinkedIn's public guest search — no login, ever."""
     warnings: list[str] = []
     attempts: list[dict[str, Any]] = []
     try:
