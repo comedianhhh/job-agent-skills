@@ -7,11 +7,63 @@ MCP server that lets an agent scan public job boards. No API keys — it uses th
 | Tool | Args | Returns |
 |---|---|---|
 | `list_board_jobs` | `board` (`greenhouse:<token>` / `lever:<company>` / `ashby:<org>`), `title_regex?`, `limit?` | open jobs on one board |
-| `get_job` | `board`, `job_id` | one posting with plain-text description (Ashby includes the compensation summary when published) |
-| `linkedin_search` | `keywords`, `location`, `hours?`, `limit?`, `remote_only?` | LinkedIn guest search: title / company / location / url / posted date |
-| `scan` | `boards_?`, `linkedin_queries?`, `hours?`, `include_regex?`, `exclude_regex?`, `location_regex?`, `limit?`, `rank_query?` | one deduplicated, filtered list across all sources, plus per-source errors; with `rank_query`, sorted best-first with `match_score` / `match_terms` |
+| `get_job` | `board`, `job_id` | one posting with plain-text description (Ashby includes the compensation summary when published); `board: "linkedin"` reads a LinkedIn posting through the optional agent-reach backend |
+| `linkedin_search` | `keywords`, `location`, `hours?`, `limit?`, `remote_only?` | LinkedIn guest search: title / company / location / url / posted date; falls back to agent-reach (below) |
+| `scan` | `boards_?`, `linkedin_queries?`, `hours?`, `include_regex?`, `exclude_regex?`, `location_regex?`, `limit?`, `rank_query?` | one deduplicated, filtered list across all sources, plus per-source `source_errors`; with `rank_query`, sorted best-first with `match_score` / `match_terms` |
 
-Every job is `{source, board, id, title, company, location, remote, url, posted_at, description}`.
+Every job is `{source, board, id, title, company, location, remote, url, posted_at, description, backend}`, where `backend` is what served it: `greenhouse-api`, `lever-api`, `ashby-api`, `linkedin-guest` or `agent-reach`.
+
+## Result shape
+
+Every tool returns the same envelope, and never raises for a board-side problem — a bad token or a throttled LinkedIn is an answer the agent can act on, not an MCP error:
+
+```json
+{
+  "schema_version": 1,
+  "ok": true,
+  "items": [{ "source": "ashby", "id": "…", "title": "…", "backend": "ashby-api" }],
+  "count": 1,
+  "backend": "ashby-api",
+  "attempts": [{ "backend": "ashby-api", "ok": true, "count": 1 }],
+  "error": null
+}
+```
+
+On failure `ok` is `false`, `items` is empty, and `error` says what happened and what to do next:
+
+```json
+{ "ok": false, "items": [], "count": 0, "backend": null,
+  "error": { "code": "NOT_FOUND", "message": "greenhouse:acme: HTTP 404", "source": "greenhouse:acme",
+             "hint": "Check the board token (from the careers-page URL) or the job id — …", "retryable": false } }
+```
+
+| Code | Retryable | Meaning → what the hint tells the agent |
+|---|---|---|
+| `UPSTREAM_BROKEN` | yes | the source failed on its side (5xx, network, non-JSON) → carry on, try once later |
+| `TIMEOUT` | yes | no answer in time → try once more later with a smaller `limit` |
+| `NOT_FOUND` | no | board token or job id does not exist (HTTP 404, job closed) → fix the argument |
+| `BAD_INPUT` | no | bad board spec or regex → fix the argument; nothing was fetched |
+| `RATE_LIMITED` | no | HTTP 429 / LinkedIn 999 → leave that source alone for an hour; do not switch backends |
+| `NEED_LOGIN` | no | the agent-reach backend has no LinkedIn session → the **user** runs `agent-reach login linkedin`; never log in for them |
+
+Only retryable codes are worth another attempt — or another backend. The split and the envelope follow [Agent Reach](https://github.com/Panniantong/Agent-Reach)'s `runtime/result.py`.
+
+Tool-specific fields sit next to the envelope:
+
+- `get_job`: `items[0]` is the posting.
+- `linkedin_search`: `warnings` (e.g. a later page was throttled and the result is partial).
+- `scan`: `scanned`, `source_errors` (one `{source, code, message, hint, retryable}` per failed board or LinkedIn query), `warnings`, `ranked_by` when ranking; `attempts` entries carry their `source`. A failing source never fails the scan — `ok` is `false` only when **every** source failed. For callers written before the envelope, `jobs` (same list as `items`) and `errors` (`"<source>: <message> [CODE]"` strings) are still returned.
+
+## LinkedIn fallback: agent-reach (optional)
+
+When LinkedIn guest search fails with a **retryable** error (`UPSTREAM_BROKEN` / `TIMEOUT`) and [`agent-reach`](https://github.com/Panniantong/Agent-Reach) is on PATH, `linkedin_search` and `scan` retry the query through `agent-reach linkedin jobs <keywords> --location <loc> --limit <n>`, and `get_job(board="linkedin", job_id=<id or URL>)` reads a posting with `agent-reach linkedin read <url>`. Each command prints one JSON envelope, which is mapped onto the codes above.
+
+- Never on a final error: a throttled guest search (`RATE_LIMITED`) is not retried through another backend.
+- Never on a partial result: if the first pages came back and a later one failed, the postings are kept and the failure goes to `warnings`.
+- Never logs in. agent-reach uses the user's own LinkedIn session in its browser; without one it answers `NEED_LOGIN`, which is returned as-is with a hint that the user must run `agent-reach login linkedin` themselves.
+- `backend` / `attempts` show which path served the result, e.g. `[{backend: linkedin-guest, ok: false, code: UPSTREAM_BROKEN}, {backend: agent-reach, ok: true, count: 12}]`.
+- agent-reach has no `hours` or `remote_only` filter: results are cut to `hours` here, and `remote_only` adds a warning.
+- `JOBS_MCP_AGENT_REACH`: unset or `auto` → use `agent-reach` from PATH if present; `0` → never; any other value → path to the executable. Tests always run with it off and the CLI mocked.
 
 Board tokens come from the careers-page URL: `boards.greenhouse.io/<token>`, `jobs.lever.co/<company>`, `jobs.ashbyhq.com/<org>`.
 
@@ -50,7 +102,7 @@ Tests run against recorded responses in `tests/fixtures/` (one trimmed snapshot 
 
 ## Notes
 
-- LinkedIn guest search is HTML from a public page and is rate-limited by LinkedIn; keep `limit` modest and do not loop it.
+- LinkedIn guest search is HTML from a public page and is rate-limited by LinkedIn; keep `limit` modest and do not loop it. A 429 / 999 that survives the built-in backoff comes back as `RATE_LIMITED`.
 - `scan` keeps postings that carry no timestamp (Greenhouse `updated_at` is an update time, not a first-published time).
 - The default `exclude_regex` drops senior / staff / principal / lead / manager / director / intern / co-op titles; pass `""` to disable.
 - Requires Python 3.10+, `mcp>=1.10` (1.x and 2.x both work), `httpx`.
