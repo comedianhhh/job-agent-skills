@@ -1,0 +1,157 @@
+{
+ "offset": 0,
+ "limit": 100,
+ "totalFound": 3,
+ "content": [
+  {
+   "id": "744000160212611",
+   "name": "UI Programmer",
+   "uuid": "895e0155-558c-41d6-bce0-7c346efc0892",
+   "jobAdId": "4155f8e6-ea00-429b-a3a7-6d9f14f5dd7d",
+   "defaultJobAd": false,
+   "refNumber": "REF32290D",
+   "company": {
+    "identifier": "Ubisoft2",
+    "name": "Ubisoft"
+   },
+   "releasedDate": "2026-11-06T14:28:28.662Z",
+   "location": {
+    "city": "Saguenay",
+    "region": "QC",
+    "country": "ca",
+    "remote": false,
+    "hybrid": false,
+    "latitude": "48.4276054",
+    "longitude": "-71.0600102",
+    "fullLocation": "Saguenay, QC, Canada"
+   },
+   "industry": {
+    "id": "computer_games",
+    "label": "Computer Games"
+   },
+   "department": {
+    "id": "13847731",
+    "label": "Ubisoft"
+   },
+   "function": {
+    "id": "information_technology",
+    "label": "Information Technology"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/Ubisoft2/postings/744000160212611",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000159397829",
+   "name": "Online Game Programmer (Rainbow Six)",
+   "uuid": "ea5b4f77-d46f-4a42-bbe4-d20b7df6a5f8",
+   "jobAdId": "2fff68dd-88d2-4a84-914c-1cb512a0d0b6",
+   "defaultJobAd": false,
+   "refNumber": "REF32266E",
+   "company": {
+    "identifier": "Ubisoft2",
+    "name": "Ubisoft"
+   },
+   "releasedDate": "2026-11-03T14:13:04.359Z",
+   "location": {
+    "city": "Saguenay",
+    "region": "QC",
+    "country": "ca",
+    "remote": false,
+    "hybrid": false,
+    "latitude": "48.4276054",
+    "longitude": "-71.0600102",
+    "fullLocation": "Saguenay, QC, Canada"
+   },
+   "industry": {
+    "id": "entertainment",
+    "label": "Entertainment"
+   },
+   "department": {
+    "id": "13847731",
+    "label": "Ubisoft"
+   },
+   "function": {
+    "id": "information_technology",
+    "label": "Information Technology"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/Ubisoft2/postings/744000159397829",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000158475199",
+   "name": "Senior Cinematic Animator ",
+   "uuid": "944cd8fe-020c-4eb6-9e99-d6c6c4b77021",
+   "jobAdId": "96c9e93a-c5f1-4cc8-818c-b706f82d50cb",
+   "defaultJobAd": true,
+   "refNumber": "REF31933K",
+   "company": {
+    "identifier": "Ubisoft2",
+    "name": "Ubisoft"
+   },
+   "releasedDate": "2026-10-29T09:54:20.429Z",
+   "location": {
+    "city": "Toronto",
+    "region": "ON",
+    "country": "ca",
+    "remote": false,
+    "hybrid": false,
+    "latitude": "43.6548253",
+    "longitude": "-79.388447",
+    "fullLocation": "Toronto, ON, Canada"
+   },
+   "industry": {
+    "id": "computer_games",
+    "label": "Computer Games"
+   },
+   "department": {
+    "id": "13847731",
+    "label": "Ubisoft"
+   },
+   "function": {
+    "id": "information_technology",
+    "label": "Information Technology"
+   },
+   "typeOfEmployment": {
+    "id": "contract",
+    "label": "Contract"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/Ubisoft2/postings/744000158475199",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  }
+ ]
+}
