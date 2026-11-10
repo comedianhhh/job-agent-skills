@@ -64,4 +64,4 @@ Cases never grant `Bash`: native Windows has no sandbox backend, and nothing her
 ## CI
 
 - `ci.yml` → `evals-static`: `validate.py` on every push — frontmatter keys, grader types and options, regexes compile, `Skill` graders name a real skill, fixtures in sync, no hard links under the plugin.
-- `evals.yml`: manual (`Run workflow`, smoke or full, optional case glob) and a Monday smoke run; uploads `results.json` + `report.html`. Needs one repository secret: `CLAUDE_CODE_OAUTH_TOKEN` (run `claude setup-token` on a Pro/Max/Team login; uses the subscription, valid one year) or `ANTHROPIC_API_KEY` (billed per token). The token wins when both are set.
+- `evals.yml`: manual only (`Run workflow`, smoke or full, optional case glob); the weekly smoke run is a local scheduled task with the logged-in CLI, so no secret is required for it. The workflow uploads `results.json` + `report.html`. Needs one repository secret: `CLAUDE_CODE_OAUTH_TOKEN` (run `claude setup-token` on a Pro/Max/Team login; uses the subscription, valid one year) or `ANTHROPIC_API_KEY` (billed per token). The token wins when both are set.
