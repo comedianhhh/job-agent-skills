@@ -6,7 +6,7 @@
 #   evals/run.sh --free          # only cases with no llm grader, 1 run, plugin arm only ($0 judge cost)
 #   evals/run.sh --case 'offer/*' # any extra flags are passed through to `claude plugin eval`
 #
-# Needs `claude` (>= 2.1.269) logged in, or ANTHROPIC_API_KEY. --scaffold copies each case's fictional
+# Needs `claude` (>= 2.1.269) logged in, CLAUDE_CODE_OAUTH_TOKEN (claude setup-token), or ANTHROPIC_API_KEY. --scaffold copies each case's fictional
 # career/ into the run workspace (fixture.sh, bash — Git Bash is enough on Windows). Write/Edit are
 # granted because a few cases create files; Bash is never granted to the agent (no sandbox on Windows).
 set -euo pipefail
