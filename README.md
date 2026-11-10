@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/job-agent-skills)](https://www.npmjs.com/package/job-agent-skills)
 
-A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby and LinkedIn for new postings.
+A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby, SmartRecruiters and LinkedIn for new postings.
 
 It is built around one rule: **every line that goes out traces to a fact you wrote down.** The agent tailors, formats, fills forms, tracks, and drills you for interviews — it never invents a title, a number, or an ownership claim.
 
@@ -14,11 +14,11 @@ It is built around one rule: **every line that goes out traces to a fact you wro
 | Skill | Does |
 |---|---|
 | `/career-init` | Scaffolds your private `career/` workspace and interviews you for `facts.md` and `answers.yaml`. |
-| `/job-match` | JD → requirement–evidence matrix, hard constraints (work authorization, location, years, band), `APPLY` / `SKIP`. |
+| `/job-match` | JD → posting-integrity verdict, requirement–evidence matrix, hard constraints (work authorization, location, years, band), your own interview-rate signals, `APPLY` / `SKIP`. |
 | `/great-resume` | Positioning, summary, bullet rewrites, LinkedIn note / cold email / referral ask. |
-| `/make-resume` | One-page Letter resume + cover letter for one role, exported to PDF behind two deterministic gates: one page, and every number traceable to `facts.md` (`scripts/check-trace.py`). |
+| `/make-resume` | One-page Letter resume + cover letter for one role. A second agent (`application-reviewer`) critiques the drafts as the hiring manager before export; then three deterministic gates: every number traceable to `facts.md` (`check-trace.py`), one page (overflow cut by relevance with `rank-cuts.py`, not by age), and the PDF's text layer read the way an ATS reads it (`check-ats.py`). |
 | `/job-apply` | Fills the application in your browser from `answers.yaml`, stops before Submit (or not — your policy), records it. |
-| `/offer` | Pipeline in `tracker.md`; mailbox triage; daily scan of your target boards via jobs-mcp. |
+| `/offer` | Pipeline in `tracker.md`; mailbox triage; daily scan of your target boards via jobs-mcp; regenerates `calibration.md` when outcomes land. |
 | `/interview` | Predict → grill (one question at a time, scoring contracts) → review → retry. NA round structure. |
 
 **Build track**
@@ -29,7 +29,7 @@ It is built around one rule: **every line that goes out traces to a fact you wro
 | `/project-guide` | Turns a repo into a lesson-by-lesson course, or your project into `guide-` + `interview-` files (pillar bullets, 15–25 questions, STAR answers). |
 | `/evidence-recap` | Turns an AI coding session into a nine-part evidence chain; confirmed facts flow into `facts.md`. |
 
-**jobs-mcp** — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. No API keys; these are the public endpoints the career pages use. `scan(rank_query=...)` ranks postings against your profile with BM25, plus local embeddings fused by RRF when the optional `rank` extra is installed.
+**jobs-mcp** — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. No API keys; these are the public endpoints the career pages use. `scan(rank_query=...)` ranks postings against your profile with BM25, plus local embeddings fused by RRF when the optional `rank` extra is installed. Every fetched description goes through the posting guard first (`jobs_mcp/guard.py`): hidden HTML and invisible Unicode are removed, text spelled in tag characters or variation selectors is decoded, instruction-shaped lines are quoted, and the result is attached as `integrity`. Plain tag stripping would have turned hidden text into visible text for the model.
 
 **Evals** (`evals/`) — 22 `claude plugin eval` cases, two per skill plus a prompt-injection case, that check the behaviours that matter (facts never invented, stage never inflated, nothing submitted without confirmation, JD text never obeyed) against a no-plugin baseline. See [evals/README.md](evals/README.md).
 
@@ -108,7 +108,8 @@ See `templates/career/README.md`.
 ## Design notes
 
 - **Facts before prose.** `job-match` refuses to score on keywords; `great-resume` refuses to add facts; `interview` treats the resume as claims to be defended.
-- **Deterministic where it can be.** The model is told to trace every claim; `scripts/check-trace.py` checks the part a script can check (numbers and leftover markers) before any PDF is produced. `scripts/career-eval.py` turns your own sent folders and tracker into offline evals: block-selection recall against a BM25 baseline, and interview rates with Wilson intervals.
+- **Deterministic where it can be.** The model is told to trace every claim; `scripts/check-trace.py` checks the part a script can check (numbers and leftover markers) before any PDF is produced. `scripts/career-eval.py` turns your own sent folders and tracker into offline evals: block-selection recall against a BM25 baseline, and interview rates with Wilson intervals; `calibrate` writes `career/calibration.md`, which marks only the groups (source, track, seniority, tailoring, stretch) that differ from the rest beyond noise, and `/job-match` may cite only those. `scripts/posting-guard.py` runs the jobs-mcp guard on pasted postings; `scripts/check-ats.py` extracts the exported PDF's text (pypdf or pdftotext) and fails on missing contact text or bullets spliced by a multi-column layout; `scripts/rank-cuts.py` orders bullets for cutting by relevance, uniqueness, and cover-letter dependency.
+- **A second reader.** The drafter does not grade its own draft: `agents/application-reviewer.md` reviews it in a fresh context, read-only, and returns `old`/`new` edits each tied to a `facts.md` section; the drafter checks every source before applying one.
 - **External writes are confirmed.** Submitting an application, opening a PR, sending a message — each is shown and confirmed unless your `answers.yaml` policy says otherwise.
 - **NA specifics.** Letter paper, one page, no photo or personal-data block; hard constraints are work authorization / sponsorship / location / years / band; pipeline is APPLIED → SCREEN → OA → TECH → ONSITE → OFFER; outreach is LinkedIn notes and cold email, not chat openers.
 - **No agent framework.** Skills are Markdown; the MCP server is ~300 lines of Python on `httpx`.
