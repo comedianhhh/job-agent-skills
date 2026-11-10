@@ -1,7 +1,12 @@
 name: Skill evals
 
 # Real model calls, so this never runs on push. Trigger it by hand (Actions → Skill evals → Run workflow)
-# or let the weekly schedule catch model-rollout regressions. Needs the ANTHROPIC_API_KEY secret.
+# or let the weekly schedule catch model-rollout regressions.
+#
+# Auth, either secret works (the OAuth token wins when both are set):
+#   CLAUDE_CODE_OAUTH_TOKEN  `claude setup-token` on a Pro/Max/Team login; runs on the subscription,
+#                            no API billing; valid one year, tied to the account that created it
+#   ANTHROPIC_API_KEY        a Console API key; billed per token
 on:
   workflow_dispatch:
     inputs:
@@ -21,8 +26,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
     steps:
+      - name: Check credentials
+        run: |
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ] && [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::Add a CLAUDE_CODE_OAUTH_TOKEN (claude setup-token) or ANTHROPIC_API_KEY repository secret"
+            exit 1
+          fi
+          [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] && echo "auth: subscription OAuth token" || echo "auth: API key"
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
@@ -34,6 +47,10 @@ jobs:
         run: npm install -g @anthropic-ai/claude-code && claude --version
       - name: Run
         run: |
+          # An unset secret arrives as an empty string; drop the API key then (or when the OAuth token is
+          # set) so the CLI does not pick up an empty or competing credential.
+          if [ -z "$ANTHROPIC_API_KEY" ] || [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ]; then unset ANTHROPIC_API_KEY; fi
+          [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ] && unset CLAUDE_CODE_OAUTH_TOKEN
           mode="${{ github.event.inputs.mode || 'smoke' }}"
           extra=()
           [ -n "${{ github.event.inputs.case }}" ] && extra+=(--case "${{ github.event.inputs.case }}")
