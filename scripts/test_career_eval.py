@@ -123,6 +123,57 @@ def test_outcomes_counts_windows_archives_and_ci():
     assert lo < 0.5 < hi
 
 
+def test_source_and_stretch_read_the_trackers_own_words():
+    app = {"company": "Coalition", "req": "Greenhouse 4731294005 (LinkedIn 4463625729)", "notes": ""}
+    assert ce.source(app) == "greenhouse"
+    assert ce.source({"company": "X", "req": "LinkedIn Easy Apply 123", "notes": ""}) == "linkedin easy apply"
+    assert ce.source({"company": "STRATIS (via Vladimir, Head of Eng)", "req": "—", "notes": ""}) == "direct contact"
+    assert ce.source({"company": "X", "req": "—", "notes": "applied via Indeed"}) == "indeed"
+    assert ce.source({"company": "X", "req": "—", "notes": ""}) == "unknown"
+    assert ce.stretch({"notes": "Stretch: 5+ yrs asked vs 4"}).startswith("stretch")
+    assert ce.stretch({"notes": "posting asks 7+ yrs"}).startswith("stretch")
+    assert ce.stretch({"notes": "Follow up on LinkedIn 2026-11-23"}) == "within range"
+
+
+def _synthetic(groups: dict[str, tuple[int, int]]) -> dict:
+    """An eval_outcomes-shaped result with one dimension (by_source) filled in."""
+    k = sum(a for a, _ in groups.values())
+    n = sum(b for _, b in groups.values())
+    empty = {key: {} for _, key in ce.GROUPS}
+    by_source = {
+        g: {"interviews": a, "n": b, "rate": a / b, "ci95": ce.wilson(a, b)} for g, (a, b) in groups.items()
+    }
+    return {
+        **empty,
+        "overall": {"interviews": k, "n": n, "rate": k / n, "ci95": ce.wilson(k, n)},
+        "by_source": by_source,
+        "pending": 0,
+        "decided": n,
+        "excluded": 0,
+        "interviews": [],
+    }
+
+
+def test_signals_need_size_and_separation():
+    strong = ce.signals(_synthetic({"referral": (6, 8), "job board": (2, 60)}))
+    assert [(s["group"], s["strength"]) for s in strong][0] == ("referral", "strong")
+    weak = ce.signals(_synthetic({"greenhouse": (2, 10), "indeed": (1, 30)}))
+    assert ("greenhouse", "weak") in [(s["group"], s["strength"]) for s in weak]
+    assert ce.signals(_synthetic({"ashby": (1, 3), "indeed": (2, 60)})) == []  # n < 5: noise
+    assert ce.signals(_synthetic({"a": (1, 20), "b": (1, 20)})) == []  # no gap
+
+
+def test_calibrate_writes_markdown_and_says_when_there_is_no_signal():
+    with tempfile.TemporaryDirectory() as t:
+        career = _career(Path(t))
+        assert ce.main(["calibrate", str(career)]) == 0
+        md = (career / "calibration.md").read_text(encoding="utf-8")
+    assert md.startswith("# Calibration from past applications")
+    assert "None yet" in md  # four decided applications cannot carry a signal
+    assert "- Acme — Backend Engineer" in md
+    assert "| Source |" in md and "| Stretch |" in md
+
+
 def test_wilson_edges():
     assert ce.wilson(0, 0) == (0.0, 0.0)
     lo, hi = ce.wilson(0, 10)

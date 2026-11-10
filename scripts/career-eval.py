@@ -252,6 +252,8 @@ def parse_tracker(text: str) -> list[dict]:
             {
                 "company": row.get("company", ""),
                 "role": row.get("role", ""),
+                "req": row.get("req", ""),
+                "notes": " ".join(row.get(k, "") for k in ("next step", "note", "notes")),
                 "applied": applied.lstrip("~"),
                 "status": status.split("/")[0].strip().upper(),
                 # an archived row that once reached SCREEN still counts as an interview
@@ -274,6 +276,36 @@ def track(role: str) -> str:
 
 def seniority(role: str) -> str:
     return "senior+" if re.search(r"\b(senior|sr\.?|staff|principal|lead)\b", role, re.I) else "mid/junior"
+
+
+SOURCES = [  # first match wins; read from the Req and Next step cells
+    ("referral", r"\breferr(?:al|ed)\b"),
+    # "STRATIS (via Vladimir, Head of Eng)", "startup (CEO Russell)": a person, not a job board
+    ("direct contact", r"\bvia (?!indeed|linkedin|greenhouse|ashby|lever|workday|workable)\w+|\b(?:ceo|cto|founder)\b"),
+    ("linkedin easy apply", r"easy apply"),
+    ("workday", r"\bworkday\b|myworkdayjobs"),
+    ("greenhouse", r"\bgreenhouse\b"),
+    ("lever", r"\blever\b"),
+    ("ashby", r"\bashby\b"),
+    ("indeed", r"\bindeed\b"),
+    ("workable", r"\bworkable\b"),
+    ("company site / other ATS", r"\b(?:icims|smartrecruiters|taleo|successfactors|oracle|ukg|eightfold|"
+     r"clearcompany|bamboohr|jobvite|paradox|careers? (?:page|site))\b"),
+]
+# "Stretch: 5+ yrs asked vs 4", "JD wants 2+ yrs", "posting asks 7+ yrs": the tracker's own words
+STRETCH = re.compile(
+    r"\bstretch\b|\b(?:asks?|asked|wants|requires?)\s+\d+\+?\s*(?:yrs|years)\b|\d+\+?\s*(?:yrs|years) asked",
+    re.I,
+)
+
+
+def source(app: dict) -> str:
+    text = f"{app.get('company', '')} {app.get('req', '')} {app.get('notes', '')}".lower()
+    return next((name for name, rx in SOURCES if re.search(rx, text)), "unknown")
+
+
+def stretch(app: dict) -> str:
+    return "stretch (years / level)" if STRETCH.search(app.get("notes", "")) else "within range"
 
 
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
@@ -342,7 +374,55 @@ def eval_outcomes(career: Path, today: date | None = None, wait_days: int = 10) 
                 d["tailored"]
             ]
         ),
+        "by_source": group(source),
+        "by_stretch": group(stretch),
+        "interviews": [{"company": d["company"], "role": d["role"]} for d in decided if d["interview"]],
     }
+
+
+GROUPS = (
+    ("Track", "by_track"),
+    ("Seniority", "by_seniority"),
+    ("Tailoring", "by_tailored"),
+    ("Source", "by_source"),
+    ("Stretch", "by_stretch"),
+)
+
+
+def signals(r: dict, min_n: int = 5, min_gap: float = 0.10) -> list[dict]:
+    """Groups whose interview rate differs from the rest of the decided applications.
+
+    `strong` when the two Wilson intervals do not overlap; `weak` when the gap is at least
+    `min_gap` with n >= `min_n` on both sides. Everything else is noise at this sample size."""
+    total_k, total_n = r["overall"]["interviews"], r["overall"]["n"]
+    out = []
+    for title, key in GROUPS:
+        for g, v in r[key].items():
+            k, n = v["interviews"], v["n"]
+            rest_k, rest_n = total_k - k, total_n - n
+            if n < min_n or rest_n < min_n:
+                continue
+            rate, rest = k / n, rest_k / rest_n
+            lo, hi = wilson(k, n)
+            rlo, rhi = wilson(rest_k, rest_n)
+            if hi < rlo or lo > rhi:
+                strength = "strong"
+            elif abs(rate - rest) >= min_gap:
+                strength = "weak"
+            else:
+                continue
+            out.append(
+                {
+                    "dimension": title,
+                    "group": g,
+                    "interviews": k,
+                    "n": n,
+                    "rate": rate,
+                    "rest_rate": rest,
+                    "strength": strength,
+                }
+            )
+    return sorted(out, key=lambda s: (s["strength"] != "strong", -abs(s["rate"] - s["rest_rate"])))
 
 
 # ------------------------------------------------------------------- reports
@@ -389,7 +469,7 @@ def report_outcomes(r: dict) -> str:
         "",
         f"Overall interview rate **{pct(o['rate'])}** ({o['interviews']}/{o['n']}, 95% CI {pct(o['ci95'][0])}–{pct(o['ci95'][1])})",
     ]
-    for title, key in (("Track", "by_track"), ("Seniority", "by_seniority"), ("Tailoring", "by_tailored")):
+    for title, key in GROUPS:
         lines += ["", f"| {title} | Interviews / n | Rate | 95% CI |", "|---|---|---|---|"]
         for g, v in sorted(r[key].items(), key=lambda kv: -kv[1]["n"]):
             lines.append(
@@ -398,13 +478,54 @@ def report_outcomes(r: dict) -> str:
     return "\n".join(lines)
 
 
+def report_calibration(r: dict, today: date) -> str:
+    """career/calibration.md: what /job-match may cite from your own history, and how strongly."""
+    o = r["overall"]
+    sig = signals(r)
+    lines = [
+        "# Calibration from past applications",
+        "",
+        f"Generated {today.isoformat()} by `scripts/career-eval.py calibrate` from `tracker.md`. "
+        "Regenerate after outcomes change; do not edit by hand.",
+        "",
+        f"Baseline: **{pct(o['rate'])}** interview rate ({o['interviews']}/{o['n']} decided, "
+        f"95% CI {pct(o['ci95'][0])}–{pct(o['ci95'][1])}); {r['pending']} still inside the follow-up window.",
+        "",
+        "## Signals",
+        "",
+        "`strong` = the group's 95% interval does not overlap the rest's. `weak` = a gap of 10+ points "
+        "with 5+ applications on each side — a hint, not a rule. Only these may be cited.",
+        "",
+    ]
+    if sig:
+        lines += ["| Strength | Dimension | Group | Interviews / n | Rate | Rest |", "|---|---|---|---|---|---|"]
+        for s in sig:
+            lines.append(
+                f"| {s['strength']} | {s['dimension']} | {s['group']} | {s['interviews']}/{s['n']} | "
+                f"{pct(s['rate'])} | {pct(s['rest_rate'])} |"
+            )
+    else:
+        lines.append("None yet: no group differs from the rest beyond noise at this sample size.")
+    lines += ["", "## Reached an interview", ""]
+    lines += [f"- {i['company']} — {i['role']}" for i in r["interviews"]] or ["- none yet"]
+    lines += ["", "## Detail", "", report_outcomes(r).split("\n", 2)[2]]
+    return "\n".join(lines) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("what", choices=["blocks", "outcomes", "all"])
+    ap.add_argument("what", choices=["blocks", "outcomes", "calibrate", "all"])
     ap.add_argument("career", type=Path, help="path to your career/ workspace")
+    ap.add_argument("--out", type=Path, help="calibrate: where to write (default <career>/calibration.md)")
     a = ap.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if a.what == "calibrate":
+        today = date.today()
+        out = a.out or a.career / "calibration.md"
+        out.write_text(report_calibration(eval_outcomes(a.career, today=today), today), encoding="utf-8")
+        print(f"career-eval: wrote {out}")
+        return 0
     parts = []
     if a.what in ("blocks", "all"):
         parts.append(report_blocks(eval_blocks(a.career)))

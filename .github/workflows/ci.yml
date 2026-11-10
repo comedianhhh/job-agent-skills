@@ -3,9 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
-    paths: ["mcp/jobs-mcp/**", "graph/**", "web/**", "evals/**", "skills/**", "extensions/**", "tests/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "graph/**", "web/**", "evals/**", "skills/**", "agents/**", "extensions/**", "tests/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
   pull_request:
-    paths: ["mcp/jobs-mcp/**", "graph/**", "web/**", "evals/**", "skills/**", "extensions/**", "tests/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
+    paths: ["mcp/jobs-mcp/**", "graph/**", "web/**", "evals/**", "skills/**", "agents/**", "extensions/**", "tests/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
 
 jobs:
   jobs-mcp:
@@ -114,10 +114,12 @@ jobs:
           python-version: "3.12"
       - name: Validate eval cases and graders (no model calls)
         run: python evals/validate.py
-      - name: Trace gate and block-selection eval scripts
+      - name: Trace, ATS, cut-ranking and career-eval scripts
         run: |
           python scripts/test_check_trace.py
           python scripts/test_career_eval.py
+          python scripts/test_check_ats.py
+          python scripts/test_rank_cuts.py
 
   pi-package:
     name: pi package (extension)
