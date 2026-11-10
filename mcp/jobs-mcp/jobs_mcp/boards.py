@@ -16,6 +16,7 @@ from urllib.parse import quote_plus
 
 import httpx
 
+from .guard import compact, guard
 from .result import BAD_INPUT, NEED_LOGIN, NOT_FOUND, UPSTREAM_BROKEN, JobsError, http_status_code
 
 USER_AGENT = (
@@ -30,7 +31,7 @@ LI_MAX_START = 1000  # the guest endpoint stops returning cards around here
 
 
 class Job(TypedDict, total=False):
-    source: str  # greenhouse | lever | ashby | linkedin
+    source: str  # greenhouse | lever | ashby | smartrecruiters | linkedin
     board: str  # board token / company slug / org slug / "guest"
     id: str
     title: str
@@ -39,12 +40,22 @@ class Job(TypedDict, total=False):
     remote: bool | None
     url: str
     posted_at: str | None  # ISO 8601 when the source provides it
-    description: str | None  # plain text, only when fetched
-    backend: str  # what served it: greenhouse-api | lever-api | ashby-api | linkedin-guest
+    description: str | None  # plain text, only when fetched; hidden HTML and invisible text removed
+    integrity: dict[str, Any]  # posting-guard report for the description (guard.py); verdict first
+    backend: str  # greenhouse-api | lever-api | ashby-api | smartrecruiters-api | linkedin-guest
 
 
 def _client() -> httpx.Client:
     return httpx.Client(headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT, follow_redirects=True)
+
+
+def _described(raw: str | None, is_html: bool | None = None) -> dict[str, Any]:
+    """`description` + `integrity` for a Job. The posting-guard runs before any model reads the
+    text: plain tag stripping would turn hidden HTML into ordinary visible text."""
+    if not raw:
+        return {"description": None}
+    text, report = guard(raw, is_html=is_html)
+    return {"description": text or None, "integrity": compact(report)}
 
 
 def _strip_html(s: str | None) -> str | None:
@@ -82,7 +93,7 @@ def greenhouse_jobs(board_token: str, with_content: bool = False) -> list[Job]:
                 remote=None,
                 url=j.get("absolute_url", ""),
                 posted_at=j.get("updated_at") or j.get("first_published"),
-                description=_strip_html(j.get("content")) if with_content else None,
+                **(_described(j.get("content"), is_html=True) if with_content else {"description": None}),
                 backend="greenhouse-api",
             )
         )
@@ -105,7 +116,7 @@ def greenhouse_job(board_token: str, job_id: str) -> Job:
         remote=None,
         url=j.get("absolute_url", ""),
         posted_at=j.get("updated_at"),
-        description=_strip_html(j.get("content")),
+        **_described(j.get("content"), is_html=True),
         backend="greenhouse-api",
     )
 
@@ -136,7 +147,7 @@ def lever_jobs(company: str) -> list[Job]:
                 remote=(j.get("workplaceType") == "remote") if j.get("workplaceType") else None,
                 url=j.get("hostedUrl", ""),
                 posted_at=posted,
-                description=_strip_html(j.get("descriptionPlain") or j.get("description")),
+                **_described(j.get("descriptionPlain") or j.get("description")),
                 backend="lever-api",
             )
         )
@@ -157,9 +168,11 @@ def ashby_jobs(org: str) -> list[Job]:
     for j in data.get("jobs", []):
         comp = j.get("compensation") or {}
         summary = comp.get("compensationTierSummary")
-        desc = _strip_html(j.get("descriptionHtml")) or j.get("descriptionPlain")
-        if summary and desc:
-            desc = f"Compensation: {summary}\n\n{desc}"
+        d = _described(j.get("descriptionHtml"), is_html=True)
+        if not d["description"]:
+            d = _described(j.get("descriptionPlain"), is_html=False)
+        if summary and d["description"]:
+            d["description"] = f"Compensation: {summary}\n\n{d['description']}"
         jobs.append(
             Job(
                 source="ashby",
@@ -171,11 +184,91 @@ def ashby_jobs(org: str) -> list[Job]:
                 remote=j.get("isRemote"),
                 url=j.get("jobUrl") or j.get("applyUrl", ""),
                 posted_at=j.get("publishedAt"),
-                description=desc,
+                **d,
                 backend="ashby-api",
             )
         )
     return jobs
+
+
+# ------------------------------------------------------------ SmartRecruiters
+
+SR_API = "https://api.smartrecruiters.com/v1/companies"
+SR_PAGE = 100
+SR_MAX = 1000  # a few large employers list thousands; scans only need the recent ones
+
+
+def _sr_location(loc: dict[str, Any]) -> str:
+    return loc.get("fullLocation") or ", ".join(x for x in (loc.get("city"), loc.get("region")) if x)
+
+
+def _sr_url(company: str, j: dict[str, Any]) -> str:
+    return j.get("postingUrl") or f"https://jobs.smartrecruiters.com/{company}/{j.get('id')}"
+
+
+def smartrecruiters_jobs(company: str) -> list[Job]:
+    """All public postings for a SmartRecruiters company identifier — the <id> in
+    jobs.smartrecruiters.com/<id> (Ubisoft is "Ubisoft2"). The list has no descriptions;
+    `smartrecruiters_job` fetches one. An unknown identifier returns an empty list, not a 404."""
+    jobs: list[Job] = []
+    with _client() as c:
+        offset = 0
+        while offset < SR_MAX:
+            r = c.get(f"{SR_API}/{company}/postings", params={"limit": SR_PAGE, "offset": offset})
+            r.raise_for_status()
+            data = r.json()
+            page = data.get("content") or []
+            for j in page:
+                loc = j.get("location") or {}
+                jobs.append(
+                    Job(
+                        source="smartrecruiters",
+                        board=company,
+                        id=str(j.get("id")),
+                        title=(j.get("name") or "").strip(),
+                        company=(j.get("company") or {}).get("name") or company,
+                        location=_sr_location(loc),
+                        remote=loc.get("remote"),
+                        url=_sr_url(company, j),
+                        posted_at=j.get("releasedDate"),
+                        description=None,
+                        backend="smartrecruiters-api",
+                    )
+                )
+            offset += SR_PAGE
+            if len(page) < SR_PAGE or offset >= (data.get("totalFound") or 0):
+                break
+    return jobs
+
+
+def smartrecruiters_job(company: str, job_id: str) -> Job:
+    """One SmartRecruiters posting with its description (the job ad's sections, in order)."""
+    with _client() as c:
+        r = c.get(f"{SR_API}/{company}/postings/{job_id}")
+        if r.status_code == 404:
+            raise JobsError(NOT_FOUND, f"smartrecruiters job {job_id} not found for {company}")
+        r.raise_for_status()
+        j = r.json()
+    sections = ((j.get("jobAd") or {}).get("sections")) or {}
+    parts = []
+    for key in ("companyDescription", "jobDescription", "qualifications", "additionalInformation"):
+        s = sections.get(key) or {}
+        if s.get("text"):
+            parts.append(f"<h3>{html.escape(s.get('title') or '')}</h3>{s['text']}")
+    loc = j.get("location") or {}
+    return Job(
+        source="smartrecruiters",
+        board=company,
+        id=str(j.get("id")),
+        title=(j.get("name") or "").strip(),
+        company=(j.get("company") or {}).get("name") or company,
+        location=_sr_location(loc),
+        remote=loc.get("remote"),
+        url=_sr_url(company, j),
+        posted_at=j.get("releasedDate"),
+        **_described("".join(parts), is_html=True),
+        backend="smartrecruiters-api",
+    )
 
 
 # ------------------------------------------------------------- LinkedIn guest
@@ -349,9 +442,9 @@ def linkedin_guest_job(target: str) -> Job:
     posted = _strip_html(_group(_LI_D_POSTED, page))
     if posted:
         header.insert(0, f"Posted: {posted}")
-    desc = _strip_html(_group(_LI_D_DESC, page))
+    d = _described(_group(_LI_D_DESC, page), is_html=True)
     if header:
-        desc = "\n".join(header) + ("\n\n" + desc if desc else "")
+        d["description"] = "\n".join(header) + ("\n\n" + d["description"] if d["description"] else "")
     return Job(
         source="linkedin",
         board="guest",
@@ -362,7 +455,7 @@ def linkedin_guest_job(target: str) -> Job:
         remote=None,
         url=f"https://www.linkedin.com/jobs/view/{job_id}",
         posted_at=None,
-        description=desc or None,
+        **d,
         backend="linkedin-guest",
     )
 
@@ -404,8 +497,8 @@ def parse_board(spec: str) -> tuple[str, str]:
         raise ValueError(f"board spec must be 'source:slug', got {spec!r}")
     source, slug = spec.split(":", 1)
     source = source.strip().lower()
-    if source not in {"greenhouse", "lever", "ashby"}:
-        raise ValueError(f"unknown source {source!r}; use greenhouse, lever or ashby")
+    if source not in {"greenhouse", "lever", "ashby", "smartrecruiters"}:
+        raise ValueError(f"unknown source {source!r}; use greenhouse, lever, ashby or smartrecruiters")
     return source, slug.strip()
 
 
@@ -417,6 +510,8 @@ def fetch_board(spec: str, with_content: bool = False) -> list[Job]:
         return greenhouse_jobs(slug, with_content=with_content)
     if source == "lever":
         return lever_jobs(slug)
+    if source == "smartrecruiters":
+        return smartrecruiters_jobs(slug)
     return ashby_jobs(slug)
 
 
@@ -425,6 +520,7 @@ def job_search_url(source: str, slug: str) -> str:
         "greenhouse": f"https://boards.greenhouse.io/{slug}",
         "lever": f"https://jobs.lever.co/{slug}",
         "ashby": f"https://jobs.ashbyhq.com/{slug}",
+        "smartrecruiters": f"https://jobs.smartrecruiters.com/{slug}",
     }[source]
 
 

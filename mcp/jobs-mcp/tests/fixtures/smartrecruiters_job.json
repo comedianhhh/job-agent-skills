@@ -1,0 +1,73 @@
+{
+ "id": "744000160212611",
+ "name": "UI Programmer",
+ "uuid": "895e0155-558c-41d6-bce0-7c346efc0892",
+ "jobId": "eb487a22-553d-4f30-8de4-b0bb912c301a",
+ "jobAdId": "4155f8e6-ea00-429b-a3a7-6d9f14f5dd7d",
+ "defaultJobAd": false,
+ "refNumber": "REF32290D",
+ "company": {
+  "name": "Ubisoft",
+  "identifier": "Ubisoft2"
+ },
+ "location": {
+  "city": "Saguenay",
+  "region": "QC",
+  "country": "ca",
+  "remote": false,
+  "hybrid": false,
+  "latitude": "48.4276054",
+  "longitude": "-71.0600102",
+  "fullLocation": "Saguenay, QC, Canada"
+ },
+ "releasedDate": "2026-11-06T14:28:28.662Z",
+ "postingUrl": "https://jobs.smartrecruiters.com/Ubisoft2/744000160212611-ui-programmer",
+ "applyUrl": "https://jobs.smartrecruiters.com/Ubisoft2/744000160212611-ui-programmer?oga=true",
+ "jobAd": {
+  "sections": {
+   "companyDescription": {
+    "title": "Company Description",
+    "text": "<p>Ubisoft is a global leader in gaming with teams across the world creating original and memorable gaming experiences, from Assassin’s Creed, Rainbow Six to Just Dance and more. We believe diverse perspectives help both players and teams thrive. If you’re passionate about innovation and pushing entertainment boundaries, join our journey and help create the unknown!</p>"
+   },
+   "jobDescription": {
+    "title": "Job Description",
+    "text": "<p>As a user interface programmer at Ubisoft Saguenay, you will develop the modules behind menus, the heads-up display (HUD), and mini-games. You’ll collaborate with design, programming, and art teams to create consistent, accessible interfaces suited to each platform.</p><p><strong>What you’ll do</strong></p><ul><li>Review game design documents to understand the intended player experience and contribute feedback to improve game design and user experience;</li><li>Define user interface (UI) features with the graphic designer, then build platform-specific menus and systems that meet the team’s visual and functional requirements;</li><li>Understand the UI structure to support the presentation team and provide tools for interface systems and internal debug drawing;</li><li>Create interaction prototypes, make quick updates based on feedback, and collaborate across design, programming, art, and other departments by sharing technical, creative, and planning input;</li><li>Integrate designs and animations with the graphic designer, provide animation hooks, and support sound integration;</li><li>Oversee and maintain UI modules and systems, assess performance and memory constraints, and optimize code across platforms;</li><li>Develop application programming interfaces (APIs) for automated UI tests to check the game’s ongoing health;</li><li>Apply usability, user experience, accessibility, and localization concepts to interfaces;</li><li>Keep your knowledge and skills current by following industry developments;</li><li>Carry out other related tasks.</li></ul>"
+   },
+   "qualifications": {
+    "title": "Qualifications",
+    "text": "<p><strong>What you bring to the team</strong></p><ul><li>Experience with C++ programming in video games, embedded systems, or a related field, with game industry experience preferred;</li><li>Knowledge of object-oriented programming, design patterns, and coding standards;</li><li>Foundational knowledge of three-dimensional (3D) graphics programming, including shaders, real-time rendering, and rendering pipelines;</li><li>Knowledge of source control and multimedia integration;</li><li>Knowledge of current graphic design and UI design trends, with familiarity with user experience concepts as an asset;</li><li>Knowledge of Adobe Flash, ActionScript 2.0 or later, or other languages such as XML, C#, JavaScript, and HLSL as an asset;</li><li>Problem-solving skills, attention to detail and outcomes, and the ability to organize, define, and estimate tasks;</li><li>Written and verbal communication skills, initiative, a self-directed and ethical approach to work, adaptability, and motivation to work on complex projects.</li></ul>"
+   },
+   "additionalInformation": {
+    "title": "Additional Information",
+    "text": ""
+   }
+  }
+ },
+ "active": true,
+ "visibility": "PUBLIC",
+ "industry": {
+  "id": "computer_games",
+  "label": "Computer Games"
+ },
+ "function": {
+  "id": "information_technology",
+  "label": "Information Technology"
+ },
+ "department": {
+  "id": 13847731,
+  "label": "Ubisoft"
+ },
+ "experienceLevel": {
+  "id": "mid_senior_level",
+  "label": "Mid-Senior Level"
+ },
+ "typeOfEmployment": {
+  "id": "permanent",
+  "label": "Full-time"
+ },
+ "language": {
+  "code": "en",
+  "label": "English",
+  "labelNative": "English (US)"
+ }
+}

@@ -6,7 +6,7 @@ MCP server that lets an agent scan public job boards. No API keys — it uses th
 
 | Tool | Args | Returns |
 |---|---|---|
-| `list_board_jobs` | `board` (`greenhouse:<token>` / `lever:<company>` / `ashby:<org>`), `title_regex?`, `limit?` | open jobs on one board |
+| `list_board_jobs` | `board` (`greenhouse:<token>` / `lever:<company>` / `ashby:<org>` / `smartrecruiters:<company id>`, e.g. `smartrecruiters:Ubisoft2`), `title_regex?`, `limit?` | open jobs on one board |
 | `get_job` | `board`, `job_id` | one posting with plain-text description (Ashby includes the compensation summary when published); `board: "linkedin"` with a posting id or any LinkedIn job URL reads LinkedIn's public job page |
 | `linkedin_search` | `keywords`, `location`, `hours?`, `limit?`, `remote_only?` | LinkedIn guest search: title / company / location / url / posted date |
 | `scan` | `boards_?`, `linkedin_queries?`, `hours?`, `include_regex?`, `exclude_regex?`, `location_regex?`, `limit?`, `rank_query?` | one deduplicated, filtered list across all sources, plus per-source `source_errors`; with `rank_query`, sorted best-first with `match_score` / `match_terms` |

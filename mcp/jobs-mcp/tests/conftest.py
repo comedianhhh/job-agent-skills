@@ -65,6 +65,12 @@ def mock_http(monkeypatch: pytest.MonkeyPatch) -> MockHTTP:
     )  # more specific, registered last so it wins
     m.json("api.lever.co", "/v0/postings/paytm", "lever_jobs.json")
     m.json("api.ashbyhq.com", "/posting-api/job-board/cohere", "ashby_jobs.json")
+    m.json("api.smartrecruiters.com", "/v1/companies/Ubisoft2/postings", "smartrecruiters_jobs.json")
+    m.json(
+        "api.smartrecruiters.com",
+        "/v1/companies/Ubisoft2/postings/744000160212611",
+        "smartrecruiters_job.json",
+    )  # more specific, registered last so it wins
 
     page = load_text("linkedin_page.html")
 

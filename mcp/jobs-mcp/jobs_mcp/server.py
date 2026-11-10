@@ -29,8 +29,9 @@ from .result import BAD_INPUT, NOT_FOUND, JobsError, attempt, classify, fail, ok
 mcp = MCPServer(
     "jobs-mcp",
     instructions=(
-        "Scan public job boards (Greenhouse, Lever, Ashby, LinkedIn guest search). "
-        "Board specs look like 'greenhouse:doordashcanada', 'lever:netflix', 'ashby:cohere'. "
+        "Scan public job boards (Greenhouse, Lever, Ashby, SmartRecruiters, LinkedIn guest search). "
+        "Board specs look like 'greenhouse:doordashcanada', 'lever:netflix', 'ashby:cohere', "
+        "'smartrecruiters:Ubisoft2'. "
         "Every tool returns {ok, items, count, backend, attempts, error}; each item is "
         "{source, board, id, title, company, location, url, posted_at, backend}. When ok is false, "
         "error is {code, message, hint, retryable}: follow error.hint, and retry only when "
@@ -62,7 +63,8 @@ def _backend_of(spec: str, jobs: list[boards.Job]) -> str:
 
 @mcp.tool()
 def list_board_jobs(board: str, title_regex: str | None = None, limit: int = 200) -> dict[str, Any]:
-    """List open jobs on one board. `board` is 'greenhouse:<token>', 'lever:<company>' or 'ashby:<org>'.
+    """List open jobs on one board. `board` is 'greenhouse:<token>', 'lever:<company>', 'ashby:<org>'
+    or 'smartrecruiters:<company id>' (the id in jobs.smartrecruiters.com/<id>, e.g. Ubisoft2).
     `title_regex` (case-insensitive) keeps only matching titles. Jobs are in `items`."""
     try:
         rx = _compile(title_regex, "title_regex")
@@ -82,8 +84,9 @@ def list_board_jobs(board: str, title_regex: str | None = None, limit: int = 200
 @mcp.tool()
 def get_job(board: str, job_id: str) -> dict[str, Any]:
     """Full posting (plain-text description) for one job; `items[0]` is that job.
-    Greenhouse / Lever / Ashby: `board` is the board spec. LinkedIn: `board` is 'linkedin' and
-    `job_id` the posting id or any linkedin.com job URL (read from the public page, no login)."""
+    Greenhouse / Lever / Ashby / SmartRecruiters: `board` is the board spec. LinkedIn: `board` is
+    'linkedin' and `job_id` the posting id or any linkedin.com job URL (read from the public page,
+    no login)."""
     try:
         if board.strip().lower().split(":", 1)[0] == "linkedin":
             job = boards.linkedin_guest_job(job_id)
@@ -93,6 +96,8 @@ def get_job(board: str, job_id: str) -> dict[str, Any]:
         source, slug = boards.parse_board(board)
         if source == "greenhouse":
             job = boards.greenhouse_job(slug, job_id)
+        elif source == "smartrecruiters":
+            job = boards.smartrecruiters_job(slug, job_id)
         else:
             job = next((j for j in boards.fetch_board(board) if j["id"] == str(job_id)), None)
             if job is None:
