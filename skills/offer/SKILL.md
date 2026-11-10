@@ -33,6 +33,14 @@ Only change a status on evidence. An automatic receipt is `APPLIED`, never `SCRE
 4. Follow-up: 10 business days after `APPLIED` with silence → one LinkedIn message (`/great-resume` outreach format), note the date; ~2 more weeks → `GHOSTED`.
 5. Interview scheduled → suggest `/interview` on that folder and a fresh 1-page export if the sent version was 2 pages.
 6. Offer → record the numbers; never negotiate or send anything.
+7. Keep the `Req` cell naming the channel (`Greenhouse 4731294005`, `LinkedIn Easy Apply 4478561371`, `referral — <name>`) and note a stretch in Next step (`Stretch: 5+ yrs asked vs 4`) — calibration reads both.
+8. When a row reaches an outcome (`SCREEN` or later, `REJECTED`, `GHOSTED`), regenerate `career/calibration.md`:
+
+   ```bash
+   python scripts/career-eval.py calibrate career/
+   ```
+
+   It lists your interview rate by source, track, seniority, tailoring and stretch, and marks only the groups that differ from the rest beyond noise; `/job-match` cites those. Report a new or changed signal in one line.
 
 ## Scanning (needs jobs-mcp)
 
