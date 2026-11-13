@@ -17,3 +17,5 @@ evals/**/results/
 *.pdf
 
 node_modules/
+.verify/
+*.tgz
