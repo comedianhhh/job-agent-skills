@@ -22,7 +22,7 @@ Claim status lives in `facts.md`: confirmed (dated ✅ or plain fact), unconfirm
 
 1. Confirm the target role, the JD (usually `<folder>/03-Job-Description.md` after `/job-match`), the channel, and what to emphasise.
 2. Read the facts and the existing resume. Conflicting sources → do **not** pick the flattering one; mark unconfirmed and list it. Missing material → draft from what exists, list ≤ 5 must-fill items.
-3. Offer 1–3 positioning lines: a safe and an ambitious version; the ambitious one states the evidence it still needs.
+3. Offer 1–3 positioning lines: a safe and an ambitious version; the ambitious one states the evidence it still needs. Ambitious means stronger framing of the same facts, never wider scope: it may not claim a domain (payments, ledgers, money movement…) the paid work wasn't in.
 4. Rewrite bullets as **action → system capability → business value → result evidence → personal boundary**. Reuse `blocks.md`; new blocks get added there (with the user's OK) so they are never lost. `blocks.md` is derived from `facts.md`: a number that is not in `facts.md` yet goes there first, confirmed by the user, and `python scripts/check-trace.py career/blocks.md` should stay clean after every edit.
 5. Produce the summary, a recruiter note, and a slightly longer self-introduction. The self-introduction is spoken — follow the "Spoken register" rules in `skills/interview/SKILL.md` (short sentences, no taglines, no summary line).
 6. Audit strong claims: original → proposed → fact → boundary → risk. Update `facts.md` only with confirmation.
@@ -32,6 +32,7 @@ Claim status lives in `facts.md`: confirmed (dated ✅ or plain fact), unconfirm
 - Titles, companies, dates, education: exactly as recorded.
 - "Led / owner / architected / founding" only with decisions, delivery, and result the user can explain.
 - No number without a source; qualitative beats invented.
+- Personal projects stay labelled personal in every line that uses them, positioning included: "event pipelines at Northwind, plus a personal double-entry ledger" — never "builds event pipelines and ledgers".
 - Team work is written as team work. Borrowed names (investors, partners, awards) go in the company line; the user's work goes in bullets. Unverifiable names are deleted, not hinted.
 - Unreleased work: what was built, never the outcome. Shipped work must say shipped.
 - Never volunteer a weakness in outgoing material.
