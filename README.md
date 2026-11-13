@@ -116,6 +116,15 @@ See `templates/career/README.md`.
 - **One skill set, two hosts.** The same `skills/` load as a Claude Code plugin and as a pi package; the pi extension (~100 lines, `@modelcontextprotocol/sdk`) is the only host-specific code. `npm run check` type-checks it, `npm run test:pi` loads it against a fake `ExtensionAPI` and round-trips a `scan` call.
 
 
+## Releasing
+
+```bash
+npm run verify           # ~30 s while working
+npm run verify:release   # ~10 min before publishing (adds the skill evals)
+```
+
+Both check exactly what `npm publish` would ship. They run the offline checks CI runs, pack the tarball (required files present, nothing private), start jobs-mcp from the packed copy, and call live Greenhouse, Lever, Ashby, SmartRecruiters and LinkedIn. `verify:release` also runs the skill evals in smoke mode through the logged-in `claude` CLI. Only deterministic graders gate the verdict; llm-judge results are reported as notes. The verdict is PASS, FAIL, or BLOCKED (something couldn't be checked, e.g. a board was unreachable). Evidence goes to `.verify/<run>/`. A `verify:release` PASS prints the tarball to publish: `npm publish .verify/<run>/<file>.tgz`. See `.claude/skills/verify-release/SKILL.md`.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
