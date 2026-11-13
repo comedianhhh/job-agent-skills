@@ -70,7 +70,8 @@ const sh = (cmd) => execSync(cmd, { cwd: ROOT, encoding: 'utf8' }).trim();
 meta.commit = sh('git rev-parse HEAD');
 meta.branch = sh('git rev-parse --abbrev-ref HEAD');
 meta.dirty = sh('git status --short') || '(clean)';
-meta.version = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
+const PKG_JSON = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')), PKG_NAME = PKG_JSON.name;
+meta.version = PKG_JSON.version;
 meta.tools = { node: process.version };
 for (const [k, c] of [['uv', 'uv --version'], ['python', 'python --version']]) {
   try { meta.tools[k] = sh(c); } catch { meta.tools[k] = 'missing'; }
@@ -340,7 +341,7 @@ writeFileSync(join(DIR, 'summary.md'), `# job-agent-skills verification ${RUN}
 
 **Verdict: ${meta.verdict}** — ${counts}
 
-- Package: job-agent-skills@${meta.version}${meta.tarball ? ` → \`${meta.tarball}\` (${meta.fileCount} files, ${(meta.packSize / 1024).toFixed(0)} KB)` : ''}
+- Package: ${PKG_NAME}@${meta.version}${meta.tarball ? ` → \`${meta.tarball}\` (${meta.fileCount} files, ${(meta.packSize / 1024).toFixed(0)} KB)` : ''}
 - Tarball sha256: \`${meta.sha256 || 'n/a'}\`
 - Commit: \`${meta.commit}\` on \`${meta.branch}\`
 - Uncommitted changes: ${meta.dirty === '(clean)' ? 'none' : '\n```\n' + meta.dirty + '\n```'}

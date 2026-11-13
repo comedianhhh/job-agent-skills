@@ -1,5 +1,5 @@
 {
-  "name": "job-agent-skills",
+  "name": "@alanstill9966/job-agent-skills",
   "version": "0.1.1",
   "description": "Job-search workflow for coding agents, North American edition: ten skills (fit analysis, resume + cover letter files, form filling, pipeline tracking, interview drills, open-source contribution, project deep-dives) plus jobs-mcp for scanning Greenhouse / Lever / Ashby / LinkedIn.",
   "type": "module",
@@ -65,5 +65,8 @@
     "@earendil-works/pi-coding-agent": "^0.85.1",
     "@types/node": "^24.0.0",
     "typescript": "^5.9.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

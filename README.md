@@ -1,6 +1,6 @@
 # job-agent-skills
 
-[![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/job-agent-skills)](https://www.npmjs.com/package/job-agent-skills)
+[![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@alanstill9966/job-agent-skills)](https://www.npmjs.com/package/@alanstill9966/job-agent-skills)
 
 A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby, SmartRecruiters and LinkedIn for new postings.
 
@@ -49,7 +49,8 @@ jobs-mcp starts through `uvx` (install [uv](https://docs.astral.sh/uv/) if you d
 ### As a pi package
 
 ```bash
-pi install npm:job-agent-skills
+pi install npm:@alanstill9966/job-agent-skills
+# (0.1.0 was published as the unscoped `job-agent-skills` from an account that is no longer used; it gets no updates)
 # or straight from git:
 pi install git:github.com/comedianhhh/job-agent-skills
 ```
