@@ -27,7 +27,7 @@ Verdicts: **PASS**, **FAIL** (a check failed), **BLOCKED** (a check couldn't run
 
 ## Report
 
-Give the verdict, the tarball and its sha256, the commit, the counts (KNOWN and NOTE included), eval cost and time, and the evidence path (`.verify/<run>/summary.md`). Name anything not checked: web/app's Next.js build is CI-only; graph/ and web/api are checked only with `--all`.
+Give the verdict, the tarball and its sha256, the commit, the counts (KNOWN and NOTE included), eval time and usage (the runner's dollar figure is an API-price estimate; on the claude.ai CLI login it counts against the subscription, it is not a bill), and the evidence path (`.verify/<run>/summary.md`). Name anything not checked: web/app's Next.js build is CI-only; graph/ and web/api are checked only with `--all`.
 
 ## Known traps
 

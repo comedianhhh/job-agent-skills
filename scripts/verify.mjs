@@ -294,7 +294,8 @@ async function evalsStage() {
   const first = evalRun('-j 3', 'evals');
   if (!first || first.partial) { record('evals', 'smoke suite ran', 'BLOCKED', { why: first ? 'partial result (cost ceiling or abort)' : 'no result JSON', log: 'logs/evals.log' }); return; }
   meta.evals = { cases: first.cases.length, costUsd: first.costUsd, durationSeconds: first.durationSeconds, reruns: [] };
-  record('evals', `smoke suite ran (${first.cases.length} cases, ≈$${first.costUsd.toFixed(2)}, ${Math.round(first.durationSeconds / 60)} min)`, 'PASS', { log: 'logs/evals.log' });
+  // costUsd is the runner's API-price estimate; on the claude.ai CLI login it is subscription usage, not a bill
+  record('evals', `smoke suite ran (${first.cases.length} cases, ${Math.round(first.durationSeconds / 60)} min, usage ≈ $${first.costUsd.toFixed(2)} at API prices, not billed on a CLI login)`, 'PASS', { log: 'logs/evals.log' });
 
   for (const c of first.cases) {
     const r = caseResult(c);
@@ -344,7 +345,7 @@ writeFileSync(join(DIR, 'summary.md'), `# job-agent-skills verification ${RUN}
 - Commit: \`${meta.commit}\` on \`${meta.branch}\`
 - Uncommitted changes: ${meta.dirty === '(clean)' ? 'none' : '\n```\n' + meta.dirty + '\n```'}
 - Tools: node ${meta.tools.node}, ${meta.tools.uv}, ${meta.tools.python}
-- Skill evals: ${meta.evals?.rescored ? `re-scored from ${meta.evals.rescored} (no model calls)` : meta.evals ? `smoke, ${meta.evals.cases} cases via ${meta.claude} (CLI login), ≈$${meta.evals.costUsd.toFixed(2)}, ${Math.round(meta.evals.durationSeconds / 60)} min${meta.evals.reruns.length ? `, re-ran ${meta.evals.reruns.join(', ')}` : ''}; gate = deterministic graders, llm judge = notes` : 'not run (fast mode; `npm run verify -- --release` before publishing)'}
+- Skill evals: ${meta.evals?.rescored ? `re-scored from ${meta.evals.rescored} (no model calls)` : meta.evals ? `smoke, ${meta.evals.cases} cases via ${meta.claude} (CLI login: subscription usage, not billed), ${Math.round(meta.evals.durationSeconds / 60)} min, usage ≈ $${meta.evals.costUsd.toFixed(2)} at API prices${meta.evals.reruns.length ? `, re-ran ${meta.evals.reruns.join(', ')}` : ''}; gate = deterministic graders, llm judge = notes` : 'not run (fast mode; `npm run verify -- --release` before publishing)'}
 - Scope: ${ALL ? 'everything (incl. graph/, web/api)' : 'what ships to npm (graph/ and web/ not checked: use --all)'}; web/app (Next.js build) is CI-only
 - Cleanup: ${meta.cleanup.stillLeft} process(es) left, unpacked copy ${meta.cleanup.unpackedRemoved ? 'removed' : 'NOT removed'}
 
