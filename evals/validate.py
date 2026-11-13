@@ -142,6 +142,15 @@ def check_fixtures_in_sync(errors: list[str]) -> None:
                     break
 
 
+def check_grader_sources(errors: list[str]) -> None:
+    from sync_fixtures import grader_files, render_grader  # same folder
+
+    for g in grader_files():
+        text = g.read_text(encoding="utf-8")
+        if render_grader(text) != text:
+            errors.append(f"{g.relative_to(ROOT)}: fixture-sources block is stale vs _fixtures (run sync_fixtures.py)")
+
+
 def check_hardlinks(errors: list[str]) -> None:
     for root, dirs, files in os.walk(PLUGIN):
         dirs[:] = [d for d in dirs if d not in {".git", "node_modules", ".next"}]
@@ -165,6 +174,7 @@ def main() -> int:
     for c in sorted(set(cases)):
         check_case(c, errors)
     check_fixtures_in_sync(errors)
+    check_grader_sources(errors)
     check_hardlinks(errors)
     skills_covered = {c.parent.name for c in cases}
     missing = SKILLS - skills_covered

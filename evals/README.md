@@ -45,6 +45,12 @@ Every case also has `skill-fired` (`tool_used: Skill` on the right skill), which
 
 Grader mix: 115 graders; 94 are free (`regex`, `tool_used`, `file_exists`) and 21 are `llm` rubrics written as explicit PASS / FAIL conditions, one per case, weighted 2–3 because they carry the honesty checks (no invented facts, no stage inflation, no claimed submissions).
 
+**Writing an `llm` grader: the judge sees only the rubric and the reply, never the workspace.** If the rubric says "FAIL if it invents facts", the judge has to be able to check that from the rubric itself, or it votes FAIL whenever it can't confirm something. Give it the source text the reply is allowed to use **verbatim, not summarised**: a summary drops details, and a correct reply that quotes a dropped detail fails. Don't paste by hand. Put a `<!-- fixture-sources: facts.md blocks.md … -->` … `<!-- /fixture-sources -->` block in the rubric, and `python evals/sync_fixtures.py` fills it from `_fixtures/career`. `validate.py` fails when a block goes stale. Also say what does *not* count: rewording, standard technical names, and "must cover" expectations are not invented facts. Then check the rubric both ways: a good reply PASSes, and the same reply with one invented fact FAILs. `interview/predict-questions-for-acme` and `great-resume/rewrite-bullets-from-facts` were rewritten this way (2026-11-12), after a correct reply failed 3/3 for quoting real facts the rubric didn't contain.
+
+In `npm run verify:release` only deterministic graders (regex, tool_used, file_exists) gate the verdict. llm-judge graders are reported as notes, because one smoke run of a small judge is too noisy to block a release. Put a check you need to be reliable into a regex or file check, e.g. the fixture's planted traps (the 40 ms p95, the team-wide 99.95%, "Lead"/"Architect", production Kafka/Kubernetes).
+
+`baseline.json` lists deterministic failures that are known, with the reason, and verify reports those as KNOWN instead of FAIL. Don't add a case to it before reading its trace.
+
 ## Run
 
 ```bash
