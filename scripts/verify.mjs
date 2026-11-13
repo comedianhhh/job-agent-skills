@@ -349,7 +349,7 @@ writeFileSync(join(DIR, 'summary.md'), `# job-agent-skills verification ${RUN}
 - Scope: ${ALL ? 'everything (incl. graph/, web/api)' : 'what ships to npm (graph/ and web/ not checked: use --all)'}; web/app (Next.js build) is CI-only
 - Cleanup: ${meta.cleanup.stillLeft} process(es) left, unpacked copy ${meta.cleanup.unpackedRemoved ? 'removed' : 'NOT removed'}
 
-${publishable ? `Publish this exact file:\n\n\`\`\`bash\nnpm publish .verify/${RUN}/${meta.tarball}\n\`\`\`\n` : meta.verdict === 'PASS' ? 'Code checks pass. Not a release check: run `npm run verify -- --release` before publishing.' : 'Do not publish.'}
+${publishable ? `Publish this exact file:\n\n\`\`\`bash\nnpm publish "${join(DIR, meta.tarball)}"\n\`\`\`\n` : meta.verdict === 'PASS' ? 'Code checks pass. Not a release check: run `npm run verify -- --release` before publishing.' : 'Do not publish.'}
 
 | Result | Stage | Check | Evidence |
 |---|---|---|---|
@@ -358,7 +358,7 @@ ${rows}
 Every command's full output is under logs/; live tool calls are in logs/live-calls.json; the packed file list is files.txt.
 `);
 console.log(`\n${meta.verdict}  ${counts}   evidence: .verify/${RUN}/summary.md`);
-if (publishable) console.log(`publish with: npm publish .verify/${RUN}/${meta.tarball}`);
+if (publishable) console.log(`publish with: npm publish "${join(DIR, meta.tarball)}"`);
 else if (meta.verdict === 'PASS' && !RELEASE) console.log('fast check only: run `npm run verify -- --release` before publishing');
 if (stillLeft || !pkgGone) { console.error(`CLEANUP INCOMPLETE: ${stillLeft} process(es) left, unpacked removed: ${pkgGone}`); process.exit(3); }
 process.exit({ PASS: 0, FAIL: 1, BLOCKED: 2 }[meta.verdict]);
