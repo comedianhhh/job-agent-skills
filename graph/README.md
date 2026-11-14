@@ -70,6 +70,18 @@ uv run --no-project apply-graph-history --db ../../career/_graph-runs/.graph.sql
 
 Reads a finished or parked run back with `get_state_history` and prints, oldest first, which node ran at each step and which state fields it changed, with each step's `checkpoint_id` (pass that in `config["configurable"]` to read or fork the run from that point). `--field` keeps only the steps that changed one field and shows its value. Checkpoints don't record who wrote them, so the node is taken from the previous checkpoint's `next`. Nothing runs and no model is called.
 
+## Regression set and scoreboard
+
+```bash
+uv run --no-project apply-graph-eval collect --limit 40     # run on real postings, keep every trace
+uv run --no-project apply-graph-eval build --size 30        # failing runs -> regression.json
+uv run --no-project apply-graph-eval score --note "what I changed"   # rerun the set, scoreboard + diff
+```
+
+Runs go over `career/*/03-Job-Description.md` and stop at the human gate; nothing is recorded and letters go to `career/_graph-evals/letters/`, not the application folder. Each run is graded by code only (no LLM judge): `ran`, `decision` (matches what the tracker says was done: applied → APPLY, BLOCKED → SKIP), `evidence` (each evidence quote really is in facts.md), `first_draft` (passed trace_check first try), `gate` (reached approval, not BLOCKED), `paragraphs` (3, as the prompt asks). `build` picks failures round-robin across checks so one common failure doesn't fill the set.
+
+Every node run is a span with wall time, model calls, input/output tokens and cost (`build_graph(..., recorder=Recorder())`; `telemetry.py`). Scoreboards in `career/_graph-evals/scores/` show totals by check, which checks flipped since the last score, a pass/fail grid per case, and per-node avg / p95 time and tokens.
+
 ## Test
 
 ```bash

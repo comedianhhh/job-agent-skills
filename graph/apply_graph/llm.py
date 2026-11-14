@@ -23,6 +23,10 @@ class LLM(Protocol):
     def parse(self, system: str, user: str, schema: type[T]) -> T: ...
 
 
+# Backends set `last_usage` after each call: {"input_tokens", "output_tokens", "cost_usd"}.
+# Input counts cached tokens too, so the number is what the node actually sent.
+
+
 class RefusalError(RuntimeError):
     pass
 
@@ -44,6 +48,14 @@ class ClaudeLLM:
             output_config={"effort": self.effort},
             output_format=schema,
         )
+        u = response.usage
+        self.last_usage = {
+            "input_tokens": u.input_tokens
+            + (u.cache_read_input_tokens or 0)
+            + (u.cache_creation_input_tokens or 0),
+            "output_tokens": u.output_tokens,
+            "cost_usd": None,  # the API reports tokens, not dollars
+        }
         if response.stop_reason == "refusal":
             raise RefusalError(str(response.stop_details))
         return response.parsed_output
@@ -63,7 +75,10 @@ class ClaudeCodeLLM:
     Runs with no tools, in an empty temp folder, so the posting cannot make it touch files.
     """
 
-    def __init__(self, model: str = "opus", effort: str = "medium", exe: str | None = None) -> None:
+    def __init__(
+        self, model: str = "opus", effort: str = "medium", exe: str | None = None, timeout: int = 600
+    ) -> None:
+        self.timeout = timeout
         self.exe = exe or shutil.which("claude") or _native_install() or "claude"
         self.model = model
         self.effort = effort
@@ -87,11 +102,27 @@ class ClaudeCodeLLM:
             "--no-session-persistence",
         ]
         with tempfile.TemporaryDirectory() as cwd:
-            proc = subprocess.run(cmd, input=user, capture_output=True, text=True, encoding="utf-8", cwd=cwd)
+            proc = subprocess.run(
+                cmd,
+                input=user,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                cwd=cwd,
+                timeout=self.timeout,
+            )
         if proc.returncode != 0:
             detail = proc.stderr.strip() or proc.stdout[:500]
             raise RuntimeError(f"claude -p failed ({proc.returncode}): {detail}")
         out = json.loads(proc.stdout)
+        u = out.get("usage") or {}
+        self.last_usage = {
+            "input_tokens": (u.get("input_tokens") or 0)
+            + (u.get("cache_read_input_tokens") or 0)
+            + (u.get("cache_creation_input_tokens") or 0),
+            "output_tokens": u.get("output_tokens") or 0,
+            "cost_usd": out.get("total_cost_usd") or 0,
+        }
         if out.get("is_error") or out.get("structured_output") is None:
             raise RefusalError(out.get("result") or out.get("subtype") or "no structured output")
         return schema.model_validate(out["structured_output"])

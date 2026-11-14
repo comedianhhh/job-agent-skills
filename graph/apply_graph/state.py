@@ -9,7 +9,14 @@ from pydantic import BaseModel, Field
 
 class Requirement(BaseModel):
     requirement: str
-    evidence: str | None = Field(description="Quote from facts.md that covers it, or null if nothing does")
+    evidence: str | None = Field(
+        description="Exact text copied from one facts.md line that covers it, or null if nothing does. "
+        "Copy only; no paraphrase, labels, caveats or comments."
+    )
+    note: str | None = Field(
+        default=None,
+        description="Your own caveat or comment (partial match, unconfirmed, closest match only), or null",
+    )
 
 
 class Match(BaseModel):
