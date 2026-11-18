@@ -48,6 +48,10 @@ On failure `ok` is `false`, `items` is empty, and `error` says what happened and
 
 Only retryable codes are worth another attempt. The split and the envelope follow [Agent Reach](https://github.com/Panniantong/Agent-Reach)'s `runtime/result.py`.
 
+### LinkedIn fallback
+
+If `agent-reach` is on `PATH`, a LinkedIn query whose guest search fails with a **retryable** code (`UPSTREAM_BROKEN`, `TIMEOUT`) is retried once as `agent-reach linkedin jobs`. That route uses the user's own signed-in browser through OpenCLI. Both tries show up in `attempts`, items carry `backend: "agent-reach"`, and a `warnings` line says how many results came from the fallback and how many were dropped for being older than `hours`. A `RATE_LIMITED` guest search never switches routes, because LinkedIn is throttling this machine and a second route to the same site makes that worse. If the fallback also fails, the guest search's error is returned, and the fallback's code (e.g. `NEED_LOGIN`) is in `attempts`. `JOBS_MCP_FALLBACK=0` turns the fallback off.
+
 Tool-specific fields sit next to the envelope:
 
 - `get_job`: `items[0]` is the posting.

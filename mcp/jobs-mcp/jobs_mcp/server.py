@@ -23,7 +23,7 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP as MCPServer
 
-from . import boards, rank
+from . import boards, fallback, rank
 from .result import BAD_INPUT, NOT_FOUND, JobsError, attempt, classify, fail, ok
 
 mcp = MCPServer(
@@ -120,7 +120,9 @@ def _linkedin(
     attempts: list[dict[str, Any]],
 ) -> list[boards.Job]:
     """LinkedIn guest search. Partial results (a later page failed) are kept and noted in
-    `warnings`. Raises JobsError when nothing came back."""
+    `warnings`. When the guest search fails with a retryable code and Agent Reach is installed,
+    the same query goes through Agent Reach instead (fallback.py). Raises JobsError when nothing
+    came back; the error is the guest search's, and `attempts` shows every backend tried."""
     partial: list[JobsError] = []
     try:
         jobs = boards.linkedin_guest_jobs(keywords, location, hours, limit, remote_only, failures=partial)
@@ -129,7 +131,22 @@ def _linkedin(
     except Exception as e:
         err = classify(e, "linkedin-guest")
         attempts.append(attempt("linkedin-guest", err))
-        raise err from None
+        exe = fallback.find_agent_reach() if err.retryable else None
+        if exe is None:  # final code (RATE_LIMITED: never switch routes to a throttling site) or no fallback
+            raise err from None
+        try:
+            jobs = fallback.linkedin_jobs(exe, keywords, location, limit)
+        except Exception as fe:
+            attempts.append(attempt(fallback.BACKEND, classify(fe, fallback.BACKEND)))
+            raise err from None
+        attempts.append(attempt(fallback.BACKEND, count=len(jobs)))
+        fresh = [j for j in jobs if boards.newer_than(j, hours)]
+        warnings.append(
+            f"linkedin-guest failed ({err.code}); {len(jobs)} result(s) came from {fallback.BACKEND}, "
+            f"{len(jobs) - len(fresh)} dropped as older than {hours}h"
+            + ("; remote_only was not applied" if remote_only else "")
+        )
+        return fresh
     attempts.append(attempt("linkedin-guest", count=len(jobs)))
     warnings.extend(f"partial result: {p.message}" for p in partial)
     return jobs

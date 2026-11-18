@@ -56,6 +56,14 @@ class MockHTTP:
         return httpx.Client(transport=httpx.MockTransport(self), headers={"User-Agent": "test"})
 
 
+@pytest.fixture(autouse=True)
+def no_agent_reach(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests never shell out to a real agent-reach; test_fallback.py opts back in with a fake."""
+    from jobs_mcp import fallback
+
+    monkeypatch.setattr(fallback, "find_agent_reach", lambda: None)
+
+
 @pytest.fixture
 def mock_http(monkeypatch: pytest.MonkeyPatch) -> MockHTTP:
     m = MockHTTP()
