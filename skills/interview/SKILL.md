@@ -81,6 +81,8 @@ Anything the user will say out loud — a pitch, a background walkthrough, a STA
 
 - Short sentences, contractions, one idea per breath. Spoken connectors are expected: "so", "basically", "the thing I did was", "and then".
 - Open like a person answering ("Sure. So, quick version —"), not with a thesis statement.
+- When the user asks for a pitch or script, hand over one finished version built from the research (the interviewer's own posts, shared history, the company's product names) — not a draft to polish over several rounds. Drill after.
+- Lead with strengths. Don't volunteer limitations or "how I learned it"; answer a direct question truthfully.
 - Order by relevance, not by time. A pitch or "tell me about yourself" leads with the one story closest to this role (the problem + one number), compresses the rest of the background into one sentence, and ends on why them. Never walk the career job by job — that reads as a resume read aloud.
 - No taglines, no parallel slogans, no closing summary line. End on a fact or a one-line "that's what got my attention", then stop.
 - Plain verbs over résumé verbs: swapped / fixed / built / made sure, not replaced / eliminated / architected / ensured.
