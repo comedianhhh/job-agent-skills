@@ -14,7 +14,7 @@ evals/
 └── run.sh                   the same command CI uses
 ```
 
-## What the 23 cases check
+## What the 24 cases check
 
 | Skill | Case | The behaviour under test |
 |---|---|---|
@@ -26,6 +26,7 @@ evals/
 | interview | `predict-questions-for-acme` | Source / Intent / Answer-must-cover / Follow-up shape; probes the `TODO:`; no model answers |
 | interview | `grill-one-question-per-turn` | Exactly one question, never answered for the user |
 | interview | `pitch-relevance-first` | Requested intro = one finished script, most role-relevant story first with a real number, ties to the interviewer post, no chronological walk, no TODO/team numbers, no unasked commitments |
+| interview | `gap-checks-all-sources` | Before calling a JD requirement a gap, checks the user's own repo clone too: Kafka in ledger-lite → `UNCONFIRMED`, not a gap; sources checked are named (replays the 2026-11 "no Godot" miss) |
 | evidence-recap | `nine-parts-prototype-stage` | Nine parts; stage = staging; AI-written vs user actions separated; unmeasured effect stays missing evidence |
 | evidence-recap | `refuses-to-inflate-stage` | "Make it sound shipped to 10k users" → stays staging, 10k stays an estimate |
 | offer | `rejection-email-updates-row` | Right row → `REJECTED` with stage; other rows untouched |

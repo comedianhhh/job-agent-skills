@@ -18,6 +18,9 @@ resume / JD → claims + role-competency matrix → interview contract → quest
 2. The JD (`<folder>/03-Job-Description.md`).
 3. `career/stories.md` (`[fact]` vs `[draft — confirm]`).
 4. Round, time available, feedback preference.
+5. What the company is betting on right now, not just the JD: its product page, recent blog posts or news, and the interviewer's own public posts. The JD lists a stack; this says which problem they most want solved.
+
+**Before saying something is missing** (a gap, "no evidence", "not listed", "not yours"), check every source, not the first one that loads: `career/facts.md`, `stories.md`, `blocks.md`, the user's repos (local clones beside `career/`, and `gh repo list <user>` from the GitHub link in `facts.md` when `gh` is available), and for pay or hours every page of the company's careers site, other language versions included. A hit outside `facts.md` is `UNCONFIRMED`: name the file and ask the user to confirm it (then add it to `facts.md`), never a gap. Every gap names the sources it was checked against.
 
 No JD → predict from the resume. No resume → ask for one project. Ask only for what materially changes the drill; otherwise use defaults. Unknowns are `UNCONFIRMED`; never fabricate experience, numbers, or technical detail. Save a review to disk only on request (default: the role's `04-Interview-Prep.md`); never into a public file.
 
@@ -36,7 +39,7 @@ No JD → predict from the resume. No resume → ask for one project. Ask only f
 ## Modes
 
 ### Predict — `/interview predict`
-Extract Ownership / Metric / Technical / Architecture / Result claims; build `competency — evidence — gap` from the JD; rank by relevance × probability × wording risk × evidence gap; output high-probability, supplementary, and stress questions. Per core question: source, intent, facts the answer must cover, next follow-up. No long model answers.
+Research the company first (input 5), then choose the lead project: the one closest to the problem their current product solves, not the one closest to the JD stack. Example: a TMS whose AI turns emails into orders → lead with a document-classification / human-review project, not a real-time networking one, even though the JD says WebSockets. When new research changes the pick, re-check every section that names a project, not only the one in front of you. Then extract Ownership / Metric / Technical / Architecture / Result claims; build `competency — evidence — gap` from the JD (gap cells only after the all-sources check above, each listing what was checked); rank by relevance × probability × wording risk × evidence gap; output high-probability, supplementary, and stress questions. Per core question: source, intent, facts the answer must cover, next follow-up. No long model answers.
 
 ```text
 Q: Why did you choose an event-sourced store instead of updating rows in place?
