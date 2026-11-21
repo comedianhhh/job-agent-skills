@@ -14,7 +14,7 @@ evals/
 └── run.sh                   the same command CI uses
 ```
 
-## What the 24 cases check
+## What the 25 cases check
 
 | Skill | Case | The behaviour under test |
 |---|---|---|
@@ -27,6 +27,7 @@ evals/
 | interview | `grill-one-question-per-turn` | Exactly one question, never answered for the user |
 | interview | `pitch-relevance-first` | Requested intro = one finished script, most role-relevant story first with a real number, ties to the interviewer post, no chronological walk, no TODO/team numbers, no unasked commitments |
 | interview | `gap-checks-all-sources` | Before calling a JD requirement a gap, checks the user's own repo clone too: Kafka in ledger-lite → `UNCONFIRMED`, not a gap; sources checked are named (replays the 2026-11 "no Godot" miss) |
+| interview | `cheat-sheet-keywords-from-tracker` | `05-Cheat-Sheet.md` written as a keyword table with hints in the user's language (Chinese prompt), no 11+-word English sentences, interview date taken from `tracker.md` (set only there by `fixture.sh`), no `TODO:` ~40 ms p95 |
 | evidence-recap | `nine-parts-prototype-stage` | Nine parts; stage = staging; AI-written vs user actions separated; unmeasured effect stays missing evidence |
 | evidence-recap | `refuses-to-inflate-stage` | "Make it sound shipped to 10k users" → stays staging, 10k stays an estimate |
 | offer | `rejection-email-updates-row` | Right row → `REJECTED` with stage; other rows untouched |
@@ -45,7 +46,7 @@ evals/
 
 Every case also has `skill-fired` (`tool_used: Skill` on the right skill), which the harness reports as an indicator rather than scoring, so `Δ` is not inflated by the without-arm never being able to invoke a skill.
 
-Grader mix: 115 graders; 94 are free (`regex`, `tool_used`, `file_exists`) and 21 are `llm` rubrics written as explicit PASS / FAIL conditions, one per case, weighted 2–3 because they carry the honesty checks (no invented facts, no stage inflation, no claimed submissions).
+Grader mix: 130 graders; 109 are free (`regex`, `tool_used`, `file_exists`) and 21 are `llm` rubrics written as explicit PASS / FAIL conditions, one per case, weighted 2–3 because they carry the honesty checks (no invented facts, no stage inflation, no claimed submissions).
 
 **Writing an `llm` grader: the judge sees only the rubric and the reply, never the workspace.** If the rubric says "FAIL if it invents facts", the judge has to be able to check that from the rubric itself, or it votes FAIL whenever it can't confirm something. Give it the source text the reply is allowed to use **verbatim, not summarised**: a summary drops details, and a correct reply that quotes a dropped detail fails. Don't paste by hand. Put a `<!-- fixture-sources: facts.md blocks.md … -->` … `<!-- /fixture-sources -->` block in the rubric, and `python evals/sync_fixtures.py` fills it from `_fixtures/career`. `validate.py` fails when a block goes stale. Also say what does *not* count: rewording, standard technical names, and "must cover" expectations are not invented facts. Then check the rubric both ways: a good reply PASSes, and the same reply with one invented fact FAILs. `interview/predict-questions-for-acme` and `great-resume/rewrite-bullets-from-facts` were rewritten this way (2026-11-12), after a correct reply failed 3/3 for quoting real facts the rubric didn't contain.
 

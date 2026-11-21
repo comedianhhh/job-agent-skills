@@ -58,6 +58,21 @@ From the ledger: verified / partial / unverified / contradictory claims with the
 ### Retry — `/interview retry`
 Only `partial` / `unverified` / `contradictory` claims; variants and counterfactuals, not repeats; compare evidence with last time; passed claims leave the queue.
 
+### Cheat sheet — `/interview cheatsheet`
+A one-page glance sheet for the last hour before the call, written to `<folder>/05-Cheat-Sheet.md`. It is for scanning, not reading:
+
+- **Keywords, never sentences.** English terms the user should say (project names, numbers with their unit and period, stack, the interviewer's product names), each with a short hint in the user's working language: the language they talk to you in. No full English sentences, no scripted answers; a script turns into reading aloud.
+- **Date and time from `career/tracker.md`** (that row's next step), never from memory or the JD. If the tracker has none, write `TBD — not in tracker` and ask the user.
+- Tables, in this order: interview (company, role, round, date/time, interviewer) → pitch beats (3–5 keywords) → the claims they will probe, each with number / baseline / period → company-specific hooks (from input 5) → questions to ask them → don'ts (team numbers, `TODO:` facts, anything `UNCONFIRMED`).
+- Facts only from `career/facts.md`; a `TODO:` number never appears, not even as a keyword.
+
+```markdown
+| Keyword | 提示 |
+|---|---|
+| webhook + event log | 替掉 cron 轮询；15 min → <30 s（2025-03） |
+| idempotency key + reconciliation | 重复事故 3–4/月 → 0（6 个月） |
+```
+
 ## Claims and what to probe
 
 - **Ownership** — personal scope, what you built by hand, decisions, team split. Project result ≠ personal result.
