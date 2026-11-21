@@ -50,6 +50,18 @@ A failing source does not fail the scan: list each `source_errors` entry under t
 
 If `jobs-mcp` is not available, say so and give the manual URLs (`boards.greenhouse.io/<token>`, `jobs.lever.co/<company>`, `jobs.ashbyhq.com/<org>`).
 
+### Browser sources (Wellfound, Workable, and other logged-in sites)
+
+Some job sites have no public endpoint and show listings only to a signed-in user, so jobs-mcp cannot reach them. For each entry under `browser_sources` in `targets.yaml`, search in the user's own browser (the host's browser tool), where they are already signed in:
+
+1. Open the entry's `url` (a saved search) in a new tab. If a sign-in page, CAPTCHA or verification code appears, stop and ask the user to handle it in that tab; never type a password or code, and never create an account.
+2. Read the result list only: company, role, location, posted, and the posting's URL. Open a posting only to read it for the GAP column. Never click Apply, message a founder or change saved searches or settings from a scan.
+3. Keep to the entry's `max_results` (default 30) and one results page per entry; no infinite scrolling, no bulk opening of tabs.
+4. Apply the same `filters` as the jobs-mcp scan and add the rows to the same `SCAN-<YYYY-MM-DD>.md` table (the URL shows the source). Never re-list a URL already in the tracker or a previous scan.
+5. Close the tabs the scan opened. A source that fails (signed out, layout changed, nothing found) is listed under the table as `source — what happened — what the user can do`, and the rest of the scan continues.
+
+Before adding a browser source, check whether the company also posts on Greenhouse, Lever, Ashby or SmartRecruiters (its careers page usually links the board); if so, add that board to `boards` instead, because jobs-mcp reads it without the browser.
+
 ## Mailbox triage
 
 Use the browser; the user logs in (never handle passwords, MFA, codes). Search by company, "interview", "assessment", "application". Map: received/thank you → `APPLIED`; recruiter call → `SCREEN`; HackerRank/CodeSignal/take-home → `OA`; technical interview → `TECH`; onsite/final → `ONSITE`; offer → `OFFER`; "not moving forward" → `REJECTED`. Copy no email bodies — company, role, status, date, next step only.
