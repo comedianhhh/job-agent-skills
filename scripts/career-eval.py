@@ -174,7 +174,10 @@ def eval_blocks(career: Path, ks: tuple[int, ...] = (10, 20)) -> dict:
     blocks = parse_blocks((career / "blocks.md").read_text(encoding="utf-8"))
     texts = [b["text"] for b in blocks]
     rows = []
-    for folder in sorted(p for p in career.iterdir() if p.is_dir()):
+    # compacted (closed) applications keep their resume + JD under _archive/, and still count
+    archive = career / "_archive"
+    archived = [p for p in archive.iterdir() if p.is_dir()] if archive.is_dir() else []
+    for folder in sorted([p for p in career.iterdir() if p.is_dir()] + archived, key=lambda p: p.name):
         res, jd = folder / "01-Resume.html", folder / "03-Job-Description.md"
         if not (res.exists() and jd.exists()) or folder.name == "application":
             continue
