@@ -1,6 +1,10 @@
-# apply-graph
+# Graphs: apply-graph and prep-graph
 
-The apply track of job-agent-skills (`/job-match` → `/make-resume` → `/job-apply`) as one [LangGraph](https://github.com/langchain-ai/langgraph) state graph, for one posting at a time.
+Two flows, one rule: the model fills nodes, code decides every edge, a person approves what goes out. [prep-graph](#prep-graph) is further down.
+
+## apply-graph
+
+The apply track of job-agent (`/job-match` → `/make-resume` → `/job-apply`) as one [LangGraph](https://github.com/langchain-ai/langgraph) state graph, for one posting at a time.
 
 ```mermaid
 flowchart TD
@@ -82,13 +86,53 @@ Runs go over `career/*/03-Job-Description.md` and stop at the human gate; nothin
 
 Every node run is a span with wall time, model calls, input/output tokens and cost (`build_graph(..., recorder=Recorder())`; `telemetry.py`). Scoreboards in `career/_graph-evals/scores/` show totals by check, which checks flipped since the last score, a pass/fail grid per case, and per-node avg / p95 time and tokens.
 
+## prep-graph
+
+Interview prep for one invite, as a state graph. Rules, each mapped to the function that enforces it: [ACCEPTANCE-prep-graph.md](ACCEPTANCE-prep-graph.md).
+
+```mermaid
+flowchart TD
+    START([invite email]) --> read_invite --> stage_gate
+    stage_gate -- "SCREEN / TECH / ONSITE" --> research
+    stage_gate -- "sentence not in the email" --> confirm_stage{{"confirm_stage<br/><i>a person names the stage</i>"}}
+    stage_gate -- "REJECTED / OA / OFFER: STOPPED" --> verdict
+    confirm_stage --> research
+    research --> plan --> plan_gate
+    plan_gate -- "problems, under 3 tries" --> plan
+    plan_gate -- "gaps not seen yet, 2 rounds at most" --> find_evidence
+    plan_gate -- clean --> verdict
+    find_evidence -- "still open" --> ask_gaps{{"ask_gaps<br/><i>a person answers or confirms</i>"}}
+    find_evidence -- "all found" --> verdict
+    ask_gaps -- answers --> plan
+    ask_gaps -- none --> verdict
+    verdict --> write_prep --> compact{{"compact<br/><i>a person ticks closed folders</i>"}} --> END([END])
+
+    classDef model fill:#e6eefc,stroke:#2f6fdb,color:#1d1d1b
+    classDef code fill:#e3f4ea,stroke:#1f8a4c,color:#1d1d1b
+    classDef human fill:#fbf0dc,stroke:#b7791f,color:#1d1d1b
+    class read_invite,research,plan,find_evidence model
+    class stage_gate,plan_gate,verdict,write_prep code
+    class confirm_stage,ask_gaps,compact human
+```
+
+- **Gates are functions over text** (`apply_graph/gates.py`): the stage sentence must be in the email; research claims are kept only if their quote is in the page; plan quotes must be in `facts.md` (text after `TODO:` is not evidence); pitch numbers go through `check-trace.py`; no "not familiar"; pitch ≤ 170 words; every skill the posting names gets a term.
+- **Search before asking.** Gaps are looked up in `facts.md`, `stories.md` and `blocks.md`; a confirmed `facts.md` hit is filled in by code, a hit elsewhere is proposed for one-click confirm.
+- **Compact** shrinks closed (`REJECTED` / `GHOSTED`) role folders to one line in `career/archive.md`, keeping only the JD and the sent resume under `career/_archive/`, and only for folders a person ticks.
+- Every finished node adds a span (time, tokens) to the state.
+
+```bash
+uv run --no-project prep-graph --invite email.txt --job career/<role>/03-Job-Description.md   --facts career/facts.md --research research.txt --career career --out career/_graph-runs/<run>
+```
+
+Writes `04-Interview-Prep.graph.md` into `--out`; never overwrites a hand-written `04-Interview-Prep.md`.
+
 ## Test
 
 ```bash
 uv run --no-project pytest
 ```
 
-Tests drive every path (approve, trace retry, give up, skip, human redraft, reject, SQLite resume, step history) and the web API (node-by-node SSE, resume over HTTP, bad input) on a scripted fake model against the fictional eval persona in `evals/_fixtures/career/`. No network, no API key.
+Tests drive every path of both graphs (apply: approve, trace retry, give up, skip, human redraft, reject, SQLite resume, step history, the web API; prep: every gate, gap search and re-plans, compact, file safety) on a scripted fake model against the fictional eval persona in `evals/_fixtures/career/`. No network, no API key.
 
 ## Layout
 
@@ -101,3 +145,6 @@ Tests drive every path (approve, trace retry, give up, skip, human redraft, reje
 | `apply_graph/cli.py` | Interactive runner with SQLite checkpoints |
 | `apply_graph/web.py`, `static/index.html` | FastAPI + SSE server and the single-page UI |
 | `apply_graph/history.py` | `changes(graph, config)` and the `apply-graph-history` command |
+| `apply_graph/prep.py`, `prep_state.py`, `prep_cli.py` | prep-graph: nodes, state, the `prep-graph` command |
+| `apply_graph/gates.py` | Every prep-graph gate as a plain function |
+| `apply_graph/compact.py` | Closed applications to one archive line |

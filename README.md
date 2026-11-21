@@ -1,12 +1,20 @@
 # job-agent
 
-The repo was renamed from `job-agent-skills`; the skills still ship on npm as `@alanstill9966/job-agent-skills` and as the `job-agent-skills` plugin. Site and 75-second explainer: https://comedianhhh.github.io/job-agent/
-
 [![CI](https://github.com/comedianhhh/job-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@alanstill9966/job-agent-skills)](https://www.npmjs.com/package/@alanstill9966/job-agent-skills)
 
-A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby, SmartRecruiters and LinkedIn for new postings.
+A job-search agent for coding agents, built for the US and Canadian market. **Site and 75-second explainer: [comedianhhh.github.io/job-agent](https://comedianhhh.github.io/job-agent/)**
 
-It is built around one rule: **every line that goes out traces to a fact you wrote down.** The agent tailors, formats, fills forms, tracks, and drills you for interviews — it never invents a title, a number, or an ownership claim.
+It is built around one rule: **every line that goes out traces to a fact you wrote down.** The agent scans boards, tailors, formats, fills forms, tracks, and preps you for interviews — it never invents a title, a number, or an ownership claim, and where a script can check that, a script does.
+
+Five parts:
+
+- **Skills** — ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`), from `/job-match` to `/interview`.
+- **jobs-mcp** — an MCP server that scans Greenhouse, Lever, Ashby, SmartRecruiters and LinkedIn, with a prompt-injection guard on every posting.
+- **Graphs** — the apply flow and interview prep as LangGraph state graphs: the model writes each step, code decides every edge, a person approves what goes out.
+- **Evals** — 25 cases with 130 graders, run against a no-plugin baseline.
+- **Tracker** — a kanban web app over the same `tracker.md` the skills write.
+
+> The repo was renamed from `job-agent-skills`. The skills still ship on npm as `@alanstill9966/job-agent-skills` and as the `job-agent-skills` plugin, so existing installs keep working.
 
 
 ## What you get
@@ -33,7 +41,14 @@ It is built around one rule: **every line that goes out traces to a fact you wro
 
 **jobs-mcp** — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. No API keys; these are the public endpoints the career pages use. `scan(rank_query=...)` ranks postings against your profile with BM25, plus local embeddings fused by RRF when the optional `rank` extra is installed. Every fetched description goes through the posting guard first (`jobs_mcp/guard.py`): hidden HTML and invisible Unicode are removed, text spelled in tag characters or variation selectors is decoded, instruction-shaped lines are quoted, and the result is attached as `integrity`. Plain tag stripping would have turned hidden text into visible text for the model.
 
-**Evals** (`evals/`) — 22 `claude plugin eval` cases, two per skill plus a prompt-injection case, that check the behaviours that matter (facts never invented, stage never inflated, nothing submitted without confirmation, JD text never obeyed) against a no-plugin baseline. See [evals/README.md](evals/README.md).
+**Graphs** (`graph/`, optional, Python + LangGraph) — two flows where the model fills each node and deterministic code decides every edge:
+
+- **apply-graph** — match → company brief → cover letter → `check-trace.py` gate (up to three drafts) → a human approves at an `interrupt()` → record. A parked run resumes from its SQLite checkpoint in a new process.
+- **prep-graph** — an interview invite → stage gate (the stage sentence must be in the email) → research (claims kept only if their quote is in the page) → plan → plan gate (quotes in `facts.md`, no `TODO:` text as evidence, numbers traced, no "not familiar", pitch ≤ 170 words, every skill the posting names covered) → gaps searched in your own files before you are asked → `READY` / `NOT_READY` → compact (closed applications shrink to one `archive.md` line, only the folders you tick). Rules and the function behind each: [graph/ACCEPTANCE-prep-graph.md](graph/ACCEPTANCE-prep-graph.md).
+
+See [graph/README.md](graph/README.md).
+
+**Evals** (`evals/`) — 25 `claude plugin eval` cases with 130 graders, at least two per skill plus a prompt-injection case, that check the behaviours that matter (facts never invented, stage never inflated, nothing submitted without confirmation, JD text never obeyed) against a no-plugin baseline. See [evals/README.md](evals/README.md).
 
 **Tracker web app** (`web/`) — a kanban over the same `career/tracker.md` the skills write, plus a scan page that runs jobs-mcp against `targets.yaml`. Next.js + FastAPI + Postgres, `docker compose up`. See [web/README.md](web/README.md).
 
@@ -64,7 +79,7 @@ Skills load as `/skill:job-match`, `/skill:offer`, … (or the model picks them 
 Copy `skills/*` into `.claude/skills/` of any project (or `~/.claude/skills/`), and add jobs-mcp to your MCP config:
 
 ```json
-{ "mcpServers": { "jobs-mcp": { "command": "uvx", "args": ["--from", "/path/to/job-agent-skills/mcp/jobs-mcp", "jobs-mcp"] } } }
+{ "mcpServers": { "jobs-mcp": { "command": "uvx", "args": ["--from", "/path/to/job-agent/mcp/jobs-mcp", "jobs-mcp"] } } }
 ```
 
 or `pip install -e mcp/jobs-mcp` and use `"command": "jobs-mcp"`.
@@ -115,7 +130,8 @@ See `templates/career/README.md`.
 - **A second reader.** The drafter does not grade its own draft: `agents/application-reviewer.md` reviews it in a fresh context, read-only, and returns `old`/`new` edits each tied to a `facts.md` section; the drafter checks every source before applying one.
 - **External writes are confirmed.** Submitting an application, opening a PR, sending a message — each is shown and confirmed unless your `answers.yaml` policy says otherwise.
 - **NA specifics.** Letter paper, one page, no photo or personal-data block; hard constraints are work authorization / sponsorship / location / years / band; pipeline is APPLIED → SCREEN → OA → TECH → ONSITE → OFFER; outreach is LinkedIn notes and cold email, not chat openers.
-- **No agent framework.** Skills are Markdown; the MCP server is ~300 lines of Python on `httpx`.
+- **No framework needed for the core.** Skills are Markdown; the MCP server is ~300 lines of Python on `httpx`. LangGraph appears only in the optional `graph/` flows, where checkpoints and human interrupts earn it.
+- **The model writes, code decides.** In the graphs every edge is a plain function over text (`graph/apply_graph/gates.py`): a failed check goes back to the model with its reason, a few tries at most, then to you. A gap is searched for in your files before you are asked, and never papered over.
 - **One skill set, two hosts.** The same `skills/` load as a Claude Code plugin and as a pi package; the pi extension (~100 lines, `@modelcontextprotocol/sdk`) is the only host-specific code. `npm run check` type-checks it, `npm run test:pi` loads it against a fake `ExtensionAPI` and round-trips a `scan` call.
 
 
