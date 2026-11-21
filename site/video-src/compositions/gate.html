@@ -1,0 +1,54 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #g-title { position: absolute; left: 120px; top: 92px; font-size: 112px; }
+    #g-well { position: absolute; left: 120px; right: 120px; top: 300px; height: 640px; padding: 56px 64px; }
+    .g-label { font-family: var(--mono); font-size: 30px; color: var(--muted); }
+    .g-line { position: relative; display: inline-block; margin-top: 20px; font-size: 52px; line-height: 1.25; white-space: nowrap; }
+    .g-num { position: relative; display: inline-block; }
+    .g-box { position: absolute; inset: -6px -10px; border: 2px solid var(--brass); border-radius: 8px; opacity: 0; }
+    #g-strike { position: absolute; left: 0; right: 0; top: 52%; height: 3px; background: var(--muted); transform-origin: left; }
+    #g-scan { position: absolute; top: -12px; bottom: -12px; left: 0; width: 3px; background: var(--brass); opacity: 0; }
+    #g-read1 { margin-top: 20px; font-family: var(--mono); font-size: 32px; color: var(--brass); }
+    #g-new-wrap { margin-top: 64px; }
+    #g-src { display: flex; gap: 24px; align-items: center; margin-top: 24px; }
+    #g-leader { width: 48px; height: 2px; background: var(--rule-2); transform-origin: left; }
+    #g-srctext { font-family: var(--mono); font-size: 30px; color: var(--ink-2); }
+    #g-read2 { margin-top: 28px; font-family: var(--mono); font-size: 32px; color: var(--brass); }
+  </style>
+  <div id="root" data-composition-id="gate" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h2 id="g-title" class="title clip" data-start="0" data-duration="14">a number with no source never ships</h2>
+    <div id="g-well" data-hold class="well bp clip" data-start="0" data-duration="14">
+      <p class="g-label">resume, the model's draft of one line</p>
+      <p class="g-line" id="g-old">improved ingestion throughput by <span class="g-num">80%<span class="g-box" id="g-b1"></span></span> across <span class="g-num">12<span class="g-box" id="g-b2"></span></span> services<span id="g-strike"></span><span id="g-scan"></span></p>
+      <p id="g-read1">check-trace: 2 numbers not in facts.md: 80%, 12</p>
+      <div id="g-new-wrap">
+        <p class="g-line" id="g-new">cut update latency from ~15 minutes to under 30 seconds</p>
+        <div id="g-src"><span id="g-leader"></span><span id="g-srctext">facts.md: reduced median … latency from ~15 minutes to under 30 seconds</span></div>
+        <p id="g-read2">check-trace: clean</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#g-title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.1);
+    tl.fromTo("#g-well", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, 0.2);
+    tl.fromTo("#g-old", { clipPath: "inset(-24px 100% -24px -24px)" }, { clipPath: "inset(-24px 0% -24px -24px)", duration: 2.0, ease: "none" }, 0.8);
+    tl.fromTo("#g-scan", { opacity: 1, x: 0 }, { opacity: 1, x: 1520, duration: 1.05, ease: "power2.inOut", immediateRender: false }, 3.1);
+    tl.set("#g-scan", { opacity: 0 }, 0);
+    tl.to("#g-scan", { opacity: 0, duration: 0.15 }, 4.15);
+    tl.fromTo("#g-b1", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 3.55);
+    tl.fromTo("#g-b2", { opacity: 0 }, { opacity: 1, duration: 0.15 }, 3.85);
+    tl.fromTo("#g-read1", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2 }, 4.3);
+    tl.fromTo("#g-strike", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power2.inOut" }, 6.0);
+    tl.to("#g-old", { color: "oklch(69% 0.026 295)", duration: 0.4 }, 6.1);
+    tl.to(["#g-b1", "#g-b2"], { opacity: 0.35, duration: 0.4 }, 6.1);
+    tl.fromTo("#g-new", { clipPath: "inset(-24px 100% -24px -24px)" }, { clipPath: "inset(-24px 0% -24px -24px)", duration: 1.8, ease: "none" }, 6.7);
+    tl.fromTo("#g-leader", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.inOut" }, 8.7);
+    tl.fromTo("#g-srctext", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 8.9);
+    tl.fromTo("#g-read2", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2 }, 9.8);
+    tl.to(["#g-well", "#g-title"], { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 13.7);
+    window.__timelines["gate"] = tl;
+  </script>
+</template>

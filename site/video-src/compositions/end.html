@@ -1,0 +1,30 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #e-claim { position: absolute; left: 120px; top: 220px; font-size: 128px; max-width: 1600px; }
+    #e-mark { position: absolute; left: 120px; top: 760px; display: flex; align-items: baseline; gap: 48px; }
+    #e-name { font-size: 96px; color: var(--brass); }
+    #e-url { font-family: var(--mono); font-size: 36px; color: var(--ink-2); }
+    #e-rule { position: absolute; left: 120px; right: 120px; top: 700px; height: 1px; background: var(--rule-2); transform-origin: left; }
+  </style>
+  <div id="root" data-composition-id="end" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h2 id="e-claim" class="title clip" data-start="0" data-duration="7">
+      <span class="word">every</span> <span class="word">line</span> <span class="word">that</span> <span class="word">goes</span> <span class="word">out</span><br>
+      <span class="word">traces</span> <span class="word">to</span> <span class="word">a</span> <span class="word">fact</span> <span class="word">you</span> <span class="word">wrote</span> <span class="word">down.</span>
+    </h2>
+    <span id="e-rule" class="clip" data-start="0" data-duration="7"></span>
+    <div id="e-mark" class="clip" data-start="0" data-duration="7">
+      <span id="e-name" class="title">job-agent</span>
+      <span id="e-url">github.com/comedianhhh/job-agent</span>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#e-claim .word", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power4.out", stagger: 0.08 }, 0.2);
+    tl.fromTo("#e-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, 2.6);
+    tl.fromTo("#e-name", { opacity: 0, filter: "blur(10px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "power4.out" }, 3.0);
+    tl.fromTo("#e-url", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 3.3);
+    window.__timelines["end"] = tl;
+  </script>
+</template>

@@ -1,0 +1,37 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #a-title { position: absolute; left: 120px; top: 92px; font-size: 112px; }
+    #a-well { position: absolute; left: 120px; right: 120px; top: 300px; height: 640px; padding: 56px 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px 64px; align-content: start; }
+    .a-field label { display: block; font-size: 30px; color: var(--muted); margin-bottom: 12px; }
+    .a-box { height: 88px; border: 1px solid var(--rule-2); border-radius: 12px; background: var(--paper); padding: 0 28px; display: flex; align-items: center; font-size: 38px; }
+    .a-val { display: inline-block; white-space: nowrap; }
+    #a-foot { grid-column: 1 / -1; display: flex; align-items: center; gap: 40px; margin-top: 24px; }
+    #a-submit { position: relative; height: 88px; padding: 0 56px; border-radius: 999px; border: 1px solid var(--rule-2); display: flex; align-items: center; font-size: 38px; font-weight: 500; }
+    #a-ring { position: absolute; inset: -10px; border: 2px solid var(--brass); border-radius: 999px; opacity: 0; }
+    #a-stop { font-family: var(--mono); font-size: 32px; color: var(--brass); }
+  </style>
+  <div id="root" data-composition-id="apply" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h2 id="a-title" class="title clip" data-start="0" data-duration="6">it fills the form. you send it.</h2>
+    <div id="a-well" class="well bp clip" data-start="0" data-duration="6">
+      <div class="a-field"><label>full name</label><div class="a-box"><span class="a-val" id="a-v1">Jordan Lee</span></div></div>
+      <div class="a-field"><label>email</label><div class="a-box"><span class="a-val" id="a-v2">jordan.lee.dev@example.com</span></div></div>
+      <div class="a-field"><label>work authorization</label><div class="a-box"><span class="a-val" id="a-v3">Canada, no sponsorship needed</span></div></div>
+      <div class="a-field"><label>resume</label><div class="a-box"><span class="a-val" id="a-v4">jordan-lee-backend.pdf</span></div></div>
+      <div id="a-foot"><span id="a-submit">submit application<span id="a-ring"></span></span><span id="a-stop">stopped before submit. you click it.</span></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#a-title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.1);
+    tl.fromTo("#a-well", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, 0.2);
+    ["#a-v1", "#a-v2", "#a-v3", "#a-v4"].forEach((s, i) => {
+      tl.fromTo(s, { clipPath: "inset(-8px 100% -8px -8px)" }, { clipPath: "inset(-8px 0% -8px -8px)", duration: 0.45, ease: "none" }, 0.8 + i * 0.5);
+    });
+    tl.fromTo("#a-ring", { opacity: 0, scale: 1.08 }, { opacity: 1, scale: 1, duration: 0.4, ease: "expo.out" }, 3.2);
+    tl.fromTo("#a-stop", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 3.4);
+    tl.to(["#a-well", "#a-title"], { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 5.7);
+    window.__timelines["apply"] = tl;
+  </script>
+</template>

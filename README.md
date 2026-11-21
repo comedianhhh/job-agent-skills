@@ -1,6 +1,8 @@
-# job-agent-skills
+# job-agent
 
-[![CI](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent-skills/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@alanstill9966/job-agent-skills)](https://www.npmjs.com/package/@alanstill9966/job-agent-skills)
+The repo was renamed from `job-agent-skills`; the skills still ship on npm as `@alanstill9966/job-agent-skills` and as the `job-agent-skills` plugin. Site and 75-second explainer: https://comedianhhh.github.io/job-agent/
+
+[![CI](https://github.com/comedianhhh/job-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/comedianhhh/job-agent/actions/workflows/ci.yml) [![npm](https://img.shields.io/npm/v/@alanstill9966/job-agent-skills)](https://www.npmjs.com/package/@alanstill9966/job-agent-skills)
 
 A job-search workflow for coding agents, built for the US and Canadian market. Ten skills for Claude Code and [pi](https://github.com/earendil-works/pi) (and any agent that reads `SKILL.md`) plus **jobs-mcp**, an MCP server that scans Greenhouse, Lever, Ashby, SmartRecruiters and LinkedIn for new postings.
 
@@ -40,7 +42,7 @@ It is built around one rule: **every line that goes out traces to a fact you wro
 ### As a Claude Code plugin
 
 ```bash
-claude plugin marketplace add comedianhhh/job-agent-skills
+claude plugin marketplace add comedianhhh/job-agent
 claude plugin install job-agent-skills
 ```
 
@@ -52,7 +54,7 @@ jobs-mcp starts through `uvx` (install [uv](https://docs.astral.sh/uv/) if you d
 pi install npm:@alanstill9966/job-agent-skills
 # (0.1.0 was published as the unscoped `job-agent-skills` from an account that is no longer used; it gets no updates)
 # or straight from git:
-pi install git:github.com/comedianhhh/job-agent-skills
+pi install git:github.com/comedianhhh/job-agent
 ```
 
 Skills load as `/skill:job-match`, `/skill:offer`, … (or the model picks them up on its own). pi has no MCP support by design, so the bundled extension ([extensions/jobs-mcp.ts](extensions/jobs-mcp.ts)) starts jobs-mcp over stdio at session start and registers its four tools natively — `list_board_jobs`, `get_job`, `linkedin_search`, `scan`. It needs `uv` on PATH; set `JOBS_MCP_COMMAND=jobs-mcp` to use a `pip install -e mcp/jobs-mcp` install instead. If the server cannot start, pi shows a warning and the skills still load.

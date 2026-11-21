@@ -1,0 +1,44 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #c-title { position: absolute; left: 120px; top: 92px; font-size: 112px; }
+    #c-well { position: absolute; left: 120px; right: 120px; top: 300px; height: 640px; padding: 44px 64px; }
+    #c-head { font-family: var(--mono); font-size: 30px; color: var(--muted); padding-bottom: 16px; border-bottom: 1px solid var(--rule-2); }
+    .c-row { position: relative; display: grid; grid-template-columns: 1fr 520px; align-items: center; height: 64px; border-bottom: 1px solid var(--rule); font-family: var(--mono); font-size: 30px; color: var(--ink-2); }
+    .c-act { color: var(--muted); }
+    .c-keep { color: var(--brass); }
+    .c-strike { position: absolute; left: 0; width: 760px; top: 50%; height: 2px; background: var(--muted); transform-origin: left; }
+    #c-line { position: absolute; left: 64px; right: 64px; top: 250px; font-family: var(--mono); font-size: 32px; color: var(--brass); white-space: nowrap; }
+    #c-sub { position: absolute; left: 64px; top: 330px; font-size: 32px; color: var(--muted); }
+  </style>
+  <div id="root" data-composition-id="compact" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h2 id="c-title" class="title clip" data-start="0" data-duration="9">closed applications shrink to one line</h2>
+    <div id="c-well" data-hold class="well bp clip" data-start="0" data-duration="9">
+      <div id="c-list">
+        <p id="c-head">2026-08-01-closedco-dev/   tracker: rejected</p>
+        <div class="c-row" id="c-r1"><span>01-resume.html</span><span class="c-keep">keep: what was sent</span></div>
+        <div class="c-row" id="c-r2"><span>03-job-description.md</span><span class="c-keep">keep: the posting is gone</span></div>
+        <div class="c-row" id="c-r3"><span>resume.pdf</span><span class="c-act">delete: rebuilt from html</span><span class="c-strike"></span></div>
+        <div class="c-row" id="c-r4"><span>02-cover-letter.md</span><span class="c-act">delete: derived</span><span class="c-strike"></span></div>
+        <div class="c-row" id="c-r5"><span>05-form-answers.md</span><span class="c-act">delete: derived</span><span class="c-strike"></span></div>
+        <div class="c-row" id="c-r6"><span>interview-prep.md</span><span class="c-act">delete: lesson kept</span><span class="c-strike"></span></div>
+      </div>
+      <p id="c-line">- 2026-08-01 | closedco | dev | rejected | lesson: map "rag" to memory-service</p>
+      <p id="c-sub">archive.md. the resume and posting move to _archive/, only after you tick it.</p>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#c-title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.1);
+    tl.fromTo("#c-well", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, 0.2);
+    tl.fromTo(".c-row", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.4, ease: "expo.out", stagger: 0.07 }, 0.5);
+    tl.fromTo(".c-strike", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.inOut", stagger: 0.12 }, 1.7);
+    tl.to(["#c-r3", "#c-r4", "#c-r5", "#c-r6"], { opacity: 0.35, duration: 0.3, stagger: 0.12 }, 1.9);
+    tl.to("#c-list", { opacity: 0, y: -24, filter: "blur(6px)", duration: 0.3, ease: "power3.in" }, 3.0);
+    tl.fromTo("#c-line", { opacity: 0, clipPath: "inset(-8px 100% -8px -8px)" }, { opacity: 1, clipPath: "inset(-8px 0% -8px -8px)", duration: 0.9, ease: "none" }, 3.3);
+    tl.fromTo("#c-sub", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 4.2);
+    tl.to(["#c-well", "#c-title"], { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 8.7);
+    window.__timelines["compact"] = tl;
+  </script>
+</template>

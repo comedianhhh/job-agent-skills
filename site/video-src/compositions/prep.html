@@ -1,0 +1,75 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #p-title { position: absolute; left: 120px; top: 92px; font-size: 112px; }
+    #p-well { position: absolute; left: 120px; right: 120px; top: 300px; height: 680px; }
+    .p-node { position: absolute; width: 270px; height: 88px; border: 1px solid var(--rule-2); border-radius: 12px; background: var(--paper); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 29px; color: var(--muted); }
+    .p-on { position: absolute; inset: -1px; border: 2px solid var(--ink-2); border-radius: 12px; opacity: 0; }
+    .p-tag { position: absolute; left: 0; right: 0; top: 100px; text-align: center; font-family: var(--mono); font-size: 28px; opacity: 0; }
+    .p-pass { color: var(--brass); }
+    .p-fail { color: var(--muted); text-decoration: line-through; }
+    .p-h { position: absolute; height: 2px; background: var(--rule-2); transform-origin: left; }
+    .p-hr { transform-origin: right; }
+    .p-v { position: absolute; width: 2px; background: var(--rule-2); transform-origin: top; }
+    #p-loop { position: absolute; left: 0; top: 0; width: 1680px; height: 680px; overflow: visible; }
+    #p-ready { position: absolute; left: 64px; top: 330px; font-size: 140px; color: var(--brass); }
+    #p-read { position: absolute; left: 64px; right: 64px; top: 580px; height: 50px; border-top: 1px solid var(--rule); padding-top: 18px; }
+    .p-r { position: absolute; left: 0; top: 18px; font-family: var(--mono); font-size: 30px; color: var(--ink-2); opacity: 0; white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="prep" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h2 id="p-title" class="title clip" data-start="0" data-duration="23">the model writes. code decides.</h2>
+    <div id="p-well" class="well bp clip" data-start="0" data-duration="23">
+      <svg id="p-loop" viewBox="0 0 1680 680" aria-hidden="true"><path id="p-loop-path" d="M1449 96 C1449 30 1119 30 1119 96" fill="none" stroke="oklch(80% 0.15 62)" stroke-width="2" stroke-dasharray="420" stroke-dashoffset="420"/></svg>
+      <span class="p-h" id="p-c1" style="left:334px; top:143px; width:60px"></span>
+      <span class="p-h" id="p-c2" style="left:664px; top:143px; width:60px"></span>
+      <span class="p-h" id="p-c3" style="left:994px; top:143px; width:60px"></span>
+      <span class="p-h" id="p-c4" style="left:1324px; top:143px; width:60px"></span>
+      <span class="p-v" id="p-c5" style="left:1519px; top:188px; height:142px"></span>
+      <span class="p-h p-hr" id="p-c6" style="left:1324px; top:373px; width:60px"></span>
+      <span class="p-h p-hr" id="p-c7" style="left:994px; top:373px; width:60px"></span>
+      <div class="p-node" id="p-n1" style="left:64px; top:100px">read_invite<span class="p-on"></span></div>
+      <div class="p-node" id="p-n2" style="left:394px; top:100px">stage_gate<span class="p-on"></span><span class="p-tag p-pass" id="p-t2" data-layout-allow-overflow>pass</span></div>
+      <div class="p-node" id="p-n3" style="left:724px; top:100px">research<span class="p-on"></span></div>
+      <div class="p-node" id="p-n4" style="left:1054px; top:100px">plan<span class="p-on"></span></div>
+      <div class="p-node" id="p-n5" style="left:1384px; top:100px">plan_gate<span class="p-on"></span><span class="p-tag p-fail" id="p-t5a" data-layout-allow-overflow>fail</span><span class="p-tag p-pass" id="p-t5b" data-layout-allow-overflow>pass</span></div>
+      <div class="p-node" id="p-n6" style="left:1384px; top:330px">find_evidence<span class="p-on"></span></div>
+      <div class="p-node" id="p-n7" style="left:1054px; top:330px">ask_gaps<span class="p-on"></span></div>
+      <div class="p-node" id="p-n8" style="left:724px; top:330px">verdict<span class="p-on"></span></div>
+      <span id="p-ready" class="title">ready</span>
+      <div id="p-read">
+        <span class="p-r" id="p-r1">read_invite: screen, "moving you to the next stage"</span>
+        <span class="p-r" id="p-r2">research: claims kept only if their quote is in the page</span>
+        <span class="p-r" id="p-r3">plan_gate: pitch talks itself down: "not familiar"</span>
+        <span class="p-r" id="p-r4">plan: attempt 2, the reason sent back word for word</span>
+        <span class="p-r" id="p-r5">find_evidence: 3 gaps found in facts.md, filled in by code</span>
+        <span class="p-r" id="p-r6">ask_gaps: 1 question for you, nothing invented</span>
+        <span class="p-r" id="p-r7">verdict: 0 problems, 0 gaps</span>
+      </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    const on = (n, t) => { tl.fromTo(`${n} .p-on`, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power2.out" }, t); tl.fromTo(n, { color: "oklch(69% 0.026 295)" }, { color: "oklch(96% 0.01 300)", duration: 0.25 }, t); };
+    const line = (c, t) => tl.fromTo(c, { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power2.inOut" }, t);
+    const read = (r, t, end) => { tl.fromTo(r, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2 }, t); tl.to(r, { opacity: 0, duration: 0.15, ease: "power3.in" }, end); };
+    tl.fromTo("#p-title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.1);
+    tl.fromTo("#p-well", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, 0.2);
+    on("#p-n1", 0.8); read("#p-r1", 0.9, 3.9);
+    line("#p-c1", 3.0); on("#p-n2", 3.3); tl.fromTo("#p-t2", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 3.5);
+    line("#p-c2", 3.9); on("#p-n3", 4.2); read("#p-r2", 4.2, 7.2);
+    line("#p-c3", 5.6); on("#p-n4", 5.9);
+    line("#p-c4", 6.6); on("#p-n5", 6.9); tl.fromTo("#p-t5a", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 7.1); read("#p-r3", 7.3, 10.3);
+    tl.fromTo("#p-loop-path", { strokeDashoffset: 420 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 9.6);
+    read("#p-r4", 10.4, 13.4);
+    tl.to("#p-t5a", { opacity: 0, duration: 0.15 }, 11.2); tl.fromTo("#p-t5b", { opacity: 0 }, { opacity: 1, duration: 0.2 }, 11.4);
+    tl.to("#p-loop-path", { opacity: 0.35, duration: 0.3 }, 11.4);
+    tl.fromTo("#p-c5", { scaleY: 0 }, { scaleY: 1, duration: 0.35, ease: "power2.inOut" }, 12.8);
+    on("#p-n6", 13.1); read("#p-r5", 13.5, 16.5);
+    line("#p-c6", 15.6); on("#p-n7", 15.9); read("#p-r6", 16.6, 19.6);
+    line("#p-c7", 18.8); on("#p-n8", 19.1); read("#p-r7", 19.7, 22.6);
+    tl.fromTo("#p-ready", { opacity: 0, filter: "blur(10px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "power4.out" }, 19.7);
+    tl.to(["#p-well", "#p-title"], { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 22.7);
+    window.__timelines["prep"] = tl;
+  </script>
+</template>

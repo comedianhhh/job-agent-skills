@@ -1,0 +1,43 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #m-title { position: absolute; left: 120px; top: 92px; font-size: 112px; }
+    #m-table { position: absolute; left: 120px; right: 120px; top: 300px; padding: 24px 48px; }
+    .m-head { display: grid; grid-template-columns: 760px 1fr; height: 72px; align-items: center; font-size: 30px; color: var(--muted); border-bottom: 1px solid var(--rule-2); }
+    .m-row { position: relative; display: grid; grid-template-columns: 760px 1fr; height: 120px; align-items: center; border-bottom: 1px solid var(--rule); font-size: 40px; }
+    .m-ev { font-family: var(--mono); font-size: 32px; color: var(--ink-2); text-transform: lowercase; }
+    .m-gap { color: var(--muted); }
+    .m-line { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; background: var(--brass); transform-origin: left; }
+    #m-verdict { position: absolute; left: 120px; top: 880px; display: flex; align-items: baseline; gap: 40px; }
+    #m-apply { font-size: 128px; color: var(--brass); }
+    #m-why { font-family: var(--mono); font-size: 30px; color: var(--ink-2); }
+  </style>
+  <div id="root" data-composition-id="match" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h2 id="m-title" class="title clip" data-start="0" data-duration="10">match before you write a word</h2>
+    <div id="m-table" class="well bp clip" data-start="0" data-duration="10">
+      <div class="m-head"><span>the posting asks</span><span>facts.md says</span></div>
+      <div class="m-row"><span>backend services in c#, java or python</span><span class="m-ev" id="m-e1">c# / .net 8, asp.net core</span><span class="m-line" id="m-l1"></span></div>
+      <div class="m-row"><span>production postgresql</span><span class="m-ev" id="m-e2">append-only event log in postgresql</span><span class="m-line" id="m-l2"></span></div>
+      <div class="m-row"><span>kafka, kubernetes (nice to have)</span><span class="m-ev m-gap" id="m-e3">gap: nothing in facts.md</span></div>
+    </div>
+    <div id="m-verdict" data-hold class="clip" data-start="0" data-duration="10">
+      <span id="m-apply" class="title">apply</span>
+      <span id="m-why">hard constraints met: authorized in canada, toronto. one nice-to-have missing.</span>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#m-title", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.1);
+    tl.fromTo("#m-table", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" }, 0.2);
+    [["#m-e1", "#m-l1", 1.2], ["#m-e2", "#m-l2", 2.2]].forEach(([e, l, t]) => {
+      tl.fromTo(l, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "power2.inOut" }, t);
+      tl.fromTo(e, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, t + 0.35);
+    });
+    tl.fromTo("#m-e3", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 3.4);
+    tl.fromTo("#m-apply", { opacity: 0, filter: "blur(10px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "power4.out" }, 4.4);
+    tl.fromTo("#m-why", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 4.8);
+    tl.to(["#m-table", "#m-verdict", "#m-title"], { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 9.7);
+    window.__timelines["match"] = tl;
+  </script>
+</template>
