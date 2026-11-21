@@ -4,8 +4,9 @@ on:
   push:
     branches: [main]
     paths: ["mcp/jobs-mcp/**", "graph/**", "web/**", "evals/**", "skills/**", "agents/**", "extensions/**", "tests/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
+  # every pull request runs CI, so the required checks on main always report (a path filter here
+  # would leave a docs-only PR waiting for checks that never start)
   pull_request:
-    paths: ["mcp/jobs-mcp/**", "graph/**", "web/**", "evals/**", "skills/**", "agents/**", "extensions/**", "tests/**", "scripts/**", "package.json", "package-lock.json", "tsconfig.json", ".github/workflows/ci.yml"]
 
 jobs:
   jobs-mcp:
