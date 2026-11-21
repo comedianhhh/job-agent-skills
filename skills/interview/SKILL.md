@@ -1,6 +1,6 @@
 ---
 name: interview
-description: Resume- and JD-driven interview prediction, mock interview with contract-based follow-up questioning, evidence review, and weak-spot retry, structured around North American rounds (recruiter screen, OA, technical, system design, behavioral). Use when the user types /interview, asks to predict questions, run a mock or stress interview, drill a resume claim, practise system design or STAR answers, or check how well they can defend what the resume says.
+description: Resume- and JD-driven interview prediction, mock interview with contract-based follow-up questioning, evidence review, and weak-spot retry, structured around North American rounds (recruiter screen, OA, technical, system design, behavioral). Use when the user types /interview, asks to prepare for an upcoming interview or predict questions, run a mock or stress interview, drill a resume claim, practise system design or STAR answers, or check how well they can defend what the resume says.
 ---
 
 # /interview — Interrogate the resume
@@ -39,7 +39,18 @@ No JD → predict from the resume. No resume → ask for one project. Ask only f
 ## Modes
 
 ### Predict — `/interview predict`
-Research the company first (input 5), then choose the lead project: the one closest to the problem their current product solves, not the one closest to the JD stack. Example: a TMS whose AI turns emails into orders → lead with a document-classification / human-review project, not a real-time networking one, even though the JD says WebSockets. When new research changes the pick, re-check every section that names a project, not only the one in front of you. Then extract Ownership / Metric / Technical / Architecture / Result claims; build `competency — evidence — gap` from the JD (gap cells only after the all-sources check above, each listing what was checked); rank by relevance × probability × wording risk × evidence gap; output high-probability, supplementary, and stress questions. Per core question: source, intent, facts the answer must cover, next follow-up. No long model answers.
+**Core pass first: it is the first section of any prep, before the claim matrix.** Finding the research is not the same as analysing it, and analysing it is not the same as being able to say it.
+
+1. **What they sell**, in one sentence.
+2. **The technique the product runs on**, 2–3 items. Example: an assistant that answers from insurers' manuals with citations → retrieval (RAG), citation, refusing when the evidence is thin.
+3. **The 3 core JD requirements**: only three, not the whole list.
+4. **What the interviewer writes about**: their recent posts, talks, the company blog. A topic they wrote about themselves is close to a certain question.
+
+Turn these into the **3–5 core questions**, phrased "How would you build X?", ranked by likelihood. Even a founder or CEO screen usually asks one of them. For each, rate the user's evidence after the all-sources check: 🟢 built it (name the project and number), 🟡 built something close (approach first, then the closest project), 🔴 not built (a truthful bridge answer: "I haven't shipped that exact thing, but here's how I'd approach it… the closest I've built is X"). A 🔴 answer never ends at "I'm not familiar with it". Each core question gets a 30-second spoken answer (steps + the user's project + one number) and one likely follow-up. Listing a project in a matrix row is not preparation for the question.
+
+Fixed questions are written so each stands alone, since the self-intro is often skipped when the interviewer already read the resume: why are you leaving (ending on why them), tell me about yourself, why this company.
+
+Then choose the lead project: the one closest to the problem their current product solves, not the one closest to the JD stack. Example: a TMS whose AI turns emails into orders → lead with a document-classification / human-review project, not a real-time networking one, even though the JD says WebSockets. When new research changes the pick, re-check every section that names a project, not only the one in front of you. Then extract Ownership / Metric / Technical / Architecture / Result claims; build `competency — evidence — gap` from the JD (gap cells only after the all-sources check above, each listing what was checked); rank by relevance × probability × wording risk × evidence gap; output high-probability, supplementary, and stress questions. Per core question: source, intent, facts the answer must cover, next follow-up. No long model answers.
 
 ```text
 Q: Why did you choose an event-sourced store instead of updating rows in place?
@@ -50,10 +61,12 @@ Follow-up: what breaks first at 10× the event volume?
 ```
 
 ### Grill — `/interview grill`
-Build the contract ([references/interview-contract-and-session.md](references/interview-contract-and-session.md)); lock a scoring contract before each question ([references/question-and-scoring-contract.md](references/question-and-scoring-contract.md)); **one question per turn**; dig / clarify / step down / switch / end based on evidence; feedback per policy (immediate = training, deferred = realistic); keep the ledger. Scenario or system design → [references/scenario-interviews.md](references/scenario-interviews.md). Never give the answer before the user answers; hints only as agreed, never project facts.
+Ask the core questions from Predict first, then the fixed ones; prep is not done until the user can answer every core question out loud, without notes, in about 40 seconds. Build the contract ([references/interview-contract-and-session.md](references/interview-contract-and-session.md)); lock a scoring contract before each question ([references/question-and-scoring-contract.md](references/question-and-scoring-contract.md)); **one question per turn**; dig / clarify / step down / switch / end based on evidence; feedback per policy (immediate = training, deferred = realistic); keep the ledger. Scenario or system design → [references/scenario-interviews.md](references/scenario-interviews.md). Never give the answer before the user answers; hints only as agreed, never project facts.
 
 ### Review — `/interview review`
 From the ledger: verified / partial / unverified / contradictory claims with the answer evidence; what needs a fact, knowledge, or toned-down wording; the two follow-ups most likely to expose the user; prioritised actions. No total score. Template: [references/review-and-retry.md](references/review-and-retry.md).
+
+After a real interview, debrief the same day: the questions actually asked and where the user got stuck go into the tracker row, and each stuck question gets a 30-second answer the same day, so it is ready for the next company.
 
 ### Retry — `/interview retry`
 Only `partial` / `unverified` / `contradictory` claims; variants and counterfactuals, not repeats; compare evidence with last time; passed claims leave the queue.
@@ -63,7 +76,7 @@ A one-page glance sheet for the last hour before the call, written to `<folder>/
 
 - **Keywords, never sentences.** English terms the user should say (project names, numbers with their unit and period, stack, the interviewer's product names), each with a short hint in the user's working language: the language they talk to you in. No full English sentences, no scripted answers; a script turns into reading aloud.
 - **Date and time from `career/tracker.md`** (that row's next step), never from memory or the JD. If the tracker has none, write `TBD — not in tracker` and ask the user.
-- Tables, in this order: interview (company, role, round, date/time, interviewer) → pitch beats (3–5 keywords) → the claims they will probe, each with number / baseline / period → company-specific hooks (from input 5) → questions to ask them → don'ts (team numbers, `TODO:` facts, anything `UNCONFIRMED`).
+- Tables, in this order: interview (company, role, round, date/time, interviewer) → core questions from Predict (per question: the steps as keywords + project + number) → why leaving / why them → pitch beats (3–5 keywords) → the claims they will probe, each with number / baseline / period → company-specific hooks (from input 5) → questions to ask them → don'ts (team numbers, `TODO:` facts, anything `UNCONFIRMED`).
 - Facts only from `career/facts.md`; a `TODO:` number never appears, not even as a keyword.
 
 ```markdown
