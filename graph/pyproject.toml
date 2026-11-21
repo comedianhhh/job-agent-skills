@@ -21,6 +21,7 @@ apply-graph = "apply_graph.cli:main"
 apply-graph-web = "apply_graph.web:main"
 apply-graph-history = "apply_graph.history:main"
 apply-graph-eval = "apply_graph.evalrun:main"
+prep-graph = "apply_graph.prep_cli:main"
 
 [build-system]
 requires = ["hatchling"]
