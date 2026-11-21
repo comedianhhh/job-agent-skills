@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>job-agent: a job search that never invents</title>
+<meta name="description" content="Open-source skills, an MCP server and LangGraph flows for coding agents. Every line that goes out traces to a fact you wrote down.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist:wght@400;500&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav-wrap">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="#top" aria-label="job-agent, back to top">job-agent</a>
+    <ul class="nav__links">
+      <li><a href="#loop">the loop</a></li>
+      <li><a href="#gate">the gate</a></li>
+      <li><a href="#runs">runs on</a></li>
+    </ul>
+    <a class="btn btn--quiet btn--nav" href="#install">install</a>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <h1>a job agent that never <span class="verb">invents</span></h1>
+        <p class="lead">Every line it sends traces to a fact you wrote down.</p>
+        <div class="cmd" aria-label="Install command">
+          <code id="cmd-hero">claude plugin marketplace add comedianhhh/job-agent</code>
+          <button class="btn btn--primary" type="button" data-copy="cmd-hero">copy</button>
+        </div>
+        <a class="textlink" href="https://github.com/comedianhhh/job-agent">read the code on github</a>
+      </div>
+      <figure class="hero__film" data-loop>
+        <div class="film" data-slot="film" data-kind="product" data-alt="The job-agent explainer: one posting from scan to prep">
+          <video muted loop playsinline preload="metadata" poster="media/poster.jpg" width="1920" height="1080" aria-label="Explainer: one example posting goes from scan to match, a resume gate, the form, interview prep and the archive">
+            <source src="media/job-agent.webm" type="video/webm">
+            <source src="media/job-agent.mp4" type="video/mp4">
+          </video>
+        </div>
+        <figcaption><span>75 seconds, silent, demo data</span><button class="btn btn--quiet btn--small" type="button" data-loop-toggle>pause</button></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="figures" aria-label="What is in the repo">
+    <div class="container">
+      <dl class="stats">
+        <div><dt>skills for the search</dt><dd>10</dd></div>
+        <div><dt>jobs-mcp tools</dt><dd>4</dd></div>
+        <div><dt>job sources scanned</dt><dd>5</dd></div>
+        <div><dt>eval cases against a baseline</dt><dd>22</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="loop" id="loop">
+    <div class="container">
+      <div class="head split">
+        <h2>one posting, start to finish</h2>
+        <p class="lead">Five steps, each with what it really prints. Demo persona, example posting.</p>
+      </div>
+      <div class="switch" data-switch>
+        <div class="tabs" role="tablist" aria-label="Steps">
+          <button role="tab" id="t-scan" aria-controls="p-scan" aria-selected="true">scan</button>
+          <button role="tab" id="t-match" aria-controls="p-match" aria-selected="false" tabindex="-1">match</button>
+          <button role="tab" id="t-resume" aria-controls="p-resume" aria-selected="false" tabindex="-1">resume</button>
+          <button role="tab" id="t-apply" aria-controls="p-apply" aria-selected="false" tabindex="-1">apply</button>
+          <button role="tab" id="t-prep" aria-controls="p-prep" aria-selected="false" tabindex="-1">prep</button>
+        </div>
+        <div class="panel" role="tabpanel" id="p-scan" aria-labelledby="t-scan">
+          <p class="panel__line">One schema for five sources, no API keys. Every posting passes a prompt-injection guard first.</p>
+          <table class="well">
+            <thead><tr><th scope="col">source</th><th scope="col">read through</th></tr></thead>
+            <tbody>
+              <tr><td>Greenhouse</td><td class="mono">the public board endpoint</td></tr>
+              <tr><td>Lever</td><td class="mono">the public board endpoint</td></tr>
+              <tr><td>Ashby</td><td class="mono">the public board endpoint</td></tr>
+              <tr><td>SmartRecruiters</td><td class="mono">the public postings endpoint</td></tr>
+              <tr><td>LinkedIn</td><td class="mono">guest search</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel" role="tabpanel" id="p-match" aria-labelledby="t-match" hidden>
+          <p class="panel__line">Each requirement gets the facts.md line that covers it, or a gap. Then apply or skip.</p>
+          <table class="well">
+            <thead><tr><th scope="col">the posting asks</th><th scope="col">facts.md says</th></tr></thead>
+            <tbody>
+              <tr><td>backend services in C#, Java or Python</td><td class="mono">C# / .NET 8, ASP.NET Core</td></tr>
+              <tr><td>production PostgreSQL</td><td class="mono">append-only event log in PostgreSQL</td></tr>
+              <tr><td>Kafka, Kubernetes (nice to have)</td><td class="mono muted">gap</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="panel" role="tabpanel" id="p-resume" aria-labelledby="t-resume" hidden>
+          <p class="panel__line">The draft passes three gates before export: traced numbers, one page, an ATS-readable text layer.</p>
+          <pre class="well blueprint"><code>check-trace: 1 file(s), 0 marker(s), 2 untraced number(s)</code></pre>
+        </div>
+        <div class="panel" role="tabpanel" id="p-apply" aria-labelledby="t-apply" hidden>
+          <p class="panel__line">It fills the form from your answers file and stops before Submit. You send it.</p>
+          <pre class="well blueprint"><code>full name           Jordan Lee
+work authorization  Canada, no sponsorship needed
+resume              jordan-lee-backend.pdf
+submit              waiting for you</code></pre>
+        </div>
+        <div class="panel" role="tabpanel" id="p-prep" aria-labelledby="t-prep" hidden>
+          <p class="panel__line">An invite starts prep-graph: research, a plan, code checks, questions only where your files are silent.</p>
+          <pre class="well blueprint"><code>stage_gate: verified
+plan_gate: 1 problem(s)
+find_evidence: 3 new gap(s): 3 in facts.md
+verdict: READY (0 reason(s))</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gate" id="gate">
+    <div class="container">
+      <h2>a number with no source never ships</h2>
+      <div class="ba">
+        <div class="ba__side">
+          <p class="ba__label">the model’s draft</p>
+          <p class="ba__line ba__line--out">Improved ingestion throughput by <mark>80%</mark> across <mark>12</mark> services.</p>
+        </div>
+        <div class="ba__side">
+          <p class="ba__label">what ships</p>
+          <p class="ba__line">Cut update latency from ~15 minutes to under 30 seconds.</p>
+          <p class="ba__src mono">facts.md: reduced median … latency from ~15 minutes to under 30 seconds</p>
+        </div>
+      </div>
+      <pre class="well blueprint terminal"><code>$ python scripts/check-trace.py --facts facts.md resume-lines.md
+UNTRACED  resume-lines.md  80%  ...Improved ingestion throughput by 80% across 12 services...
+UNTRACED  resume-lines.md  12   ...Improved ingestion throughput by 80% across 12 services...
+check-trace: 1 file(s), 0 marker(s), 2 untraced number(s)</code></pre>
+    </div>
+  </section>
+
+  <section class="graph band">
+    <div class="container">
+      <div class="head split">
+        <h2>the model writes, code decides</h2>
+        <p class="lead">A failed check goes back to the model word for word, three tries.</p>
+      </div>
+      <figure class="diagram well blueprint" aria-label="Diagram of prep-graph: read the invite, check the stage, research, plan, check the plan, search your files, ask you, verdict">
+        <ol class="path">
+          <li>read_invite</li><li class="gate-node">stage_gate</li><li>research</li><li>plan</li><li class="gate-node">plan_gate</li><li>find_evidence</li><li class="ask-node">ask_gaps</li><li class="gate-node">verdict</li>
+        </ol>
+        <figcaption>Brass nodes are code. The dashed one asks you.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="runs" id="runs">
+    <div class="container rows">
+      <h2>runs where your agent runs</h2>
+      <dl>
+        <div><dt>Claude Code</dt><dd>A plugin: ten skills and jobs-mcp, started through uvx.</dd></div>
+        <div><dt>pi</dt><dd>An npm package; an extension starts jobs-mcp over stdio.</dd></div>
+        <div><dt>Any agent that reads SKILL.md</dt><dd>Copy the skills folder and add jobs-mcp to your MCP config.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="close" id="install">
+    <div class="container close__grid">
+      <div>
+        <h2>install it</h2>
+        <div class="cmd cmd--stack" aria-label="Install commands for Claude Code">
+          <code id="cmd-close">claude plugin marketplace add comedianhhh/job-agent
+claude plugin install job-agent-skills</code>
+          <button class="btn btn--quiet" type="button" data-copy="cmd-close">copy both</button>
+        </div>
+        <p class="close__note">Then run <code>/career-init</code>. It writes your facts.md with you.</p>
+      </div>
+      <div class="close__shot" data-slot="close" data-kind="product" data-alt="The prep graph at ready, from the explainer">
+        <img src="media/ready.jpg" width="1920" height="1080" alt="The prep graph with every node lit and the verdict ready" loading="lazy">
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container footer__grid">
+    <a class="wordmark wordmark--foot" href="#top" aria-label="job-agent, back to top">job-agent</a>
+    <div>
+      <h3>repo</h3>
+      <ul>
+        <li><a href="https://github.com/comedianhhh/job-agent/tree/main/skills">skills</a></li>
+        <li><a href="https://github.com/comedianhhh/job-agent/tree/main/mcp">jobs-mcp</a></li>
+        <li><a href="https://github.com/comedianhhh/job-agent/tree/main/graph">graphs</a></li>
+        <li><a href="https://github.com/comedianhhh/job-agent/tree/main/evals">evals</a></li>
+        <li><a href="https://github.com/comedianhhh/job-agent/tree/main/web">tracker</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>read</h3>
+      <ul>
+        <li><a href="https://github.com/comedianhhh/job-agent#readme">readme</a></li>
+        <li><a href="https://github.com/comedianhhh/job-agent/blob/main/graph/ACCEPTANCE-prep-graph.md">gate rules</a></li>
+        <li><a href="https://www.npmjs.com/package/@alanstill9966/job-agent-skills">npm package</a></li>
+      </ul>
+    </div>
+    <p class="footer__legal">MIT licence. Built by Nianzhi (Alan) Li.</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
+  const text = document.getElementById(b.dataset.copy).textContent;
+  try { await navigator.clipboard.writeText(text); b.textContent = 'copied'; } catch { b.textContent = 'select and copy'; }
+  setTimeout(() => { b.textContent = b.dataset.copy === 'cmd-close' ? 'copy both' : 'copy'; }, 1600);
+}));
+document.querySelectorAll('[data-switch]').forEach((sw) => {
+  const tabs = [...sw.querySelectorAll('[role=tab]')];
+  const show = (t) => { tabs.forEach((x) => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; document.getElementById(x.getAttribute('aria-controls')).hidden = !on; }); };
+  tabs.forEach((t, i) => { t.addEventListener('click', () => show(t)); t.addEventListener('keydown', (e) => { const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (d) { const n = tabs[(i + d + tabs.length) % tabs.length]; show(n); n.focus(); } }); });
+});
+document.querySelectorAll('[data-loop]').forEach((el) => {
+  const btn = el.querySelector('[data-loop-toggle]');
+  const s = { seen: false, hover: false, focus: false, held: matchMedia('(prefers-reduced-motion: reduce)').matches };
+  const sync = () => {
+    const run = s.seen && !s.hover && !s.focus && !s.held;
+    el.classList.toggle('is-running', run);
+    el.querySelectorAll('video').forEach((v) => (run ? v.play().catch(() => {}) : v.pause()));
+    btn.textContent = s.held ? 'play' : 'pause';
+  };
+  btn.addEventListener('click', () => { s.held = !s.held; sync(); });
+  [['pointerenter', 'hover', true], ['pointerleave', 'hover', false], ['focusin', 'focus', true], ['focusout', 'focus', false]].forEach(([t, k, v]) => el.addEventListener(t, () => { s[k] = v; sync(); }));
+  new IntersectionObserver(([e]) => { s.seen = e.isIntersecting; sync(); }).observe(el);
+});
+</script>
+<script>window.hallmarkSlots = (m) => { for (const [k, v] of Object.entries(m)) { const s = document.querySelector(`[data-slot="${k}"]`); if (!s) continue; const im = new Image(); im.src = typeof v === 'string' ? v : v.src; im.alt = (typeof v === 'object' && v.alt) || s.dataset.alt || ''; s.querySelectorAll(':scope > img').forEach((o) => o.remove()); s.prepend(im); } };
+document.querySelectorAll('[data-slot] img').forEach((i) => { if (i.complete && !i.naturalWidth) i.remove(); else i.addEventListener('error', () => i.remove(), { once: true }); });</script>
+</body>
+</html>

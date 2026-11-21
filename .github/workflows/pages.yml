@@ -1,0 +1,38 @@
+name: pages
+
+# Publishes site/ (the landing page and its video) to GitHub Pages.
+# The video's source (site/video-src) stays in the repo but is not deployed.
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the page folder
+        run: |
+          mkdir -p _site
+          cp site/index.html site/styles.css site/tokens.css site/base.css _site/
+          cp -r site/media _site/media
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

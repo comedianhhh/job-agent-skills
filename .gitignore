@@ -19,3 +19,10 @@ evals/**/results/
 node_modules/
 .verify/
 *.tgz
+
+# site build output
+site/video-src/renders/
+site/video-src/.hyperframes/
+.hallmark/
+site/.hallmark/
+site/video-src/.thumbnails/

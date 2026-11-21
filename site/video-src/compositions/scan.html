@@ -1,0 +1,48 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #scan-title { position: absolute; left: 120px; top: 92px; font-size: 112px; }
+    #scan-well { position: absolute; left: 120px; right: 120px; top: 300px; height: 660px; overflow: hidden; }
+    #scan-feed { position: absolute; left: 0; right: 0; top: 0; }
+    .scan-row { display: grid; grid-template-columns: 1fr 420px 300px; align-items: center; height: 96px; padding: 0 48px; border-bottom: 1px solid var(--rule); font-size: 40px; }
+    .scan-row .co { color: var(--muted); }
+    .scan-row .src { font-family: var(--mono); font-size: 30px; color: var(--muted); text-align: right; }
+    #scan-pick { position: relative; }
+    #scan-ring { position: absolute; inset: 0; border: 2px solid var(--brass); border-radius: 12px; opacity: 0; }
+    #scan-note { position: absolute; left: 120px; top: 990px; }
+  </style>
+  <div id="root" data-composition-id="scan" data-width="1920" data-height="1080">
+    <div class="scene-bg"></div>
+    <h1 id="scan-title" class="title clip" data-start="0" data-duration="6">
+      <span class="word" id="scan-w1">one posting.</span>
+      <span class="word" id="scan-w2">every line checked.</span>
+    </h1>
+    <div id="scan-well" class="well bp clip" data-start="0" data-duration="6">
+      <div id="scan-feed" data-layout-allow-overflow data-layout-allow-occlusion>
+        <div class="scan-row"><span>data platform engineer</span><span class="co">harbor ledger</span><span class="src">greenhouse</span></div>
+        <div class="scan-row"><span>full stack engineer, maps</span><span class="co">northline maps</span><span class="src">lever</span></div>
+        <div class="scan-row"><span>platform engineer</span><span class="co">quarry health</span><span class="src">ashby</span></div>
+        <div class="scan-row"><span>software engineer ii</span><span class="co">pallet systems</span><span class="src">smartrecruiters</span></div>
+        <div class="scan-row"><span>site reliability engineer</span><span class="co">example freight co</span><span class="src">linkedin</span></div>
+        <div class="scan-row"><span>ml engineer, search</span><span class="co">harbor ledger</span><span class="src">greenhouse</span></div>
+        <div class="scan-row" id="scan-pick"><span>backend engineer, payments events</span><span class="co">tidewater pay</span><span class="src" id="scan-src">ashby</span><span id="scan-ring"></span></div>
+        <div class="scan-row"><span>frontend engineer</span><span class="co">northline maps</span><span class="src">lever</span></div>
+        <div class="scan-row"><span>staff engineer, billing</span><span class="co">pallet systems</span><span class="src">greenhouse</span></div>
+        <div class="scan-row"><span>developer advocate</span><span class="co">quarry health</span><span class="src">linkedin</span></div>
+      </div>
+    </div>
+    <p id="scan-note" class="mono muted clip" data-start="0" data-duration="6">jobs-mcp: greenhouse, lever, ashby, smartrecruiters, linkedin. example data.</p>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#scan-feed", { y: 0 }, { y: -296, duration: 3.0, ease: "power2.inOut" }, 0);
+    tl.fromTo("#scan-feed > div:nth-of-type(-n+3)", { opacity: 1 }, { opacity: 0, duration: 0.6, ease: "power2.in", stagger: 0.25 }, 1.6);
+    tl.set("#scan-w1", { opacity: 1 }, 0);
+    tl.fromTo("#scan-ring", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 3.1);
+    tl.fromTo("#scan-src", { color: "oklch(69% 0.026 295)" }, { color: "oklch(80% 0.15 62)", duration: 0.3 }, 3.1);
+    tl.fromTo("#scan-w2", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 3.5);
+    tl.fromTo("#scan-note", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.6);
+    tl.to("#scan-well", { opacity: 0, filter: "blur(8px)", duration: 0.22, ease: "power3.in" }, 5.7);
+    window.__timelines["scan"] = tl;
+  </script>
+</template>

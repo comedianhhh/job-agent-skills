@@ -8,10 +8,10 @@
     "name": "Nianzhi (Alan) Li",
     "url": "https://github.com/comedianhhh"
   },
-  "homepage": "https://github.com/comedianhhh/job-agent-skills",
+  "homepage": "https://github.com/comedianhhh/job-agent",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/comedianhhh/job-agent-skills.git"
+    "url": "git+https://github.com/comedianhhh/job-agent.git"
   },
   "keywords": [
     "pi-package",

@@ -1,0 +1,33 @@
+@font-face { font-family: "Instrument Serif"; src: url("fonts/instrument-serif-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Geist"; src: url("fonts/geist-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "Geist"; src: url("fonts/geist-sans-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+@font-face { font-family: "Geist Mono"; src: url("fonts/geist-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+
+:root {
+  --paper: oklch(12.5% 0.027 290);
+  --paper-2: oklch(16% 0.03 290);
+  --paper-3: oklch(20% 0.032 290);
+  --ink: oklch(96% 0.01 300);
+  --ink-2: oklch(85% 0.017 298);
+  --muted: oklch(69% 0.026 295);
+  --rule: oklch(27% 0.034 290);
+  --rule-2: oklch(36% 0.04 292);
+  --grid: oklch(96% 0.01 300 / 0.05);
+  --brass: oklch(80% 0.15 62);
+  --brass-ink: oklch(14% 0.028 290);
+  --display: "Instrument Serif", Georgia, serif;
+  --body: "Geist", Arial, sans-serif;
+  --mono: "Geist Mono", Menlo, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--paper); color: var(--ink); font-family: var(--body); font-variant-numeric: tabular-nums; }
+
+.scene-bg { position: absolute; inset: 0; background: var(--paper); }
+.title { font-family: var(--display); font-weight: 400; text-transform: lowercase; letter-spacing: -0.015em; line-height: 0.98; color: var(--ink); }
+.well { background: var(--paper-2); border: 1px solid var(--rule); border-radius: 16px; }
+.bp { background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 48px 48px; }
+.mono { font-family: var(--mono); font-size: 30px; text-transform: lowercase; color: var(--ink-2); }
+.muted { color: var(--muted); }
+.brass { color: var(--brass); }
+.word { display: inline-block; }

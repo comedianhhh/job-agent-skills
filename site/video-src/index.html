@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <link rel="stylesheet" href="assets/lumen.css" />
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="75" data-width="1920" data-height="1080">
+      <div id="scan" data-composition-id="scan" data-composition-src="compositions/scan.html" data-start="0" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="match" data-composition-id="match" data-composition-src="compositions/match.html" data-start="6" data-duration="10" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="gate" data-composition-id="gate" data-composition-src="compositions/gate.html" data-start="16" data-duration="14" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="apply" data-composition-id="apply" data-composition-src="compositions/apply.html" data-start="30" data-duration="6" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="prep" data-composition-id="prep" data-composition-src="compositions/prep.html" data-start="36" data-duration="23" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="compact" data-composition-id="compact" data-composition-src="compositions/compact.html" data-start="59" data-duration="9" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="end" data-composition-id="end" data-composition-src="compositions/end.html" data-start="68" data-duration="7" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
