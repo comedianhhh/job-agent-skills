@@ -56,7 +56,7 @@
         <div><dt>skills for the search</dt><dd>10</dd></div>
         <div><dt>jobs-mcp tools</dt><dd>4</dd></div>
         <div><dt>job sources scanned</dt><dd>5</dd></div>
-        <div><dt>eval cases against a baseline</dt><dd>22</dd></div>
+        <div><dt>eval cases against a baseline</dt><dd>26</dd></div>
       </dl>
     </div>
   </section>
@@ -76,7 +76,7 @@
           <button role="tab" id="t-prep" aria-controls="p-prep" aria-selected="false" tabindex="-1">prep</button>
         </div>
         <div class="panel" role="tabpanel" id="p-scan" aria-labelledby="t-scan">
-          <p class="panel__line">One schema for five sources, no API keys. Every posting passes a prompt-injection guard first.</p>
+          <p class="panel__line">Five public boards in one schema, no API keys; sites that need your login are read in your own browser. Every posting passes a prompt-injection guard.</p>
           <table class="well">
             <thead><tr><th scope="col">source</th><th scope="col">read through</th></tr></thead>
             <tbody>
@@ -85,6 +85,7 @@
               <tr><td>Ashby</td><td class="mono">the public board endpoint</td></tr>
               <tr><td>SmartRecruiters</td><td class="mono">the public postings endpoint</td></tr>
               <tr><td>LinkedIn</td><td class="mono">guest search</td></tr>
+              <tr><td>Wellfound</td><td class="mono">your signed-in browser, read-only</td></tr>
             </tbody>
           </table>
         </div>

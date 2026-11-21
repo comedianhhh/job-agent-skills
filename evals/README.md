@@ -14,7 +14,7 @@ evals/
 └── run.sh                   the same command CI uses
 ```
 
-## What the 25 cases check
+## What the 26 cases check
 
 | Skill | Case | The behaviour under test |
 |---|---|---|
@@ -33,6 +33,7 @@ evals/
 | offer | `rejection-email-updates-row` | Right row → `REJECTED` with stage; other rows untouched |
 | offer | `receipt-is-applied-not-screen` | Auto-receipt → `APPLIED`, follow-up dated ~10 business days out |
 | offer | `scan-without-jobs-mcp` | No MCP in the run → says so, gives manual board URLs, invents no postings |
+| offer | `browser-source-without-browser` | A Wellfound browser source but no browser in the run → says the search needs the user's signed-in browser, invents no postings, never asks for a password |
 | job-apply | `portal-handled-by-user` | Workday is in `portals_handled_by_me` → hand over, no filling |
 | job-apply | `missing-materials-route-to-make-resume` | No folder/PDFs → stop, route to `/make-resume` |
 | make-resume | `tailor-from-master-with-tbd` | Folder from master; HTML + letter written; export honestly not run; no invented stack |
@@ -46,7 +47,7 @@ evals/
 
 Every case also has `skill-fired` (`tool_used: Skill` on the right skill), which the harness reports as an indicator rather than scoring, so `Δ` is not inflated by the without-arm never being able to invoke a skill.
 
-Grader mix: 130 graders; 109 are free (`regex`, `tool_used`, `file_exists`) and 21 are `llm` rubrics written as explicit PASS / FAIL conditions, one per case, weighted 2–3 because they carry the honesty checks (no invented facts, no stage inflation, no claimed submissions).
+Grader mix: 136 graders; 112 are free (`regex`, `tool_used`, `file_exists`) and 24 are `llm` rubrics written as explicit PASS / FAIL conditions, at most one per case, weighted 2–3 because they carry the honesty checks (no invented facts, no stage inflation, no claimed submissions).
 
 **Writing an `llm` grader: the judge sees only the rubric and the reply, never the workspace.** If the rubric says "FAIL if it invents facts", the judge has to be able to check that from the rubric itself, or it votes FAIL whenever it can't confirm something. Give it the source text the reply is allowed to use **verbatim, not summarised**: a summary drops details, and a correct reply that quotes a dropped detail fails. Don't paste by hand. Put a `<!-- fixture-sources: facts.md blocks.md … -->` … `<!-- /fixture-sources -->` block in the rubric, and `python evals/sync_fixtures.py` fills it from `_fixtures/career`. `validate.py` fails when a block goes stale. Also say what does *not* count: rewording, standard technical names, and "must cover" expectations are not invented facts. Then check the rubric both ways: a good reply PASSes, and the same reply with one invented fact FAILs. `interview/predict-questions-for-acme` and `great-resume/rewrite-bullets-from-facts` were rewritten this way (2026-11-12), after a correct reply failed 3/3 for quoting real facts the rubric didn't contain.
 

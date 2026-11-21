@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: browser-source-without-browser
+context:
+  scaffold_script: fixture.sh

@@ -10,6 +10,11 @@ linkedin:
   - { keywords: "software engineer", location: "Toronto, Ontario, Canada" }
   - { keywords: "backend engineer", location: "Canada", remote_only: true }
 
+# Sites with no public endpoint (signed-in only): /offer searches them in your own browser, read-only,
+# one results page per entry. Paste the URL of a search you saved on the site. Remove what you don't use.
+browser_sources:
+  - { name: wellfound, url: "https://wellfound.com/jobs", max_results: 30 }
+
 filters:
   hours: 24
   include_regex: "engineer|developer"
